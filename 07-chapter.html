@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>アルゴリズムとフローチャート — Japanese Study Notes</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", "Meiryo", sans-serif;
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 40px 25px 80px;
+      line-height: 1.6;
+      color: #1a1a2e;
+      background: #f5f6f8;
+    }
+
+    /* ---- Page Header ---- */
+    .page-header {
+      margin-bottom: 36px;
+      padding-bottom: 24px;
+      border-bottom: 2px solid #e2e5ec;
+    }
+
+    .page-header .chapter {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: #8890a6;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 34px;
+      margin-bottom: 8px;
+      letter-spacing: 0.02em;
+      color: #16213e;
+      font-weight: 700;
+    }
+
+    h1 rt {
+      font-size: 12px;
+      color: #a0a4b4;
+      font-weight: 400;
+    }
+
+    .ref {
+      font-size: 14px;
+      color: #8890a6;
+    }
+
+    /* ---- Toolbar ---- */
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 0 -25px 40px;
+      padding: 14px 25px;
+      background: rgba(245, 246, 248, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid #e2e5ec;
+    }
+
+    .hint {
+      font-size: 13px;
+      color: #8890a6;
+      margin-right: auto;
+    }
+
+    .toggle-btn {
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      padding: 8px 20px;
+      border: 2px solid #4a6fa5;
+      border-radius: 999px;
+      background: #fff;
+      color: #4a6fa5;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .toggle-btn:hover {
+      background: #4a6fa5;
+      color: #fff;
+    }
+
+    .toggle-btn.active {
+      background: #4a6fa5;
+      color: #fff;
+    }
+
+    /* ---- Section Headers ---- */
+    .section-header {
+      margin-top: 56px;
+      margin-bottom: 28px;
+    }
+
+    .section-header:first-of-type {
+      margin-top: 0;
+    }
+
+    .section-label {
+      display: inline-block;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #fff;
+      background: #16213e;
+      padding: 4px 14px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #16213e;
+      margin-bottom: 4px;
+      line-height: 1.4;
+    }
+
+    .section-title rt {
+      font-size: 10px;
+      color: #a0a4b4;
+    }
+
+    .section-q {
+      font-size: 15px;
+      color: #8890a6;
+      font-style: italic;
+    }
+
+    /* ---- Breakdown: inline flowing text ---- */
+    .breakdown {
+      font-size: 26px;
+      line-height: 2.8;
+      letter-spacing: 0.02em;
+      margin-bottom: 20px;
+    }
+
+    .word {
+      display: inline;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      border-radius: 6px;
+      padding: 1px 3px;
+      margin: 0 1px;
+    }
+
+    .word:active {
+      background: rgba(74, 111, 165, 0.1);
+    }
+
+    .word ruby {
+      color: #1a1a2e;
+      transition: color 0.2s ease;
+    }
+
+    .word.revealed ruby {
+      color: #4a6fa5;
+    }
+
+    .word.revealed {
+      background: rgba(74, 111, 165, 0.06);
+    }
+
+    rt {
+      font-size: 11px;
+      line-height: 1;
+      color: #a0a4b4;
+      font-weight: 400;
+    }
+
+    /* ---- Meaning: inline pill on tap ---- */
+    .meaning {
+      display: none;
+      font-size: 12px;
+      line-height: 1.3;
+      color: #4a6fa5;
+      background: rgba(74, 111, 165, 0.08);
+      padding: 2px 7px;
+      border-radius: 5px;
+      margin: 0 2px;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .word.revealed .meaning {
+      display: inline;
+    }
+
+    /* ---- Answer words (numbered blanks) ---- */
+    .answer-word .answer-text {
+      display: inline;
+    }
+
+    .answer-word .answer-text ruby {
+      color: #4a6fa5;
+      font-weight: 500;
+    }
+
+    .answer-word .answer-num {
+      display: none;
+      font-size: 18px;
+      color: #e07a5f;
+      font-weight: 600;
+    }
+
+    .answer-word .blank {
+      display: none;
+    }
+
+    body.hide-answers .answer-word .answer-text {
+      display: none;
+    }
+
+    body.hide-answers .answer-word .answer-num {
+      display: inline;
+    }
+
+    body.hide-answers .answer-word .blank {
+      display: inline;
+      letter-spacing: 0.1em;
+      color: #e07a5f;
+      opacity: 0.55;
+    }
+
+    /* ---- Translation ---- */
+    .translation {
+      margin: 16px 0 48px;
+      padding: 16px 20px;
+      font-size: 16px;
+      line-height: 1.7;
+      color: #4a6fa5;
+      background: rgba(74, 111, 165, 0.04);
+      border-radius: 10px;
+    }
+
+    .translation-title {
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      letter-spacing: 0.08em;
+      color: #4a6fa5;
+      text-transform: uppercase;
+    }
+
+    /* ---- Formula ---- */
+    .formula-block {
+      text-align: center;
+      margin: 30px 0 40px;
+      padding: 24px 20px;
+      background: #fff;
+      border-radius: 12px;
+    }
+
+    .formula-enzyme {
+      font-size: 16px;
+      color: #4a6fa5;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .formula-arrow {
+      font-size: 20px;
+      color: #b0b4c4;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    .formula {
+      font-family: "SF Mono", "Fira Code", "Courier New", monospace;
+      font-size: 19px;
+      color: #16213e;
+      overflow-x: auto;
+      white-space: nowrap;
+      line-height: 2;
+    }
+
+    .formula .plus {
+      margin: 0 8px;
+      color: #b0b4c4;
+    }
+
+    .formula .arrow-r {
+      margin: 0 10px;
+      color: #b0b4c4;
+    }
+
+    .answer-inline .answer-text {
+      display: inline;
+      color: #4a6fa5;
+      font-weight: 500;
+    }
+
+    .answer-inline .answer-num {
+      display: none;
+    }
+
+    .answer-inline .blank {
+      display: none;
+    }
+
+    body.hide-answers .answer-inline .answer-text {
+      display: none;
+    }
+
+    body.hide-answers .answer-inline .answer-num {
+      display: inline;
+      color: #e07a5f;
+      font-weight: 600;
+    }
+
+    body.hide-answers .answer-inline .blank {
+      display: inline;
+      letter-spacing: 0.1em;
+      color: #e07a5f;
+      opacity: 0.55;
+    }
+
+    .formula-gloss {
+      font-size: 13px;
+      margin-top: 14px;
+      color: #8890a6;
+      line-height: 1.9;
+    }
+
+    /* Words inside formula lines & glosses (smaller scale) */
+    .formula .word,
+    .formula-gloss .word {
+      color: #8890a6;
+    }
+
+    .formula rt,
+    .formula-gloss rt {
+      font-size: 9px;
+    }
+
+    .formula .meaning,
+    .formula-gloss .meaning {
+      font-size: 11px;
+      padding: 1px 5px;
+    }
+
+    /* ---- Divider ---- */
+    .divider {
+      margin: 48px 0;
+      text-align: center;
+      font-size: 13px;
+      letter-spacing: 0.5em;
+      color: #d0d4de;
+      text-indent: 0.5em;
+    }
+
+    /* ---- Symbol / Flowchart Table ---- */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 30px 0 12px;
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .unit-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .unit-table th {
+      background: #16213e;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 10px 14px;
+      text-align: left;
+    }
+
+    .unit-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #e2e5ec;
+      color: #1a1a2e;
+      vertical-align: middle;
+    }
+
+    .unit-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .unit-table rt {
+      font-size: 9px;
+    }
+
+    .unit-table .meaning {
+      font-size: 11px;
+      padding: 1px 5px;
+    }
+
+    .unit-table .word {
+      color: #1a1a2e;
+    }
+
+    /* Header words: light styling on dark background */
+    .unit-table th .word ruby {
+      color: #fff;
+    }
+
+    .unit-table th .word.revealed {
+      background: rgba(255, 255, 255, 0.10);
+    }
+
+    .unit-table th .word.revealed ruby {
+      color: #cfd8ec;
+    }
+
+    .unit-table th .meaning {
+      background: rgba(255, 255, 255, 0.14);
+      color: #cfd8ec;
+    }
+
+    .unit-table .symbol-cell {
+      text-align: center;
+      width: 90px;
+    }
+
+    .unit-table .symbol-cell svg {
+      display: block;
+      margin: 0 auto;
+    }
+
+    .table-note {
+      font-size: 13px;
+      color: #8890a6;
+      margin-bottom: 48px;
+      padding: 0 4px;
+      line-height: 2;
+    }
+
+    .table-note .word {
+      color: #8890a6;
+    }
+
+    .table-note rt {
+      font-size: 9px;
+    }
+
+    .table-note .meaning {
+      font-size: 11px;
+      padding: 1px 5px;
+    }
+
+    /* ---- Key Terms Section ---- */
+    .terms-section {
+      margin-top: 60px;
+      padding-top: 40px;
+      border-top: 2px solid #e2e5ec;
+    }
+
+    .terms-heading {
+      font-size: 22px;
+      font-weight: 700;
+      color: #16213e;
+      margin-bottom: 6px;
+    }
+
+    .terms-sub {
+      font-size: 14px;
+      color: #8890a6;
+      margin-bottom: 30px;
+    }
+
+    .term-item {
+      margin-bottom: 20px;
+      padding: 14px 18px;
+      background: #fff;
+      border-radius: 10px;
+    }
+
+    .term-jp {
+      font-size: 18px;
+      font-weight: 600;
+      color: #16213e;
+    }
+
+    .term-jp rt {
+      font-size: 11px;
+      color: #a0a4b4;
+    }
+
+    .term-item .word.revealed {
+      background: rgba(74, 111, 165, 0.06);
+    }
+
+    .term-item .meaning {
+      font-size: 11px;
+      padding: 1px 5px;
+    }
+
+    .term-en {
+      font-size: 14px;
+      color: #4a6fa5;
+      font-weight: 500;
+      margin-left: 8px;
+    }
+
+    .term-def {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #555a6e;
+      margin-top: 6px;
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 600px) {
+      body { padding: 25px 16px 60px; }
+      h1 { font-size: 26px; }
+      .section-title { font-size: 19px; }
+      .breakdown { font-size: 22px; line-height: 2.6; }
+      .formula { font-size: 16px; }
+      .translation { font-size: 14px; padding: 14px 16px; }
+      .hint { display: none; }
+      .toolbar { padding: 12px 16px; margin: 0 -16px 30px; }
+      .term-jp { font-size: 16px; }
+      .unit-table { font-size: 13px; }
+      .unit-table th, .unit-table td { padding: 8px 10px; }
+      .unit-table .symbol-cell { width: 64px; }
+    }
+  
+    /* Added usability improvements: responsive layout, readable controls, and print support. */
+    html { scroll-behavior: smooth; }
+    body { width: min(100% - 28px, 920px); padding-left: 0 !important; padding-right: 0 !important; }
+    img, svg, video, canvas, table { max-width: 100%; }
+    table { display: block; overflow-x: auto; }
+    button, .toggle-btn, input, select { touch-action: manipulation; }
+    button, .toggle-btn { min-height: 40px; cursor: pointer; }
+    :focus-visible { outline: 3px solid #647de8; outline-offset: 3px; }
+    .chapter-nav { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; margin: 0 0 22px; padding: 12px 14px; border:1px solid #dfe3ed; border-radius:12px; background:rgba(255,255,255,.88); font-size:14px; }
+    .chapter-nav a { color:#4257a6; text-decoration:none; font-weight:600; padding:7px 9px; border-radius:8px; }
+    .chapter-nav a:hover { background:#eef1ff; }
+    .chapter-nav .home-link { margin-right:auto; }
+    @media (max-width: 600px) {
+      body { width: calc(100% - 24px); padding-top: 18px !important; padding-bottom: 40px !important; font-size: 15px; }
+      h1 { font-size: clamp(24px, 7vw, 32px) !important; overflow-wrap:anywhere; }
+      .toolbar { margin-left: -12px !important; margin-right: -12px !important; padding: 10px 12px !important; gap:8px !important; }
+      .chapter-nav { gap:5px; padding:8px; }
+      .chapter-nav a { padding:8px 6px; }
+    }
+    @media print {
+      body { width:100%; max-width:none; padding:0 !important; background:#fff !important; color:#000 !important; }
+      .toolbar, .chapter-nav, button, .toggle-btn { display:none !important; }
+      .card, section, table { break-inside:avoid; }
+    }
+    
+  
+/* Study-site polish: shared accessible controls, focus states, themes, and spacing. */
+:root { color-scheme: light; --study-bg:#f5f6fa; --study-card:#fff; --study-text:#20243a; --study-muted:#687089; --study-line:#e1e5ef; --study-accent:#5267b8; --study-soft:#eef1ff; }
+html { scroll-padding-top: 90px; }
+body { background:var(--study-bg); color:var(--study-text); transition:background .18s,color .18s; }
+.page-header { border-color:var(--study-line)!important; }
+.section-header, .section-title, .translation, .table-note, .formula-gloss, .unit-table, .term-card, .example-box, .breakdown, .card { max-width:100%; }
+.translation, .table-note, .term-card, .example-box, .breakdown, .unit-table, table { overflow-wrap:anywhere; }
+.chapter-nav { position:relative; }
+.study-progress { position:fixed; inset:0 0 auto; height:4px; z-index:9999; background:transparent; pointer-events:none; }
+.study-progress span { display:block; width:0; height:100%; background:linear-gradient(90deg,#7487df,#a4b1ff); transition:width .08s linear; }
+.study-tools { display:flex; align-items:center; gap:8px; flex-wrap:wrap; width:100%; }
+.study-tools .tool-spacer { flex:1 1 12px; }
+.study-tools button { appearance:none; border:1px solid #d6dced; border-radius:999px; background:#fff; color:#36436e; font-family:inherit; font-size:13px; font-weight:600; line-height:1.2; padding:10px 13px; min-height:42px; cursor:pointer; }
+.study-tools button:hover { background:#f0f2ff; border-color:#aab5e8; }
+.study-tools button[aria-pressed="true"] { background:#e9edff; border-color:#9aa8eb; }
+.study-tools .font-size-label { font-size:12px; color:var(--study-muted); }
+body.study-large-text { font-size:1.12em; }
+body.study-larger-text { font-size:1.24em; }
+body.study-show-meanings .meaning { display:inline!important; }
+body.study-show-meanings .word { background:rgba(99,119,201,.07); border-radius:5px; }
+body.study-dark { --study-bg:#171a24; --study-card:#222635; --study-text:#edf0fa; --study-muted:#b4bad0; --study-line:#3a4054; --study-accent:#b1bdff; --study-soft:#2c3350; color-scheme:dark; }
+body.study-dark .toolbar, body.study-dark .chapter-nav, body.study-dark .study-tools button { background:#222635!important; color:#edf0fa!important; border-color:#414860!important; }
+body.study-dark .chapter-nav a, body.study-dark .toggle-btn { color:#c6ceff!important; }
+body.study-dark .translation, body.study-dark .table-note, body.study-dark .breakdown, body.study-dark .unit-table, body.study-dark .term-card, body.study-dark .example-box, body.study-dark .card, body.study-dark section { background-color:var(--study-card); color:var(--study-text); border-color:var(--study-line); }
+body.study-dark .page-header h1, body.study-dark h1, body.study-dark h2, body.study-dark h3 { color:var(--study-text)!important; }
+body.study-dark .study-tools button[aria-pressed="true"] { background:#343d61!important; }
+.word[onclick], .answer-word[onclick] { -webkit-tap-highlight-color:transparent; }
+.word:focus-visible { outline:2px solid #7185df; outline-offset:2px; border-radius:4px; }
+@media(max-width:600px){ .study-tools button { flex:1 1 auto; padding:10px 9px; font-size:12px; } .study-tools .tool-spacer { display:none; } .study-progress { height:3px; } }
+@media(prefers-reduced-motion:reduce){ html{scroll-behavior:auto!important} *,*::before,*::after{transition:none!important;animation:none!important} }
+@media print { .study-progress,.study-tools {display:none!important} body {font-size:11pt!important} .meaning {display:inline!important} }
+
+  </style>
+</head>
+
+<body>
+  <nav class="chapter-nav" aria-label="Chapter navigation">
+    <a class="home-link" href="index.html">⌂ All notes</a><a href="06-chapter.html" aria-label="Previous chapter">← Previous</a><a href="08-chapter.html" aria-label="Next chapter">Next →</a>
+  </nav>
+
+
+  <!-- ==================== PAGE HEADER ==================== -->
+  <div class="page-header">
+    <div class="chapter">Unit 3 · IT Fundamentals — <span class="word" onclick="toggleWord(event, this)"><ruby>対策学習<rt>たいさくがくしゅう</rt></ruby>ワークシート<span class="meaning">exam-prep worksheet</span></span></div>
+    <h1><span class="word" onclick="toggleWord(event, this)">アルゴリズム<span class="meaning">algorithm</span></span>と<span class="word" onclick="toggleWord(event, this)">フローチャート<span class="meaning">flowchart</span></span></h1>
+    <div class="ref">対策学習ワークシート 1–3 — Algorithms &amp; Flowcharts</div>
+  </div>
+
+  <!-- ==================== TOOLBAR ==================== -->
+  <div class="toolbar">
+    <div class="hint">Tap any word to reveal its meaning</div>
+    <div class="toggle-btn active" id="toggleAnswers" onclick="toggleAnswers()">Hide Answers ✓</div>
+  </div>
+
+  <!-- ==================== SECTION 1 ==================== -->
+  <div class="section-header">
+    <span class="section-label">1</span>
+    <div class="section-title"><span class="word" onclick="toggleWord(event, this)">アルゴリズム<span class="meaning">algorithm</span></span><span class="word" onclick="toggleWord(event, this)">とは<span class="meaning">as for... (definition marker)</span></span></div>
+    <div class="section-q">What is an algorithm — the "recipe" for a computer?</div>
+  </div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)">アルゴリズム<span class="meaning">algorithm</span></span><span class="word" onclick="toggleWord(event, this)">とは<span class="meaning">is defined as</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>特定<rt>とくてい</rt></ruby>の<span class="meaning">specific / particular</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>問題<rt>もんだい</rt></ruby><span class="meaning">problem</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>や<rt>や</rt></ruby><span class="meaning">and (non-exhaustive list)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>課題<rt>かだい</rt></ruby><span class="meaning">task / issue</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>解決<rt>かいけつ</rt></ruby>する<span class="meaning">to solve</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>ための<rt>ための</rt></ruby><span class="meaning">for (the purpose of)</span></span>「<span class="word" onclick="toggleWord(event, this)"><ruby>手順<rt>てじゅん</rt></ruby><span class="meaning">procedure / steps</span></span>」<span class="word" onclick="toggleWord(event, this)"><ruby>や<rt>や</rt></ruby><span class="meaning">and</span></span>「<span class="word" onclick="toggleWord(event, this)"><ruby>計算方法<rt>けいさんほうほう</rt></ruby><span class="meaning">calculation method</span></span>」、<span class="word answer-word" onclick="toggleWord(event, this)">「<span class="answer-text"><ruby>処理手順<rt>しょりてじゅん</rt></ruby></span><span class="answer-num">（1）</span><span class="blank">＿＿＿＿＿＿</span><span class="meaning">processing procedure</span></span>」の<span class="word" onclick="toggleWord(event, this)"><ruby>こと<rt>こと</rt></ruby><span class="meaning">the thing of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>である<rt>である</rt></ruby><span class="meaning">is (formal)</span></span>。＝<span class="word" onclick="toggleWord(event, this)">コンピュータに<span class="meaning">to the computer</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>仕事<rt>しごと</rt></ruby>させる<span class="meaning">make it do work (causative)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>手順書<rt>てじゅんしょ</rt></ruby><span class="meaning">written procedure / instruction manual</span></span>
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    An algorithm is the "procedure," "calculation method," or (processing procedure) for solving a specific problem or task. In short: the instruction manual that makes a computer do its work.
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)">コンピューター<span class="meaning">computer</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>に<rt>に</rt></ruby><span class="meaning">to</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>問題<rt>もんだい</rt></ruby><span class="meaning">problem</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>や<rt>や</rt></ruby><span class="meaning">and</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>課題<rt>かだい</rt></ruby><span class="meaning">task</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>処理<rt>しょり</rt></ruby>させる<span class="meaning">to make it process (causative)</span></span><span class="word" onclick="toggleWord(event, this)">には<span class="meaning">in order to (purpose)</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>処理<rt>しょり</rt></ruby>の<span class="meaning">processing's</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>手順<rt>てじゅん</rt></ruby></span><span class="answer-num">（2）</span><span class="blank">＿＿＿＿</span><span class="meaning">procedure / order of steps</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>考<rt>かんが</rt></ruby>える<span class="meaning">to think about / consider</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>必要<rt>ひつよう</rt></ruby>が<span class="meaning">necessity</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>ある<rt>ある</rt></ruby><span class="meaning">there is (must)</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    To have a computer process problems and tasks, it is necessary to think about the (procedure) of the processing.
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)">アルゴリズム<span class="meaning">algorithm</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>は<rt>は</rt></ruby><span class="meaning">topic</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>料理<rt>りょうり</rt></ruby><span class="meaning">cooking / cuisine</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>で<rt>で</rt></ruby><span class="meaning">in (comparison base)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>言<rt>い</rt></ruby>うと<span class="meaning">if you compare it to</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text">レシピ</span><span class="answer-num">（3）</span><span class="blank">＿＿＿＿</span><span class="meaning">recipe</span></span><span class="word" onclick="toggleWord(event, this)">のような<span class="meaning">like / such as</span></span><span class="word" onclick="toggleWord(event, this)">イメージ<span class="meaning">image / mental picture</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>である<rt>である</rt></ruby><span class="meaning">is</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    An algorithm is like a (recipe) in cooking, as a mental image.
+  </div>
+
+  <!-- ==================== SECTION 2 ==================== -->
+  <div class="section-header">
+    <span class="section-label">2</span>
+    <div class="section-title">フローチャート（<span class="word" onclick="toggleWord(event, this)"><ruby>流<rt>なが</rt></ruby>れ<ruby>図<rt>ず</rt></ruby><span class="meaning">flow diagram</span></span>）</div>
+    <div class="section-q">Flowcharts — and the symbols every exam expects you to know</div>
+  </div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)">フローチャート<span class="meaning">flowchart</span></span><span class="word" onclick="toggleWord(event, this)">とは<span class="meaning">is defined as</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)">アルゴリズム<span class="meaning">algorithm</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>視覚<rt>しかく</rt></ruby></span><span class="answer-num">（4）</span><span class="blank">＿＿＿＿</span><span class="meaning">visual</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>的<rt>てき</rt></ruby><span class="meaning">-ic / -al (adjectivizer)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>に<rt>に</rt></ruby><span class="meaning">as (adverbial)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>表現<rt>ひょうげん</rt></ruby>した<span class="meaning">expressed</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>図<rt>ず</rt></ruby><span class="meaning">diagram</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>であり<rt>であり</rt></ruby><span class="meaning">and is (formal)</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span>「<span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>流<rt>なが</rt></ruby>れ<ruby>図<rt>ず</rt></ruby></span><span class="answer-num">（5）</span><span class="blank">＿＿＿＿＿</span><span class="meaning">flow diagram</span></span>」<span class="word" onclick="toggleWord(event, this)"><ruby>と<rt>と</rt></ruby><span class="meaning">quote</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>も<rt>も</rt></ruby><span class="meaning">also</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>呼<rt>よ</rt></ruby>ばれる<span class="meaning">is called (passive)</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    A flowchart is a diagram that expresses an algorithm (visually), and it is also called a "flow diagram."
+  </div>
+
+  <!-- ==================== FLOWCHART SYMBOL TABLE ==================== -->
+  <div class="table-wrap">
+    <table class="unit-table">
+      <tr>
+        <th class="symbol-cell"><span class="word" onclick="toggleWord(event, this)"><ruby>記号<rt>きごう</rt></ruby><span class="meaning">symbol</span></span></th>
+        <th><span class="word" onclick="toggleWord(event, this)"><ruby>名称<rt>めいしょう</rt></ruby><span class="meaning">name</span></span></th>
+        <th><span class="word" onclick="toggleWord(event, this)"><ruby>何<rt>なに</rt></ruby><span class="meaning">what</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>表<rt>あらわ</rt></ruby>すか<span class="meaning">it represents</span></span></th>
+        <th><span class="word" onclick="toggleWord(event, this)">ポイント<span class="meaning">key point</span></span></th>
+      </tr>
+      <tr>
+        <td class="symbol-cell">
+          <svg width="64" height="26" viewBox="0 0 64 26" role="img" aria-label="terminator symbol (rounded)"><rect x="8" y="4" width="48" height="18" rx="9" fill="none" stroke="#4a6fa5" stroke-width="2"/></svg>
+        </td>
+        <td><span class="word" onclick="toggleWord(event, this)"><ruby>端子<rt>たんし</rt></ruby><span class="meaning">terminator (terminal symbol)</span></span></td>
+        <td><span class="word" onclick="toggleWord(event, this)"><ruby>処理<rt>しょり</rt></ruby>の<span class="meaning">processing's</span></span><span class="word answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>開始<rt>かいし</rt></ruby></span><span class="answer-num">（6）</span><span class="blank">＿＿＿＿</span><span class="meaning">start</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>と<rt>と</rt></ruby><span class="meaning">and</span></span><span class="word answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>終了<rt>しゅうりょう</rt></ruby></span><span class="answer-num">（7）</span><span class="blank">＿＿＿＿</span><span class="meaning">end</span></span></td>
+        <td><span class="word" onclick="toggleWord(event, this)"><ruby>開始<rt>かいし</rt></ruby>・<ruby>終了<rt>しゅうりょう</rt></ruby><span class="meaning">start / end</span></span></td>
+      </tr>
+      <tr>
+        <td class="symbol-cell">
+          <svg width="64" height="26" viewBox="0 0 64 26" role="img" aria-label="process symbol (rectangle)"><rect x="10" y="4" width="44" height="18" fill="none" stroke="#4a6fa5" stroke-width="2"/></svg>
+        </td>
+        <td><span class="word" onclick="toggleWord(event, this)"><ruby>処理<rt>しょり</rt></ruby>（<ruby>四角<rt>しかく</rt></ruby>）<span class="meaning">process (rectangle)</span></span></td>
+        <td><span class="word answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>具体<rt>ぐたい</rt></ruby></span><span class="answer-num">（8）</span><span class="blank">＿＿＿＿</span><span class="meaning">concrete / specific</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>的<rt>てき</rt></ruby><span class="meaning">-ic</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>処理<rt>しょり</rt></ruby><span class="meaning">process</span></span></td>
+        <td><span class="word" onclick="toggleWord(event, this)"><ruby>計算<rt>けいさん</rt></ruby>・<ruby>代入<rt>だいにゅう</rt></ruby><span class="meaning">calculation / assignment</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>など<rt>など</rt></ruby><span class="meaning">etc.</span></span></td>
+      </tr>
+      <tr>
+        <td class="symbol-cell">
+          <svg width="64" height="30" viewBox="0 0 64 30" role="img" aria-label="flow line (arrow)"><line x1="32" y1="3" x2="32" y2="22" stroke="#4a6fa5" stroke-width="2"/><polygon points="27,20 37,20 32,29" fill="#4a6fa5"/></svg>
+        </td>
+        <td><span class="word" onclick="toggleWord(event, this)"><ruby>流<rt>なが</rt></ruby>れ<ruby>線<rt>せん</rt></ruby><span class="meaning">flow line (arrow)</span></span></td>
+        <td><span class="word" onclick="toggleWord(event, this)"><ruby>処理<rt>しょり</rt></ruby>の<span class="meaning">processing's</span></span><span class="word answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>流<rt>なが</rt></ruby>れ</span><span class="answer-num">（9）</span><span class="blank">＿＿＿</span><span class="meaning">flow</span></span></td>
+        <td><span class="word" onclick="toggleWord(event, this)"><ruby>原則<rt>げんそく</rt></ruby><span class="meaning">as a rule / in principle</span></span>「<span class="word" onclick="toggleWord(event, this)"><ruby>上<rt>うえ</rt></ruby>から<span class="meaning">from the top</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>下<rt>した</rt></ruby><span class="meaning">downward</span></span>」「<span class="word" onclick="toggleWord(event, this)"><ruby>左<rt>ひだり</rt></ruby>から<span class="meaning">from the left</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>右<rt>みぎ</rt></ruby><span class="meaning">to the right</span></span>」</td>
+      </tr>
+      <tr>
+        <td class="symbol-cell">
+          <svg width="64" height="34" viewBox="0 0 64 34" role="img" aria-label="decision symbol (diamond)"><polygon points="32,2 60,17 32,32 4,17" fill="none" stroke="#4a6fa5" stroke-width="2"/></svg>
+        </td>
+        <td><span class="word" onclick="toggleWord(event, this)"><ruby>判断<rt>はんだん</rt></ruby>（<ruby>菱形<rt>ひしがた</rt></ruby>）<span class="meaning">decision (diamond)</span></span></td>
+        <td><span class="word" onclick="toggleWord(event, this)"><ruby>条件<rt>じょうけん</rt></ruby><span class="meaning">condition</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>による<rt>による</rt></ruby><span class="meaning">depending on</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>処理<rt>しょり</rt></ruby>の<span class="meaning">processing's</span></span><span class="word answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>判断<rt>はんだん</rt></ruby></span><span class="answer-num">（10）</span><span class="blank">＿＿＿＿</span><span class="meaning">decision / judgment</span></span></td>
+        <td>Yes / No <span class="word" onclick="toggleWord(event, this)"><ruby>など<rt>など</rt></ruby><span class="meaning">etc.</span></span></td>
+      </tr>
+      <tr>
+        <td class="symbol-cell">
+          <svg width="64" height="26" viewBox="0 0 64 26" role="img" aria-label="loop terminal symbol (hexagon)"><polygon points="18,4 46,4 58,13 46,22 18,22 6,13" fill="none" stroke="#4a6fa5" stroke-width="2"/></svg>
+        </td>
+        <td><span class="word" onclick="toggleWord(event, this)">ループ<span class="meaning">loop</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>端子<rt>たんし</rt></ruby><span class="meaning">terminal</span></span></td>
+        <td><span class="word" onclick="toggleWord(event, this)">ループ<span class="meaning">loop's</span></span><span class="word answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>開始<rt>かいし</rt></ruby></span><span class="answer-num">（11）</span><span class="blank">＿＿＿＿</span><span class="meaning">start</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>と<rt>と</rt></ruby><span class="meaning">and</span></span><span class="word answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>終了<rt>しゅうりょう</rt></ruby></span><span class="answer-num">（12）</span><span class="blank">＿＿＿＿</span><span class="meaning">end</span></span></td>
+        <td><span class="word" onclick="toggleWord(event, this)"><ruby>繰<rt>く</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>し<span class="meaning">repetition</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>表<rt>あらわ</rt></ruby>す<span class="meaning">represents</span></span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="table-note">
+    <span class="word" onclick="toggleWord(event, this)"><ruby>試験<rt>しけん</rt></ruby><span class="meaning">exam</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>では<rt>では</rt></ruby><span class="meaning">in</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>記号<rt>きごう</rt></ruby>の<span class="meaning">symbol's</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>形<rt>かたち</rt></ruby>と<span class="meaning">shape</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>名称<rt>めいしょう</rt></ruby>の<span class="meaning">name's</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>組<rt>くみ</rt></ruby>み<ruby>合<rt>あ</rt></ruby>わせ<span class="meaning">combination</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>で<rt>で</rt></ruby><span class="meaning">by means of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>出題<rt>しゅつだい</rt></ruby><span class="meaning">asked (as questions)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>されます<rt>されます</rt></ruby><span class="meaning">(passive, polite)</span></span>！<span class="word" onclick="toggleWord(event, this)"><ruby>流<rt>なが</rt></ruby>れ<ruby>線<rt>せん</rt></ruby>は<span class="meaning">flow lines</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>原則<rt>げんそく</rt></ruby><span class="meaning">in principle</span></span>「<span class="word" onclick="toggleWord(event, this)"><ruby>上<rt>うえ</rt></ruby>から<span class="meaning">top</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>下<rt>した</rt></ruby><span class="meaning">down</span></span>」「<span class="word" onclick="toggleWord(event, this)"><ruby>左<rt>ひだり</rt></ruby>から<span class="meaning">left</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>右<rt>みぎ</rt></ruby><span class="meaning">right</span></span>」——<span class="word" onclick="toggleWord(event, this)"><ruby>逆<rt>ぎゃく</rt></ruby>の<span class="meaning">reverse</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>場合<rt>ばあい</rt></ruby>は<span class="meaning">in the case of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>矢印<rt>やじるし</rt></ruby>が<span class="meaning">arrow</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>必<rt>かなら</rt></ruby>ず<span class="meaning">always</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>必要<rt>ひつよう</rt></ruby><span class="meaning">necessary</span></span>！
+  </div>
+
+  <!-- ==================== SECTION 3 ==================== -->
+  <div class="section-header">
+    <span class="section-label">3</span>
+    <div class="section-title">アルゴリズムの<span class="word" onclick="toggleWord(event, this)"><ruby>基本構造<rt>きほんこうぞう</rt></ruby><span class="meaning">basic structures</span></span></div>
+    <div class="section-q">The three basic structures — and the two kinds of repetition</div>
+  </div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)">アルゴリズム<span class="meaning">algorithm</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>基本構造<rt>きほんこうぞう</rt></ruby><span class="meaning">basic structures</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>は<rt>は</rt></ruby><span class="meaning">topic</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span>①<span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>順次<rt>じゅんじ</rt></ruby></span><span class="answer-num">（13）</span><span class="blank">＿＿＿＿</span><span class="meaning">sequential</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>構造<rt>こうぞう</rt></ruby><span class="meaning">structure</span></span>、②<span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>選択<rt>せんたく</rt></ruby></span><span class="answer-num">（14）</span><span class="blank">＿＿＿＿</span><span class="meaning">selection</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>構造<rt>こうぞう</rt></ruby><span class="meaning">structure</span></span>、③<span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>繰<rt>く</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>し</span><span class="answer-num">（15）</span><span class="blank">＿＿＿＿＿</span><span class="meaning">repetition</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>構造<rt>こうぞう</rt></ruby><span class="meaning">structure</span></span><span class="word" onclick="toggleWord(event, this)">の3つ<span class="meaning">three in total</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>である<rt>である</rt></ruby><span class="meaning">is</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    The basic structures of an algorithm are three: ① the (sequential) structure, ② the (selection) structure, and ③ the (repetition) structure.
+  </div>
+
+  <!-- ==================== 3基本構造 FORMULA ==================== -->
+  <div class="formula-block">
+    <div class="formula-enzyme"><span class="word" onclick="toggleWord(event, this)"><ruby>基本構造<rt>きほんこうぞう</rt></ruby><span class="meaning">basic structures</span></span> — <span class="word" onclick="toggleWord(event, this)"><ruby>整理<rt>せいり</rt></ruby><span class="meaning">summary / organized</span></span></div>
+    <div class="formula-arrow">↓</div>
+    <div class="formula">
+      ① <span class="word" onclick="toggleWord(event, this)"><ruby>順次構造<rt>じゅんじこうぞう</rt></ruby><span class="meaning">sequential structure</span></span><span class="arrow-r">：</span><span class="word" onclick="toggleWord(event, this)"><ruby>命令<rt>めいれい</rt></ruby><span class="meaning">instruction / command</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>順番<rt>じゅんばん</rt></ruby></span><span class="answer-num">（16）</span><span class="blank">＿＿＿＿</span><span class="meaning">in order</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>に<rt>に</rt></ruby><span class="meaning">in</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>実行<rt>じっこう</rt></ruby>する<span class="meaning">execute</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>構造<rt>こうぞう</rt></ruby><span class="meaning">structure</span></span>
+    </div>
+    <div class="formula">
+      ② <span class="word" onclick="toggleWord(event, this)"><ruby>選択構造<rt>せんたくこうぞう</rt></ruby><span class="meaning">selection structure</span></span>（<span class="word" onclick="toggleWord(event, this)"><ruby>分岐構造<rt>ぶんきこうぞう</rt></ruby><span class="meaning">branch structure</span></span>）<span class="arrow-r">：</span><span class="word" onclick="toggleWord(event, this)"><ruby>条件<rt>じょうけん</rt></ruby><span class="meaning">condition</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>によって<rt>によって</rt></ruby><span class="meaning">depending on</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>実行<rt>じっこう</rt></ruby>の<span class="meaning">execution's</span></span><span class="word answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>流<rt>なが</rt></ruby>れ</span><span class="answer-num">（17）</span><span class="blank">＿＿＿</span><span class="meaning">flow</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>変<rt>か</rt></ruby>わる<span class="meaning">changes</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>構造<rt>こうぞう</rt></ruby><span class="meaning">structure</span></span>
+    </div>
+    <div class="formula">
+      ③ <span class="word" onclick="toggleWord(event, this)"><ruby>繰<rt>く</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>し<ruby>構造<rt>こうぞう</rt></ruby><span class="meaning">repetition structure</span></span><span class="arrow-r">：</span><span class="word" onclick="toggleWord(event, this)"><ruby>条件<rt>じょうけん</rt></ruby><span class="meaning">condition</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>に<rt>に</rt></ruby><span class="meaning">to</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>従<rt>したが</rt></ruby>って<span class="meaning">according to</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>同<rt>おな</rt></ruby>じ<span class="meaning">the same</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>処理<rt>しょり</rt></ruby><span class="meaning">processing</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>繰<rt>く</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>す</span><span class="answer-num">（18）</span><span class="blank">＿＿＿＿＿</span><span class="meaning">repeat</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>構造<rt>こうぞう</rt></ruby><span class="meaning">structure</span></span>
+    </div>
+    <div class="formula-gloss">
+      <span class="word" onclick="toggleWord(event, this)"><ruby>順番<rt>じゅんばん</rt></ruby><span class="meaning">order</span></span>＝<span class="word" onclick="toggleWord(event, this)"><ruby>上<rt>うえ</rt></ruby>から<span class="meaning">top to bottom</span></span>／<span class="word" onclick="toggleWord(event, this)"><ruby>分岐<rt>ぶんき</rt></ruby><span class="meaning">branch</span></span>＝Yes・No／<span class="word" onclick="toggleWord(event, this)"><ruby>繰<rt>く</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>し<span class="meaning">loop</span></span>＝ループ<span class="word" onclick="toggleWord(event, this)"><ruby>端子<rt>たんし</rt></ruby>で<span class="meaning">with loop terminals</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>表現<rt>ひょうげん</rt></ruby><span class="meaning">expressed</span></span>
+    </div>
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)"><ruby>繰<rt>く</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>し<span class="meaning">repetition</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>には<rt>には</rt></ruby><span class="meaning">there are (kinds) in</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span>①<span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>前<rt>まえ</rt></ruby></span><span class="answer-num">（19）</span><span class="blank">＿＿＿</span><span class="meaning">before (pre-test)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>判定<rt>はんてい</rt></ruby><span class="meaning">check / evaluation</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>繰<rt>く</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>し<span class="meaning">repetition</span></span>、②<span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>後<rt>あと</rt></ruby></span><span class="answer-num">（20）</span><span class="blank">＿＿＿</span><span class="meaning">after (post-test)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>判定<rt>はんてい</rt></ruby><span class="meaning">check</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>繰<rt>く</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>しが<span class="meaning">repetition</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>ある<rt>ある</rt></ruby><span class="meaning">there is</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    Repetition comes in two kinds: ① (pre-test) repetition and ② (post-test) repetition.
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>前<rt>まえ</rt></ruby></span><span class="answer-num">（19）</span><span class="blank">＿＿＿</span><span class="meaning">before</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>判定<rt>はんてい</rt></ruby><span class="meaning">check</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>繰<rt>く</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>しは<span class="meaning">pre-test repetition</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>処理<rt>しょり</rt></ruby><span class="meaning">processing</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>する<rt>する</rt></ruby><span class="meaning">do</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>前<rt>まえ</rt></ruby></span><span class="answer-num">（19）</span><span class="blank">＿＿＿</span><span class="meaning">before</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>に<rt>に</rt></ruby><span class="meaning">at the point of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>繰<rt>く</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>すかどうかを<span class="meaning">whether to repeat</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>判定<rt>はんてい</rt></ruby>する<span class="meaning">to check</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    In (pre-test) repetition, the computer checks whether to repeat before doing the processing.
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>後<rt>あと</rt></ruby></span><span class="answer-num">（20）</span><span class="blank">＿＿＿</span><span class="meaning">after</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>判定<rt>はんてい</rt></ruby><span class="meaning">check</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>繰<rt>く</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>しは<span class="meaning">post-test repetition</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>処理<rt>しょり</rt></ruby><span class="meaning">processing</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>した<rt>した</rt></ruby><span class="meaning">did (past)</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>後<rt>あと</rt></ruby></span><span class="answer-num">（20）</span><span class="blank">＿＿＿</span><span class="meaning">after</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>に<rt>に</rt></ruby><span class="meaning">at the point of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>繰<rt>く</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>すかどうかを<span class="meaning">whether to repeat</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>判定<rt>はんてい</rt></ruby>する<span class="meaning">to check</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    In (post-test) repetition, the computer checks whether to repeat after doing the processing.
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>後<rt>あと</rt></ruby></span><span class="answer-num">（20）</span><span class="blank">＿＿＿</span><span class="meaning">post-test</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>判定<rt>はんてい</rt></ruby><span class="meaning">check</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>場合<rt>ばあい</rt></ruby>は<span class="meaning">in the case of</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>必<rt>かなら</rt></ruby>ず<span class="meaning">always / without fail</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>最低<rt>さいてい</rt></ruby><span class="meaning">at least / minimum</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text">1</span><span class="answer-num">（21）</span><span class="blank">＿</span><span class="meaning">1 — one time</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>回<rt>かい</rt></ruby><span class="meaning">times (counter)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>は<rt>は</rt></ruby><span class="meaning">topic</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>処理<rt>しょり</rt></ruby>が<span class="meaning">processing</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>行<rt>おこな</rt></ruby>われる<span class="meaning">is performed (passive)</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    In the case of (post-test) repetition, the processing is always performed at least (1) time.
+  </div>
+
+  <!-- ==================== 前判定 vs 後判定 FORMULA ==================== -->
+  <div class="formula-block">
+    <div class="formula-enzyme"><span class="word" onclick="toggleWord(event, this)"><ruby>試験対策<rt>しけんたいさく</rt></ruby><span class="meaning">exam point</span></span> — <span class="word" onclick="toggleWord(event, this)"><ruby>前判定<rt>まえはんてい</rt></ruby><span class="meaning">pre-test</span></span> vs <span class="word" onclick="toggleWord(event, this)"><ruby>後判定<rt>あとはんてい</rt></ruby><span class="meaning">post-test</span></span></div>
+    <div class="formula-arrow">↓</div>
+    <div class="formula">
+      <span class="word" onclick="toggleWord(event, this)"><ruby>前判定<rt>まえはんてい</rt></ruby><span class="meaning">pre-test</span></span><span class="arrow-r">：</span><span class="word" onclick="toggleWord(event, this)"><ruby>判定<rt>はんてい</rt></ruby><span class="meaning">check</span></span> <span class="arrow-r">→</span> <span class="word" onclick="toggleWord(event, this)"><ruby>処理<rt>しょり</rt></ruby><span class="meaning">process</span></span> <span class="arrow-r">→</span> <span class="word" onclick="toggleWord(event, this)"><ruby>最低<rt>さいてい</rt></ruby><span class="meaning">minimum</span></span> 0<span class="word" onclick="toggleWord(event, this)"><ruby>回<rt>かい</rt></ruby><span class="meaning">times</span></span><span class="word" onclick="toggleWord(event, this)">の<span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>可能<rt>かのう</rt></ruby><span class="meaning">possible</span></span>
+    </div>
+    <div class="formula">
+      <span class="word" onclick="toggleWord(event, this)"><ruby>後判定<rt>あとはんてい</rt></ruby><span class="meaning">post-test</span></span><span class="arrow-r">：</span><span class="word" onclick="toggleWord(event, this)"><ruby>処理<rt>しょり</rt></ruby><span class="meaning">process</span></span> <span class="arrow-r">→</span> <span class="word" onclick="toggleWord(event, this)"><ruby>判定<rt>はんてい</rt></ruby><span class="meaning">check</span></span> <span class="arrow-r">→</span> <span class="word" onclick="toggleWord(event, this)"><ruby>必<rt>かなら</rt></ruby>ず<span class="meaning">always</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>最低<rt>さいてい</rt></ruby><span class="meaning">at least</span></span> <span class="word answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text">1</span><span class="answer-num">（21）</span><span class="blank">＿</span><span class="meaning">1 — one time</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>回<rt>かい</rt></ruby><span class="meaning">time</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>実行<rt>じっこう</rt></ruby><span class="meaning">executed</span></span>
+    </div>
+    <div class="formula-gloss">
+      <span class="word" onclick="toggleWord(event, this)"><ruby>後判定<rt>あとはんてい</rt></ruby>は<span class="meaning">post-test</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>処理<rt>しょり</rt></ruby>が<span class="meaning">processing</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>先<rt>さき</rt></ruby>！<span class="meaning">comes first</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>最低<rt>さいてい</rt></ruby><span class="meaning">minimum</span></span><span class="word answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text">1</span><span class="answer-num">（21）</span><span class="blank">＿</span><span class="meaning">1 time</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>回<rt>かい</rt></ruby>は<span class="meaning">time(s)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>保証<rt>ほうしょう</rt></ruby>される<span class="meaning">is guaranteed</span></span>——<span class="word" onclick="toggleWord(event, this)"><ruby>非常<rt>ひじょう</rt></ruby>に<span class="meaning">very</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>よく出る<rt>よくでる</rt></ruby><span class="meaning">frequently asked</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>論点<rt>ろんてん</rt></ruby>！<span class="meaning">exam point</span></span>
+    </div>
+  </div>
+
+  <!-- ==================== KEY TERMS ==================== -->
+  <div class="terms-section">
+    <div class="terms-heading"><span class="word" onclick="toggleWord(event, this)">Key Terms<span class="meaning">重要用語</span></span> — <span class="word" onclick="toggleWord(event, this)"><ruby>重要用語<rt>じゅうようようご</rt></ruby><span class="meaning">key terms</span></span></div>
+    <div class="terms-sub"><span class="word" onclick="toggleWord(event, this)"><ruby>用語<rt>ようご</rt></ruby><span class="meaning">terms</span></span> <span class="word" onclick="toggleWord(event, this)"><ruby>集<rt>しゅう</rt></ruby><span class="meaning">collection</span></span> — Glossary of terms from this unit</div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">アルゴリズム<rt>アルゴリズム</rt></ruby><span class="meaning">algorithm</span></span>
+      <span class="term-en">algorithm (No. 1–3)</span>
+      <div class="term-def">The "procedure," "calculation method," or "processing procedure" for solving a specific problem — like a recipe for a computer.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">手順書<rt>てじゅんしょ</rt></ruby><span class="meaning">written procedure</span></span>
+      <span class="term-en">written procedure</span>
+      <div class="term-def">A document listing steps in order. An algorithm is the "instruction manual" that makes a computer do its work.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">フローチャート<rt>フローチャート</rt></ruby><span class="meaning">flowchart</span></span>
+      <span class="term-en">flowchart</span>
+      <div class="term-def">A diagram that expresses an algorithm visually. Also called a 流れ図 (flow diagram).</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">流れ図<rt>ながれず</rt></ruby><span class="meaning">flow diagram</span></span>
+      <span class="term-en">flow diagram (No. 5)</span>
+      <div class="term-def">Another name for a flowchart: a visual representation of processing steps.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">端子<rt>たんし</rt></ruby><span class="meaning">terminator symbol</span></span>
+      <span class="term-en">terminator symbol (No. 6–7, 11–12)</span>
+      <div class="term-def">The rounded (stadium-shaped) symbol marking the start and end of processing.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">処理<rt>しょり</rt></ruby>（<ruby>四角<rt>しかく</rt></ruby>）<span class="meaning">process symbol</span></span>
+      <span class="term-en">process symbol (No. 8)</span>
+      <div class="term-def">The rectangle symbol showing a concrete process such as a calculation or an assignment.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">流れ線<rt>ながれせん</rt></ruby><span class="meaning">flow line</span></span>
+      <span class="term-en">flow line (No. 9)</span>
+      <div class="term-def">The arrow showing the flow of processing. In principle: top to bottom, left to right.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">判断<rt>はんだん</rt></ruby>（<ruby>菱形<rt>ひしがた</rt></ruby>）<span class="meaning">decision symbol</span></span>
+      <span class="term-en">decision symbol (No. 10)</span>
+      <div class="term-def">The diamond symbol for a decision based on a condition, with Yes/No branches.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">ループ端子<rt>ループたんし</rt></ruby><span class="meaning">loop terminal</span></span>
+      <span class="term-en">loop terminal (No. 11–12)</span>
+      <div class="term-def">The hexagonal symbol pair marking the start and end of a loop, expressing repetition.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">順次構造<rt>じゅんじこうぞう</rt></ruby><span class="meaning">sequential structure</span></span>
+      <span class="term-en">sequential structure (No. 13, 16)</span>
+      <div class="term-def">Instructions are executed one after another, in order.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">選択構造<rt>せんたくこうぞう</rt></ruby>（<ruby>分岐構造<rt>ぶんきこうぞう</rt></ruby>）<span class="meaning">selection / branch structure</span></span>
+      <span class="term-en">selection / branch structure (No. 14, 17)</span>
+      <div class="term-def">The flow of execution changes depending on a condition.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">繰り返し構造<rt>くりかえしこうぞう</rt></ruby><span class="meaning">repetition structure</span></span>
+      <span class="term-en">repetition structure (No. 15, 18)</span>
+      <div class="term-def">The same processing is repeated according to a condition.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">前判定繰り返し<rt>まえはんていくりかえし</rt></ruby><span class="meaning">pre-test repetition</span></span>
+      <span class="term-en">pre-test repetition (No. 19)</span>
+      <div class="term-def">The repeat check happens before processing, so the process may run 0 times.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">後判定繰り返し<rt>あとはんていくりかえし</rt></ruby><span class="meaning">post-test repetition</span></span>
+      <span class="term-en">post-test repetition (No. 20–21)</span>
+      <div class="term-def">The repeat check happens after processing, so the process always runs at least 1 time.</div>
+    </div>
+  </div>
+
+  <div class="table-note">
+    <strong><span class="word" onclick="toggleWord(event, this)"><ruby>注記<rt>ちゅうき</rt></ruby><span class="meaning">note</span></span>:</strong> The source material contained transcription (OCR) errors; corrections were made only
+    where the intended wording was clear: 「（具体）的処理」→「（具体的）処理」, 「命令在（順番）」→「命令を（順番）」,
+    and the interleaved repetition block 「①（前前判定繰り返しは、処理をする（後判定繰り返しは…」which was restored to its
+    natural order: ①（前）判定繰り返し、②（後）判定繰り返しがある ／ 前判定は処理をする（前）に判定する ／
+    後判定は処理をした（後）に判定する ／ 後判定は必ず最低（1）回は処理が行われる.
+    <span class="word" onclick="toggleWord(event, this)"><ruby>判断<rt>はんだん</rt></ruby>の<span class="meaning">decision's</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>形<rt>かたち</rt></ruby><span class="meaning">shape</span></span>は<span class="word" onclick="toggleWord(event, this)"><ruby>菱形<rt>ひしがた</rt></ruby>（<span class="meaning">diamond (ひし形)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>試験<rt>しけん</rt></ruby><span class="meaning">exam</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>表記<rt>ひょうき</rt></ruby>）<span class="meaning">notation</span></span>。
+    The blank labels （1）〜（21） were introduced for study purposes since the original worksheet blanks were unnumbered;
+    repeated blanks (前・後・1) share the same number to keep the mapping consistent.
+  </div>
+
+  <script>
+    function toggleWord(event, el) {
+      if (event && event.stopPropagation) event.stopPropagation();
+      el.classList.toggle('revealed');
+    }
+    function toggleAnswers() {
+      var hidden = document.body.classList.toggle('hide-answers');
+      var btn = document.getElementById('toggleAnswers');
+      if (btn) { btn.classList.toggle('active', !hidden); btn.textContent = hidden ? 'Show Answers' : 'Hide Answers'; btn.setAttribute('aria-pressed', String(hidden)); }
+    }
+  </script>
+
+<script>
+(function(){
+  const body=document.body;
+  const toolbar=document.querySelector('.toolbar');
+  const progress=document.createElement('div'); progress.className='study-progress'; progress.setAttribute('aria-hidden','true'); progress.innerHTML='<span></span>'; document.body.prepend(progress);
+  const progressBar=progress.firstElementChild;
+  function updateProgress(){const max=document.documentElement.scrollHeight-window.innerHeight;progressBar.style.width=(max>0?Math.min(100,window.scrollY/max*100):100)+'%';}
+  window.addEventListener('scroll',updateProgress,{passive:true}); window.addEventListener('resize',updateProgress); updateProgress();
+  if(toolbar){
+    const tools=document.createElement('div'); tools.className='study-tools'; tools.setAttribute('aria-label','Study display controls');
+    tools.innerHTML='<button type="button" id="meaningsToggle" aria-pressed="false">Show all meanings</button><button type="button" id="themeToggle" aria-pressed="false">Dark mode</button><span class="tool-spacer"></span><span class="font-size-label">Text size</span><button type="button" id="fontNormal" aria-pressed="true" aria-label="Normal text size">A</button><button type="button" id="fontLarge" aria-pressed="false" aria-label="Large text size">A+</button><button type="button" id="fontLarger" aria-pressed="false" aria-label="Extra large text size">A++</button><button type="button" id="resetWords">Reset revealed words</button>';
+    toolbar.appendChild(tools);
+    const meanings=document.getElementById('meaningsToggle');
+    meanings.addEventListener('click',()=>{const on=body.classList.toggle('study-show-meanings');meanings.setAttribute('aria-pressed',String(on));meanings.textContent=on?'Hide all meanings':'Show all meanings';});
+    const theme=document.getElementById('themeToggle'); theme.addEventListener('click',()=>{const on=body.classList.toggle('study-dark');theme.setAttribute('aria-pressed',String(on));theme.textContent=on?'Light mode':'Dark mode';});
+    function setFont(size){body.classList.remove('study-large-text','study-larger-text');if(size===1)body.classList.add('study-large-text');if(size===2)body.classList.add('study-larger-text');[['fontNormal',0],['fontLarge',1],['fontLarger',2]].forEach(([id,n])=>document.getElementById(id).setAttribute('aria-pressed',String(n===size)));}
+    document.getElementById('fontNormal').addEventListener('click',()=>setFont(0));document.getElementById('fontLarge').addEventListener('click',()=>setFont(1));document.getElementById('fontLarger').addEventListener('click',()=>setFont(2));
+    document.getElementById('resetWords').addEventListener('click',()=>{body.querySelectorAll('.word.revealed').forEach(el=>el.classList.remove('revealed'));});
+  }
+  // Make existing word-by-word glossary items keyboard accessible.
+  document.querySelectorAll('.word[onclick], .answer-word[onclick]').forEach(el=>{if(!el.hasAttribute('tabindex'))el.setAttribute('tabindex','0');if(!el.hasAttribute('role'))el.setAttribute('role','button');el.addEventListener('keydown',ev=>{if((ev.key==='Enter'||ev.key===' ')&&ev.target===el){ev.preventDefault();el.click();}});});
+})();
+</script>
+</body>
+</html>

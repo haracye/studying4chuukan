@@ -1,0 +1,2155 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ITパスポート 第7章 — データ構造（Part 1）</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #f5f6f8;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans",
+      "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif;
+    color: #2c3e50;
+    line-height: 1.8;
+    padding-bottom: 60px;
+  }
+
+  .container { max-width: 800px; margin: 0 auto; padding: 0 20px; }
+
+  /* ---------- Header ---------- */
+  .header { padding: 50px 0 30px; text-align: center; }
+  .chapter-label {
+    font-size: 13px; letter-spacing: 2px; text-transform: uppercase;
+    color: #8a94a6; margin-bottom: 8px;
+  }
+  .header h1 { font-size: 30px; color: #16213e; margin-bottom: 12px; letter-spacing: 1px; }
+  .header .subtitle { font-size: 14px; color: #8a94a6; }
+
+  /* ---------- Sticky Toolbar ---------- */
+  .toolbar {
+    position: sticky; top: 0;
+    background: rgba(245, 246, 248, 0.95);
+    backdrop-filter: blur(8px);
+    padding: 12px 0; border-bottom: 1px solid #e3e6ea; z-index: 100;
+  }
+  .toolbar-inner {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 10px;
+  }
+  .toolbar-instruction { font-size: 13px; color: #8a94a6; }
+  .toolbar-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .answer-btn, .mini-btn {
+    background: #e07a5f; color: white; border: none;
+    padding: 9px 18px; border-radius: 20px; font-size: 13px;
+    cursor: pointer; font-family: inherit;
+    transition: background 0.2s, transform 0.1s; letter-spacing: 0.5px;
+  }
+  .mini-btn { background: #4a6fa5; padding: 8px 14px; }
+  .answer-btn:hover { background: #d06a4f; }
+  .mini-btn:hover { background: #3d5f8f; }
+  .answer-btn:active, .mini-btn:active { transform: scale(0.97); }
+  .answer-btn.active { background: #4a6fa5; }
+  .mini-btn.off { background: #b4bac4; }
+
+  /* ---------- Sections ---------- */
+  .section { margin-top: 55px; scroll-margin-top: 120px; }
+  .section-header { cursor: pointer; user-select: none; }
+  .section-chevron {
+    display: inline-block; color: #e07a5f; font-size: 18px;
+    margin-right: 6px; transition: transform 0.25s;
+  }
+  .section.collapsed .section-chevron { transform: rotate(-90deg); }
+  .section-badge {
+    display: inline-block; background: #16213e; color: white;
+    font-size: 13px; padding: 4px 16px; border-radius: 15px;
+    margin-bottom: 12px; letter-spacing: 1px;
+  }
+  .section h2 { font-size: 24px; color: #16213e; margin-bottom: 4px; }
+  .section .heading-translation {
+    font-size: 13px; color: #4a6fa5; margin-bottom: 24px; font-style: italic;
+  }
+  .section.collapsed .section-content { display: none; }
+
+  .sentence-block { margin-bottom: 8px; }
+  .divider { border: none; border-top: 1px dashed #d9dde3; margin: 28px 0; }
+
+  /* ---------- Japanese Sentence ---------- */
+  .japanese { font-size: 21px; line-height: 2.6; margin-bottom: 14px; }
+  .word {
+    cursor: pointer; border-radius: 4px; padding: 2px 3px;
+    transition: background 0.15s; display: inline;
+  }
+  .word:hover { background: #eef2f7; }
+  .word.revealed { background: #e3eaf4; }
+  .meaning {
+    display: none; font-size: 12px; color: #4a6fa5;
+    margin-left: 3px; vertical-align: middle; font-weight: 500;
+  }
+  .word.revealed .meaning { display: inline; }
+  ruby rt { font-size: 10px; color: #9aa3b0; letter-spacing: 0; line-height: 1; }
+  body.hide-furigana rt { display: none; }
+
+  /* ---------- Translation ---------- */
+  .translation {
+    background: #eef2f7; border-left: 3px solid #4a6fa5;
+    padding: 12px 18px; border-radius: 0 8px 8px 0; margin-bottom: 10px;
+  }
+  .translation-title {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px;
+    color: #4a6fa5; margin-bottom: 4px; font-weight: 600;
+  }
+  .translation p { font-size: 14px; color: #4a6fa5; line-height: 1.7; }
+  body.hide-translations .translation { display: none; }
+
+  /* ---------- Answers ---------- */
+  .answer-num {
+    font-size: 14px; color: #e07a5f; font-weight: 600; margin: 0 2px;
+  }
+  .blank { display: none; color: #e07a5f; letter-spacing: 1px; }
+  body.hide-answers .answer-text { display: none; }
+  body.hide-answers .blank { display: inline; }
+  body.hide-answers .answer-word { background: #fdf1ed; }
+
+  /* ---------- Formula / Diagram Cards ---------- */
+  .formula-block {
+    background: white; border-radius: 12px; padding: 24px;
+    margin: 24px 0; box-shadow: 0 2px 8px rgba(22, 33, 62, 0.06);
+  }
+  .formula-block h3 {
+    font-size: 15px; color: #16213e; margin-bottom: 14px;
+    border-bottom: 2px solid #f0f1f3; padding-bottom: 8px;
+  }
+  .formula-content {
+    text-align: center; font-size: 19px; color: #16213e;
+    letter-spacing: 0.5px; overflow-x: auto; white-space: nowrap;
+    padding: 10px 0; cursor: pointer; border-radius: 8px;
+    transition: background 0.15s; line-height: 2;
+  }
+  .formula-content:hover { background: #f5f8fc; }
+  .formula-content.selected { background: #e3eaf4; }
+  .formula-note {
+    font-size: 12px; color: #8a94a6; text-align: center;
+    margin-top: 12px; line-height: 1.6; white-space: normal;
+  }
+  .cell-info {
+    background: #eef2f7; border-radius: 8px; padding: 10px 16px;
+    font-size: 13px; color: #4a6fa5; line-height: 1.7;
+    margin-top: 12px; min-height: 20px; white-space: normal;
+  }
+  .jump-link {
+    cursor: pointer; color: #4a6fa5; padding: 4px 10px;
+    border-radius: 8px; transition: background 0.15s;
+  }
+  .jump-link:hover { background: #e3eaf4; }
+
+  .diagram {
+    display: flex; justify-content: center; align-items: flex-end;
+    gap: 10px; flex-wrap: nowrap; overflow-x: auto; padding: 16px 0;
+  }
+  .diagram .cell { min-width: 64px; text-align: center; }
+  .diagram .cell-label { font-size: 11px; color: #8a94a6; margin-bottom: 4px; }
+  .diagram .cell-box {
+    background: #f0f3f8; border: 1.5px solid #4a6fa5; border-radius: 8px;
+    padding: 8px 10px; font-size: 15px; color: #16213e; font-weight: 600;
+    cursor: pointer; transition: background 0.15s, transform 0.1s;
+  }
+  .diagram .cell-box:hover { background: #e3eaf4; }
+  .diagram .cell-box:active { transform: scale(0.95); }
+  .diagram .cell-box.top { background: #4a6fa5; color: white; }
+  .diagram .cell-box.found {
+    background: #e07a5f; border-color: #e07a5f; color: white;
+  }
+  .diagram .arrow {
+    font-size: 16px; color: #e07a5f; align-self: flex-end;
+    padding-bottom: 10px; font-weight: bold;
+  }
+
+  /* ---------- Glossary ---------- */
+  .glossary { margin-top: 70px; }
+  .glossary h2 { font-size: 24px; color: #16213e; text-align: center; }
+  .glossary .glossary-subtitle { text-align: center; font-size: 13px; color: #8a94a6; margin-bottom: 30px; }
+  .glossary-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px;
+  }
+  .glossary-card {
+    background: white; border-radius: 12px; padding: 20px;
+    box-shadow: 0 2px 8px rgba(22, 33, 62, 0.06);
+    cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+    position: relative;
+  }
+  .glossary-card:hover {
+    transform: translateY(-2px); box-shadow: 0 4px 12px rgba(22, 33, 62, 0.1);
+  }
+  .learned-badge {
+    position: absolute; top: 12px; right: 14px; font-size: 11px;
+    color: #2e9e6b; font-weight: 700; display: none;
+  }
+  .glossary-card.learned { border: 2px solid #2e9e6b; }
+  .glossary-card.learned .learned-badge { display: block; }
+  .glossary-card .term-jp { font-size: 18px; color: #16213e; margin-bottom: 2px; }
+  .glossary-card .term-jp rt { font-size: 10px; color: #9aa3b0; }
+  .glossary-card .term-en { font-size: 12px; color: #4a6fa5; font-weight: 600; margin-bottom: 8px; }
+  .glossary-card .term-def { font-size: 12.5px; color: #6b7482; line-height: 1.6; }
+  .reset-link { color: #e07a5f; cursor: pointer; text-decoration: underline; }
+
+  /* ---------- Content Quiz ---------- */
+  .quiz-block {
+    background: white; border-radius: 12px; padding: 26px;
+    margin-top: 40px; box-shadow: 0 2px 8px rgba(22, 33, 62, 0.06);
+    text-align: center;
+  }
+  .quiz-block h2 { font-size: 22px; color: #16213e; margin-bottom: 6px; }
+  .quiz-sub { font-size: 12px; color: #8a94a6; margin-bottom: 18px; line-height: 1.7; }
+  .quiz-progress { font-size: 12px; color: #e07a5f; font-weight: 600; margin-bottom: 10px; }
+  .quiz-question {
+    font-size: 19px; color: #16213e; line-height: 2.4;
+    margin: 10px 0 6px; min-height: 60px;
+  }
+  .quiz-question rt { font-size: 10px; color: #9aa3b0; }
+  .quiz-translation {
+    background: #eef2f7; border-left: 3px solid #4a6fa5;
+    padding: 10px 16px; border-radius: 0 8px 8px 0;
+    margin: 8px 0 20px; text-align: left;
+  }
+  .quiz-translation .translation-title {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px;
+    color: #4a6fa5; margin-bottom: 4px; font-weight: 600;
+  }
+  .quiz-translation p { font-size: 14px; color: #4a6fa5; line-height: 1.7; }
+  body.hide-translations .quiz-translation { display: none; }
+  .quiz-choices {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    max-width: 560px; margin: 0 auto 16px;
+  }
+  .quiz-choice {
+    background: #f0f3f8; border: 2px solid #d9dfe8; border-radius: 10px;
+    padding: 12px 10px; font-size: 16px; color: #16213e;
+    cursor: pointer; font-family: inherit; line-height: 2;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  }
+  .quiz-choice rt { font-size: 10px; color: #9aa3b0; }
+  .quiz-choice .word { padding: 1px 2px; }
+  .quiz-choice .meaning { font-size: 11px; }
+  .quiz-choice:hover { background: #e3eaf4; border-color: #4a6fa5; }
+  .quiz-choice:active { transform: scale(0.98); }
+  .quiz-choice.correct {
+    background: #e3f4ea; border-color: #2e9e6b; color: #1d6b49; font-weight: 600;
+  }
+  .quiz-choice.wrong {
+    background: #fbe7e2; border-color: #e07a5f; color: #b5533d; font-weight: 600;
+  }
+  .quiz-choice.disabled { cursor: default; }
+  .quiz-choice.disabled:hover { background: #f0f3f8; border-color: #d9dfe8; }
+  .quiz-choice.disabled.correct:hover { background: #e3f4ea; border-color: #2e9e6b; }
+  .quiz-choice.disabled.wrong:hover { background: #fbe7e2; border-color: #e07a5f; }
+  .quiz-feedback {
+    font-size: 14px; color: #4a6fa5; min-height: 60px; margin-bottom: 14px;
+    line-height: 2; padding: 0 10px; text-align: left;
+  }
+  .quiz-feedback rt { font-size: 10px; color: #9aa3b0; }
+  .quiz-feedback .word { padding: 1px 2px; }
+  .quiz-feedback .fb-en {
+    display: block; font-size: 12px; color: #8a94a6; line-height: 1.7; margin-top: 6px;
+  }
+  .quiz-feedback strong.ok { color: #2e9e6b; }
+  .quiz-feedback strong.ng { color: #e07a5f; }
+  .quiz-btns { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+  .quiz-score { font-size: 13px; color: #8a94a6; margin-top: 16px; }
+  .quiz-result { font-size: 20px; color: #16213e; font-weight: 700; margin: 14px 0; }
+
+  .footer { margin-top: 60px; text-align: center; font-size: 12px; color: #b4bac4; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 600px) {
+    .header h1 { font-size: 22px; }
+    .section h2 { font-size: 20px; }
+    .japanese { font-size: 18px; }
+    .quiz-question { font-size: 17px; }
+    .quiz-choice { font-size: 14px; }
+    .toolbar-inner { flex-direction: column; align-items: flex-start; }
+    .formula-content { font-size: 15px; }
+    .glossary-grid { grid-template-columns: 1fr; }
+    .quiz-choices { grid-template-columns: 1fr; }
+  }
+</style>
+
+<style id="library-navigation-style">
+.library-nav{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:0 0 22px;padding:12px 14px;border:1px solid #dfe3ed;border-radius:12px;background:rgba(255,255,255,.92);font:14px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;position:relative;z-index:5}
+.library-nav a{color:#4357a8;text-decoration:none;font-weight:650;padding:7px 9px;border-radius:8px}
+.library-nav a:focus-visible{outline:3px solid #9ba9f3;outline-offset:2px}.library-nav a:hover{background:#eef1ff}
+@media(max-width:600px){.library-nav{gap:4px;padding:9px}.library-nav a{font-size:12px;padding:7px 5px}}
+@media(prefers-color-scheme:dark){.library-nav{background:#222635;border-color:#3a4054}.library-nav a{color:#bdc7ff}.library-nav a:hover{background:#303956}}
+</style>
+</head>
+<body class="hide-answers">
+<nav class="library-nav" aria-label="Chapter navigation"><a href="index.html">← All notes</a><a href="09-chapter.html">← Previous</a><a href="11-chapter.html">Next →</a></nav>
+
+<div class="header">
+  <div class="container">
+    <div class="chapter-label">Chapter 7 · IT Passport · テクノロジー系</div>
+    <h1>データ構造</h1>
+    <div class="subtitle">対策学習ワークシート Part 1 — Algorithms &amp; Programming: Data Structures</div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <div class="container toolbar-inner">
+    <span class="toolbar-instruction">Tap any word to reveal its meaning · 単語をタップして意味を表示</span>
+    <div class="toolbar-btns">
+      <button class="mini-btn" onclick="toggleFurigana(event)">Furigana ON</button>
+      <button class="mini-btn" onclick="toggleTranslations(event)">Translations ON</button>
+      <button class="mini-btn" onclick="scrollTo0('quizBlock')">Quiz</button>
+      <button class="answer-btn" id="answerBtn" onclick="toggleAnswers()">Show Answers ✓</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ============ SECTION A ============ -->
+  <div class="section" id="sectionA">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-chevron">▾</span><span class="section-badge">Section A</span>
+      <h2>データ構造とは？</h2>
+      <div class="heading-translation">What is a Data Structure? — tap ①〜⑤ to jump!</div>
+    </div>
+    <div class="section-content">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>数据構造<rt>データこうぞう</rt></ruby><span class="meaning">data structure</span></span>
+          <span class="word" onclick="toggleWord(this, event)">とは<span class="meaning">as for ~ (definition marker)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">、<span class="meaning">comma</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>複数<rt>ふくすう</rt></ruby><span class="meaning">multiple / several</span></span>
+          <span class="word" onclick="toggleWord(this, event)">の<span class="meaning">connection particle (of)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">データ<span class="meaning">data</span></span>
+          <span class="word" onclick="toggleWord(this, event)">を<span class="meaning">object marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>整理<rt>せいり</rt></ruby><span class="meaning">organize</span></span>
+          <span class="word" onclick="toggleWord(this, event)">して<span class="meaning">and then (te-form)</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>格納<rt>かくのう</rt></ruby><span class="meaning">store</span></span>
+          <span class="word" onclick="toggleWord(this, event)">する<span class="meaning">to do</span></span>
+          <span class="word answer-word" onclick="toggleWord(this, event)">
+            <span class="answer-text">「<ruby>入<rt>い</rt></ruby>れ<ruby>物<rt>もの</rt></ruby>」</span>
+            <span class="answer-num">（1）</span>
+            <span class="blank">＿＿＿＿</span>
+            <span class="meaning">container / box</span>
+          </span>
+          <span class="word" onclick="toggleWord(this, event)">の<span class="meaning">connection particle (like a)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">ような<span class="meaning">like / similar to</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>物<rt>もの</rt></ruby><span class="meaning">thing</span></span>
+          <span class="word" onclick="toggleWord(this, event)">です<span class="meaning">is (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>A data structure is like a "container" used to organize and store multiple pieces of data.</p>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>数据構造<rt>データこうぞう</rt></ruby><span class="meaning">data structure</span></span>
+          <span class="word" onclick="toggleWord(this, event)">に<span class="meaning">in / within</span></span>
+          <span class="word" onclick="toggleWord(this, event)">は<span class="meaning">topic marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)">、<span class="meaning">comma</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>主<rt>おも</rt></ruby>に<span class="meaning">mainly</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>次<rt>つぎ</rt></ruby>の<span class="meaning">the following</span></span>
+          <span class="word" onclick="toggleWord(this, event)">ような<span class="meaning">such as</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>物<rt>もの</rt></ruby><span class="meaning">things</span></span>
+          <span class="word" onclick="toggleWord(this, event)">が<span class="meaning">subject marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>有<rt>あ</rt></ruby>ります<span class="meaning">there are (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>The main types of data structures include the following:</p>
+        </div>
+      </div>
+
+      <div class="formula-block">
+        <h3>主なデータ構造 — The Five Data Structures（タップでジャンプ！）</h3>
+        <div class="formula-content">
+          <span class="jump-link" onclick="goToSection('sectionB')">①
+            <span class="word answer-word" onclick="toggleWord(this, event)">
+              <span class="answer-text">（<ruby>配列<rt>はいれつ</rt></ruby>）</span>
+              <span class="answer-num">（2）</span>
+              <span class="blank">＿＿＿＿</span>
+              <span class="meaning">array</span>
+            </span>
+          </span>
+          <span class="jump-link" onclick="goToSection('sectionC')">②
+            <span class="word answer-word" onclick="toggleWord(this, event)">
+              <span class="answer-text">（リスト）</span>
+              <span class="answer-num">（3）</span>
+              <span class="blank">＿＿＿＿</span>
+              <span class="meaning">list</span>
+            </span>
+          </span>
+          <span class="jump-link" onclick="goToSection('sectionD')">③
+            <span class="word answer-word" onclick="toggleWord(this, event)">
+              <span class="answer-text">（キュー）</span>
+              <span class="answer-num">（4）</span>
+              <span class="blank">＿＿＿＿</span>
+              <span class="meaning">queue</span>
+            </span>
+          </span>
+          <span class="jump-link" onclick="goToSection('sectionE')">④
+            <span class="word answer-word" onclick="toggleWord(this, event)">
+              <span class="answer-text">（スタック）</span>
+              <span class="answer-num">（5）</span>
+              <span class="blank">＿＿＿＿</span>
+              <span class="meaning">stack</span>
+            </span>
+          </span>
+          <span class="jump-link" onclick="goToSection('sectionF')">⑤
+            <span class="word answer-word" onclick="toggleWord(this, event)">
+              <span class="answer-text">（<ruby>木構造<rt>きこうぞう</rt></ruby>）</span>
+              <span class="answer-num">（6）</span>
+              <span class="blank">＿＿＿＿</span>
+              <span class="meaning">tree structure</span>
+            </span>
+          </span>
+        </div>
+        <div class="formula-note">array · list · queue · stack · tree — tap any one to jump to its section.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ SECTION B ============ -->
+  <div class="section" id="sectionB">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-chevron">▾</span><span class="section-badge">Section B</span>
+      <h2>配列（Array）</h2>
+      <div class="heading-translation">Arrays</div>
+    </div>
+    <div class="section-content">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>配列<rt>はいれつ</rt></ruby><span class="meaning">array</span></span>
+          <span class="word" onclick="toggleWord(this, event)">とは<span class="meaning">as for ~ (definition marker)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">、<span class="meaning">comma</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>複数<rt>ふくすう</rt></ruby><span class="meaning">multiple</span></span>
+          <span class="word" onclick="toggleWord(this, event)">の<span class="meaning">connection particle (of)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">データ<span class="meaning">data</span></span>
+          <span class="word" onclick="toggleWord(this, event)">を<span class="meaning">object marker</span></span>
+          <span class="word answer-word" onclick="toggleWord(this, event)">
+            <span class="answer-text">（<ruby>連続<rt>れんぞく</rt></ruby>的）</span>
+            <span class="answer-num">（7）</span>
+            <span class="blank">＿＿＿＿</span>
+            <span class="meaning">contiguous / consecutive</span>
+          </span>
+          <span class="word" onclick="toggleWord(this, event)">に<span class="meaning">(adverbial marker)</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>並<rt>なら</rt></ruby>べた<span class="meaning">lined up / arranged</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>数据構造<rt>データこうぞう</rt></ruby><span class="meaning">data structure</span></span>
+          <span class="word" onclick="toggleWord(this, event)">です<span class="meaning">is (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>An array is a data structure in which multiple pieces of data are arranged contiguously.</p>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>配列<rt>はいれつ</rt></ruby><span class="meaning">array</span></span>
+          <span class="word" onclick="toggleWord(this, event)">の<span class="meaning">connection particle (of)</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>各<rt>かく</rt></ruby><span class="meaning">each</span></span>
+          <span class="word" onclick="toggleWord(this, event)">データ<span class="meaning">data</span></span>
+          <span class="word" onclick="toggleWord(this, event)">に<span class="meaning">to (attachment)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">は<span class="meaning">topic marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)">、<span class="meaning">comma</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>先頭<rt>せんとう</rt></ruby><span class="meaning">beginning / head</span></span>
+          <span class="word" onclick="toggleWord(this, event)">から<span class="meaning">from</span></span>
+          <span class="word" onclick="toggleWord(this, event)">0→1→2→3→4→…<span class="meaning">0, 1, 2, 3, 4, ...</span></span>
+          <span class="word" onclick="toggleWord(this, event)">という<span class="meaning">called / such as</span></span>
+          <span class="word answer-word" onclick="toggleWord(this, event)">
+            <span class="answer-text">（<ruby>添字<rt>そえじ</rt></ruby>）</span>
+            <span class="answer-num">（8）</span>
+            <span class="blank">＿＿＿＿</span>
+            <span class="meaning">index / subscript</span>
+          </span>
+          <span class="word" onclick="toggleWord(this, event)">が<span class="meaning">subject marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>付<rt>つ</rt></ruby>けられて<span class="meaning">is assigned (passive)</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>居<rt>い</rt></ruby>ます<span class="meaning">exists / is (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>Each piece of data in an array is assigned an "index," numbered from the head: 0 → 1 → 2 → 3 → 4 → …</p>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>例<rt>れい</rt></ruby>えば<span class="meaning">for example</span></span>
+          <span class="word" onclick="toggleWord(this, event)">、<span class="meaning">comma</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>配列<rt>はいれつ</rt></ruby><span class="meaning">array</span></span>
+          <span class="word" onclick="toggleWord(this, event)">a<span class="meaning">the array named "a"</span></span>
+          <span class="word" onclick="toggleWord(this, event)">に<span class="meaning">in / into</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>要素番号<rt>ようそばんごう</rt></ruby><span class="meaning">element number</span></span>
+          <span class="word" onclick="toggleWord(this, event)">0・1・2・3<span class="meaning">0, 1, 2, 3</span></span>
+          <span class="word" onclick="toggleWord(this, event)">に<span class="meaning">at / to</span></span>
+          <span class="word" onclick="toggleWord(this, event)">データ<span class="meaning">data</span></span>
+          <span class="word" onclick="toggleWord(this, event)">10・20・30・40<span class="meaning">10, 20, 30, 40</span></span>
+          <span class="word" onclick="toggleWord(this, event)">が<span class="meaning">subject marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>入<rt>はい</rt></ruby>っている<span class="meaning">is contained</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>時<rt>とき</rt></ruby><span class="meaning">when / at the time</span></span>
+          <span class="word" onclick="toggleWord(this, event)">、<span class="meaning">comma</span></span>
+          <span class="word" onclick="toggleWord(this, event)">a［2］<span class="meaning">a[2] (the element at index 2)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">で<span class="meaning">by means of</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>取<rt>と</rt></ruby>り<ruby>出<rt>だ</rt></ruby>せる<span class="meaning">can retrieve</span></span>
+          <span class="word" onclick="toggleWord(this, event)">データ<span class="meaning">data</span></span>
+          <span class="word" onclick="toggleWord(this, event)">は<span class="meaning">topic marker</span></span>
+          <span class="word answer-word" onclick="toggleWord(this, event)">
+            <span class="answer-text">（30）</span>
+            <span class="answer-num">（9）</span>
+            <span class="blank">＿＿＿＿</span>
+            <span class="meaning">30</span>
+          </span>
+          <span class="word" onclick="toggleWord(this, event)">です<span class="meaning">is (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>For example, if array "a" contains the data 10, 20, 30, 40 at element numbers 0, 1, 2, and 3, then the data retrieved by a[2] is 30.</p>
+        </div>
+      </div>
+
+      <div class="formula-block">
+        <h3>配列 a のイメージ — Array "a" Example（ボックスをタップ！）</h3>
+        <div class="diagram">
+          <div class="cell">
+            <div class="cell-label"><ruby>要素番号<rt>ようそばんごう</rt></ruby> 0</div>
+            <div class="cell-box" onclick="selectCell(this, 'a[0]＝10。先頭の要素。添字は0から始まる！ — a[0] = 10, the first element. Indexes start at 0!', event)">a[0]=10</div>
+          </div>
+          <div class="cell">
+            <div class="cell-label">要素番号 1</div>
+            <div class="cell-box" onclick="selectCell(this, 'a[1]＝20。2番目の要素。 — a[1] = 20, the second element.', event)">a[1]=20</div>
+          </div>
+          <div class="cell">
+            <div class="cell-label">要素番号 2</div>
+            <div class="cell-box top" onclick="selectCell(this, 'a[2]＝30。3番目の要素。a［2］で取り出せるデータは30！ — a[2] = 30, the third element. a[2] retrieves the data 30!', event)">a[2]=30</div>
+          </div>
+          <div class="cell">
+            <div class="cell-label">要素番号 3</div>
+            <div class="cell-box" onclick="selectCell(this, 'a[3]＝40。4番目の要素。 — a[3] = 40, the fourth element.', event)">a[3]=40</div>
+          </div>
+        </div>
+        <div class="cell-info">ボックスをタップして説明を表示 — Tap any box to see its explanation</div>
+        <div class="formula-note">Indexes start at 0, so a[2] refers to the third element — the value 30.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ SECTION C ============ -->
+  <div class="section" id="sectionC">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-chevron">▾</span><span class="section-badge">Section C</span>
+      <h2>リスト（List）</h2>
+      <div class="heading-translation">Lists</div>
+    </div>
+    <div class="section-content">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)">リスト<span class="meaning">list</span></span>
+          <span class="word" onclick="toggleWord(this, event)">は<span class="meaning">topic marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)">、<span class="meaning">comma</span></span>
+          <span class="word answer-word" onclick="toggleWord(this, event)">
+            <span class="answer-text">「データ部」＋「<ruby>指示子<rt>ポインタ</rt></ruby>部」</span>
+            <span class="answer-num">（10）</span>
+            <span class="blank">＿＿＿＿＿＿</span>
+            <span class="meaning">data part + pointer part</span>
+          </span>
+          <span class="word" onclick="toggleWord(this, event)">で<span class="meaning">by means of</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>構成<rt>こうせい</rt></ruby><span class="meaning">is composed</span></span>
+          <span class="word" onclick="toggleWord(this, event)">される<span class="meaning">is done (passive)</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>数据構造<rt>データこうぞう</rt></ruby><span class="meaning">data structure</span></span>
+          <span class="word" onclick="toggleWord(this, event)">です<span class="meaning">is (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>A list is a data structure in which each element is composed of a "data part" and a "pointer part."</p>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)">リスト<span class="meaning">list</span></span>
+          <span class="word" onclick="toggleWord(this, event)">で<span class="meaning">in</span></span>
+          <span class="word" onclick="toggleWord(this, event)">は<span class="meaning">topic marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)">、<span class="meaning">comma</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>指示子<rt>ポインタ</rt></ruby><span class="meaning">pointer</span></span>
+          <span class="word" onclick="toggleWord(this, event)">を<span class="meaning">object marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>辿<rt>たど</rt></ruby>る<span class="meaning">to trace / follow</span></span>
+          <span class="word" onclick="toggleWord(this, event)">こと<span class="meaning">the act of (nominalizer)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">で<span class="meaning">by means of</span></span>
+          <span class="word" onclick="toggleWord(this, event)">、<span class="meaning">comma</span></span>
+          <span class="word" onclick="toggleWord(this, event)">データ<span class="meaning">data</span></span>
+          <span class="word" onclick="toggleWord(this, event)">を<span class="meaning">object marker</span></span>
+          <span class="word answer-word" onclick="toggleWord(this, event)">
+            <span class="answer-text">（つなぐ）</span>
+            <span class="answer-num">（11）</span>
+            <span class="blank">＿＿＿＿</span>
+            <span class="meaning">to connect / link</span>
+          </span>
+          <span class="word" onclick="toggleWord(this, event)">こと<span class="meaning">the act of (nominalizer)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">が<span class="meaning">subject marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>出来<rt>でき</rt></ruby>ます<span class="meaning">can be done (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>In a list, by following the pointers, the data can be linked together.</p>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>指示子<rt>ポインタ</rt></ruby><span class="meaning">pointer</span></span>
+          <span class="word" onclick="toggleWord(this, event)">は<span class="meaning">topic marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)">、<span class="meaning">comma</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>次<rt>つぎ</rt></ruby>の<span class="meaning">the next</span></span>
+          <span class="word" onclick="toggleWord(this, event)">データ<span class="meaning">data</span></span>
+          <span class="word" onclick="toggleWord(this, event)">が<span class="meaning">subject marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>記憶<rt>きおく</rt></ruby><span class="meaning">memory / storage</span></span>
+          <span class="word" onclick="toggleWord(this, event)">上<span class="meaning">on / above</span></span>
+          <span class="word" onclick="toggleWord(this, event)">の<span class="meaning">connection particle (of)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">どの<span class="meaning">which</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>位置<rt>いち</rt></ruby><span class="meaning">position / location</span></span>
+          <span class="word" onclick="toggleWord(this, event)">に<span class="meaning">at / in</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>有<rt>あ</rt></ruby>るか<span class="meaning">exists (whether it is)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">を<span class="meaning">object marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>示<rt>しめ</rt></ruby>す<span class="meaning">to indicate / show</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>物<rt>もの</rt></ruby><span class="meaning">thing</span></span>
+          <span class="word" onclick="toggleWord(this, event)">です<span class="meaning">is (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>A pointer indicates where the next piece of data is located in memory.</p>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)">リスト<span class="meaning">list</span></span>
+          <span class="word" onclick="toggleWord(this, event)">の<span class="meaning">connection particle (of)</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>特徴<rt>とくちょう</rt></ruby><span class="meaning">characteristic / feature</span></span>
+          <span class="word" onclick="toggleWord(this, event)">は<span class="meaning">topic marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)">、<span class="meaning">comma</span></span>
+          <span class="word" onclick="toggleWord(this, event)">データ<span class="meaning">data</span></span>
+          <span class="word" onclick="toggleWord(this, event)">の<span class="meaning">connection particle (of)</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>追加<rt>ついか</rt></ruby><span class="meaning">addition</span></span>
+          <span class="word" onclick="toggleWord(this, event)">・<span class="meaning">and (listing)</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>挿入<rt>そうにゅう</rt></ruby><span class="meaning">insertion</span></span>
+          <span class="word" onclick="toggleWord(this, event)">・<span class="meaning">and (listing)</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>削除<rt>さくじょ</rt></ruby><span class="meaning">deletion</span></span>
+          <span class="word" onclick="toggleWord(this, event)">が<span class="meaning">subject marker</span></span>
+          <span class="word answer-word" onclick="toggleWord(this, event)">
+            <span class="answer-text">（<ruby>簡単<rt>かんたん</rt></ruby>）</span>
+            <span class="answer-num">（12）</span>
+            <span class="blank">＿＿＿＿</span>
+            <span class="meaning">easy</span>
+          </span>
+          <span class="word" onclick="toggleWord(this, event)">である<span class="meaning">is (plain form)</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>点<rt>てん</rt></ruby><span class="meaning">point / aspect</span></span>
+          <span class="word" onclick="toggleWord(this, event)">です<span class="meaning">is (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>The key characteristic of lists is that adding, inserting, and deleting data is easy.</p>
+        </div>
+      </div>
+
+      <div class="formula-block">
+        <h3>リスト構造のイメージ — List Structure Example（ボックスをタップ！）</h3>
+        <div class="diagram">
+          <div class="cell">
+            <div class="cell-label">データ1</div>
+            <div class="cell-box" onclick="selectCell(this, 'データ1＝10。データ部とポインタ部で構成される。 — Data 1 = 10. Each node consists of a data part and a pointer part.', event)">10</div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="cell">
+            <div class="cell-label">データ2</div>
+            <div class="cell-box" onclick="selectCell(this, 'データ2＝40。ポインタが次の位置（データ3）を指す。 — Data 2 = 40. Its pointer indicates the next node (Data 3).', event)">40</div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="cell">
+            <div class="cell-label">データ3</div>
+            <div class="cell-box" onclick="selectCell(this, 'データ3＝30。メモリ上はバラバラでも、ポインタで論理的につながる。 — Data 3 = 30. Even scattered in memory, pointers link them logically.', event)">30</div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="cell">
+            <div class="cell-label">データ4</div>
+            <div class="cell-box" onclick="selectCell(this, 'データ4＝20。最後のノードのポインタはNULL（終端）を示す。 — Data 4 = 20. The final node points to NULL (end of list).', event)">20</div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="cell">
+            <div class="cell-label"><ruby>終端<rt>しゅうたん</rt></ruby></div>
+            <div class="cell-box" onclick="selectCell(this, 'NULL＝次のデータがないことを示す終端。 — NULL marks the end: there is no next data.', event)">NULL</div>
+          </div>
+        </div>
+        <div class="cell-info">ボックスをタップして説明を表示 — Tap any box to see its explanation</div>
+        <div class="formula-note">Each node stores data plus a pointer to the next node — the data is linked regardless of its physical memory location.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ SECTION D ============ -->
+  <div class="section" id="sectionD">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-chevron">▾</span><span class="section-badge">Section D</span>
+      <h2>キュー（Queue）</h2>
+      <div class="heading-translation">Queues</div>
+    </div>
+    <div class="section-content">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)">キュー<span class="meaning">queue</span></span>
+          <span class="word" onclick="toggleWord(this, event)">は<span class="meaning">topic marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)">、<span class="meaning">comma</span></span>
+          <span class="word" onclick="toggleWord(this, event)">データ<span class="meaning">data</span></span>
+          <span class="word" onclick="toggleWord(this, event)">を<span class="meaning">object marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>順番<rt>じゅんばん</rt></ruby><span class="meaning">order / turn</span></span>
+          <span class="word" onclick="toggleWord(this, event)">に<span class="meaning">in / by (manner)</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>格納<rt>かくのう</rt></ruby><span class="meaning">store</span></span>
+          <span class="word" onclick="toggleWord(this, event)">し<span class="meaning">and (connective)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">、<span class="meaning">comma</span></span>
+          <span class="word answer-word" onclick="toggleWord(this, event)">
+            <span class="answer-text">「<ruby>先<rt>さき</rt></ruby>に<ruby>入<rt>い</rt></ruby>れたデータから<ruby>順番<rt>じゅんばん</rt></ruby>に<ruby>取<rt>と</rt></ruby>り<ruby>出<rt>だ</rt></ruby>す」</span>
+            <span class="answer-num">（13）</span>
+            <span class="blank">＿＿＿＿＿＿</span>
+            <span class="meaning">retrieve in order, starting with the data entered first</span>
+          </span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>数据構造<rt>データこうぞう</rt></ruby><span class="meaning">data structure</span></span>
+          <span class="word" onclick="toggleWord(this, event)">です<span class="meaning">is (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>A queue is a data structure that stores data in order and retrieves it starting with the data that was entered first.</p>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)">これ<span class="meaning">this</span></span>
+          <span class="word" onclick="toggleWord(this, event)">を<span class="meaning">object marker</span></span>
+          <span class="word answer-word" onclick="toggleWord(this, event)">
+            <span class="answer-text">「<ruby>先入<rt>せんにゅう</rt></ruby>れ<ruby>先出<rt>せんだし</rt></ruby>し（FIFO：First-In First-Out）<ruby>方式<rt>ほうしき</rt></ruby>」</span>
+            <span class="answer-num">（14）</span>
+            <span class="blank">＿＿＿＿＿＿</span>
+            <span class="meaning">First-In, First-Out method</span>
+          </span>
+          <span class="word" onclick="toggleWord(this, event)">と<span class="meaning">quotation marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>呼<rt>よ</rt></ruby>びます<span class="meaning">is called (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>This is called the "First-In, First-Out (FIFO)" method.</p>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>意味<rt>いみ</rt></ruby><span class="meaning">image / analogy</span></span>
+          <span class="word" onclick="toggleWord(this, event)">：<span class="meaning">colon</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>買<rt>か</rt></ruby>い<span class="meaning">shopping</span></span>
+          <span class="word" onclick="toggleWord(this, event)">の<span class="meaning">connection particle (of)</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>登録<rt>レジ</rt></ruby><span class="meaning">cash register</span></span>
+          <span class="word" onclick="toggleWord(this, event)">や<span class="meaning">or / and</span></span>
+          <span class="word" onclick="toggleWord(this, event)">、<span class="meaning">comma</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>店<rt>みせ</rt></ruby><span class="meaning">shop</span></span>
+          <span class="word" onclick="toggleWord(this, event)">に<span class="meaning">at / to</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>並<rt>なら</rt></ruby>ぶ<span class="meaning">line up / queue up</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>行列<rt>ぎょうれつ</rt></ruby><span class="meaning">line / row (of people)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">と<span class="meaning">with / same as</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>同<rt>おな</rt></ruby>じ<span class="meaning">the same</span></span>
+          <span class="word" onclick="toggleWord(this, event)">です<span class="meaning">is (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>後<rt>あと</rt></ruby>から<span class="meaning">later / afterward</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>来<rt>き</rt></ruby>た<span class="meaning">came</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>人<rt>ひと</rt></ruby><span class="meaning">person</span></span>
+          <span class="word" onclick="toggleWord(this, event)">は<span class="meaning">topic marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>行列<rt>ぎょうれつ</rt></ruby><span class="meaning">line</span></span>
+          <span class="word" onclick="toggleWord(this, event)">の<span class="meaning">connection particle (of)</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>後<rt>うし</rt></ruby>ろ<span class="meaning">behind / back</span></span>
+          <span class="word" onclick="toggleWord(this, event)">に<span class="meaning">to / at</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>並<rt>なら</rt></ruby>び<span class="meaning">lines up</span></span>
+          <span class="word" onclick="toggleWord(this, event)">、<span class="meaning">comma</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>先頭<rt>せんとう</rt></ruby><span class="meaning">front / head</span></span>
+          <span class="word" onclick="toggleWord(this, event)">の<span class="meaning">connection particle (of)</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>人<rt>ひと</rt></ruby><span class="meaning">person</span></span>
+          <span class="word" onclick="toggleWord(this, event)">から<span class="meaning">from</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>順番<rt>じゅんばん</rt></ruby><span class="meaning">in order</span></span>
+          <span class="word" onclick="toggleWord(this, event)">に<span class="meaning">by (manner)</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>店<rt>みせ</rt></ruby><span class="meaning">shop</span></span>
+          <span class="word" onclick="toggleWord(this, event)">に<span class="meaning">to / into</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>入<rt>はい</rt></ruby>って<span class="meaning">enter (te-form)</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>行<rt>い</rt></ruby>きます<span class="meaning">go (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>Image: It works like a checkout line or a queue of people at a shop. People who arrive later join at the back, and people enter the shop in order from the front.</p>
+        </div>
+      </div>
+
+      <div class="formula-block">
+        <h3>キューの操作 — Queue Operations（行をタップ！）</h3>
+        <div class="formula-content" onclick="selectCell(this, 'エンキュー（Enqueue）＝ キューにデータを取り込む（最後尾に追加する）操作。 — Enqueue: the operation of adding data to the rear of the queue.', event)">
+          <span class="word answer-word" onclick="toggleWord(this, event)">
+            <span class="answer-text"><ruby>入<rt>い</rt></ruby>キュー（Enqueue）</span>
+            <span class="answer-num">（15）</span>
+            <span class="blank">＿＿＿＿＿</span>
+            <span class="meaning">enqueue — add to the rear</span>
+          </span>：データを<b><ruby>最後尾<rt>さいごび</rt></ruby></b>に<span class="word" onclick="toggleWord(this, event)"><ruby>追加<rt>ついか</rt></ruby><span class="meaning">add</span></span>
+        </div>
+        <div class="formula-content" onclick="selectCell(this, 'デキュー（Dequeue）＝ キューからデータを取り出す（先頭から出す）操作。 — Dequeue: the operation of removing data from the front of the queue.', event)">
+          <span class="word answer-word" onclick="toggleWord(this, event)">
+            <span class="answer-text"><ruby>出<rt>で</rt></ruby>キュー（Dequeue）</span>
+            <span class="answer-num">（16）</span>
+            <span class="blank">＿＿＿＿＿</span>
+            <span class="meaning">dequeue — remove from the front</span>
+          </span>：データを<b><ruby>先頭<rt>せんとう</rt></ruby></b>から<span class="word" onclick="toggleWord(this, event)"><ruby>取<rt>と</rt></ruby>り<ruby>出<rt>だ</rt></ruby>す<span class="meaning">retrieve</span></span>
+        </div>
+        <div class="cell-info">行をタップして解説を表示 — Tap a row to see the explanation</div>
+        <div class="formula-note">Enqueue adds to the rear; dequeue removes from the front — like a line at the register (FIFO).</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ SECTION E ============ -->
+  <div class="section" id="sectionE">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-chevron">▾</span><span class="section-badge">Section E</span>
+      <h2>スタック（Stack）</h2>
+      <div class="heading-translation">Stacks</div>
+    </div>
+    <div class="section-content">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)">スタック<span class="meaning">stack</span></span>
+          <span class="word" onclick="toggleWord(this, event)">は<span class="meaning">topic marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)">、<span class="meaning">comma</span></span>
+          <span class="word" onclick="toggleWord(this, event)">データ<span class="meaning">data</span></span>
+          <span class="word" onclick="toggleWord(this, event)">を<span class="meaning">object marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>順番<rt>じゅんばん</rt></ruby><span class="meaning">in order</span></span>
+          <span class="word" onclick="toggleWord(this, event)">に<span class="meaning">by (manner)</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>格納<rt>かくのう</rt></ruby><span class="meaning">store</span></span>
+          <span class="word" onclick="toggleWord(this, event)">し<span class="meaning">and (connective)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">、<span class="meaning">comma</span></span>
+          <span class="word answer-word" onclick="toggleWord(this, event)">
+            <span class="answer-text">「<ruby>最後<rt>さいご</rt></ruby>に<ruby>入<rt>い</rt></ruby>れたデータから<ruby>順番<rt>じゅんばん</rt></ruby>に<ruby>取<rt>と</rt></ruby>り<ruby>出<rt>だ</rt></ruby>す」</span>
+            <span class="answer-num">（17）</span>
+            <span class="blank">＿＿＿＿＿＿</span>
+            <span class="meaning">retrieve in order, starting with the data entered last</span>
+          </span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>数据構造<rt>データこうぞう</rt></ruby><span class="meaning">data structure</span></span>
+          <span class="word" onclick="toggleWord(this, event)">です<span class="meaning">is (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>A stack is a data structure that stores data in order and retrieves it starting with the data that was entered last.</p>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)">これ<span class="meaning">this</span></span>
+          <span class="word" onclick="toggleWord(this, event)">を<span class="meaning">object marker</span></span>
+          <span class="word answer-word" onclick="toggleWord(this, event)">
+            <span class="answer-text">「<ruby>後入<rt>ごい</rt></ruby>れ<ruby>先出<rt>せんだし</rt></ruby>し（LIFO：Last-In First-Out）<ruby>方式<rt>ほうしき</rt></ruby>」</span>
+            <span class="answer-num">（18）</span>
+            <span class="blank">＿＿＿＿＿＿</span>
+            <span class="meaning">Last-In, First-Out method</span>
+          </span>
+          <span class="word" onclick="toggleWord(this, event)">と<span class="meaning">quotation marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>呼<rt>よ</rt></ruby>びます<span class="meaning">is called (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>This is called the "Last-In, First-Out (LIFO)" method.</p>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>意味<rt>いみ</rt></ruby><span class="meaning">image / analogy</span></span>
+          <span class="word" onclick="toggleWord(this, event)">：<span class="meaning">colon</span></span>
+          <span class="word answer-word" onclick="toggleWord(this, event)">
+            <span class="answer-text"><ruby>最後尾<rt>さいごび</rt></ruby>に<ruby>乗<rt>の</rt></ruby>った<ruby>人<rt>ひと</rt></ruby>から<ruby>順番<rt>じゅんばん</rt></ruby>に<ruby>降<rt>お</rt></ruby>りて<ruby>行<rt>い</rt></ruby>く「エレベーター」</span>
+            <span class="answer-num">（19）</span>
+            <span class="blank">＿＿＿＿＿</span>
+            <span class="meaning">like an elevator where the last person on gets off first</span>
+          </span>
+          <span class="word" onclick="toggleWord(this, event)">と<span class="meaning">with / same as</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>同<rt>おな</rt></ruby>じ<span class="meaning">the same</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>意味<rt>いみ</rt></ruby><span class="meaning">image</span></span>
+          <span class="word" onclick="toggleWord(this, event)">です<span class="meaning">is (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>Image: It works like an "elevator" where the person who got on last is the first to get off.</p>
+        </div>
+      </div>
+
+      <div class="formula-block">
+        <h3>スタックの操作 — Stack Operations（タップ！）</h3>
+        <div class="formula-content" onclick="selectCell(this, 'プッシュ（Push）＝ スタックにデータを追加する操作。順番に上に積み上げていく。 — Push: the operation of adding data to the stack, stacking it up in order.', event)">
+          <span class="word answer-word" onclick="toggleWord(this, event)">
+            <span class="answer-text">プッシュ（Push）</span>
+            <span class="answer-num">（20）</span>
+            <span class="blank">＿＿＿＿</span>
+            <span class="meaning">push — add to the top</span>
+          </span>：データを<b>上</b>に<span class="word" onclick="toggleWord(this, event)"><ruby>積<rt>つ</rt></ruby>み<ruby>上<rt>あ</rt></ruby>げる<span class="meaning">stack up</span></span>
+        </div>
+        <div class="formula-content" onclick="selectCell(this, 'ポップ（Pop）＝ スタックからデータを取り出す操作。一番上にある最新のデータから取り出す。 — Pop: retrieving data from the stack — the newest data on top comes out first.', event)">
+          <span class="word answer-word" onclick="toggleWord(this, event)">
+            <span class="answer-text">ポップ（Pop）</span>
+            <span class="answer-num">（21）</span>
+            <span class="blank">＿＿＿＿</span>
+            <span class="meaning">pop — remove from the top</span>
+          </span>：<b><ruby>一番上<rt>いちばんうえ</rt></ruby></b>の<span class="word" onclick="toggleWord(this, event)"><ruby>最新<rt>さいしん</rt></ruby><span class="meaning">newest</span></span>データから<span class="word" onclick="toggleWord(this, event)"><ruby>取<rt>と</rt></ruby>り<ruby>出<rt>だ</rt></ruby>す<span class="meaning">retrieve</span></span>
+        </div>
+        <div class="diagram" style="flex-direction: column; align-items: center; gap: 6px;">
+          <div class="cell" style="min-width: 180px;"><div class="cell-box" onclick="selectCell(this, '↓プッシュで入ってくる／↑ポップで出ていくのは、いつもこの一番上！ — Pushes come in here and pops go out here — always the top!', event)">↑ ポップ／プッシュ ↓（一番上）</div></div>
+          <div class="cell" style="min-width: 120px;"><div class="cell-box" onclick="selectCell(this, '最後に入れたデータ＝一番上の最新データ。 — The last data pushed = the newest, on top.', event)">40（最新）</div></div>
+          <div class="cell" style="min-width: 120px;"><div class="cell-box" onclick="selectCell(this, '途中のデータ。上のものが先に出る。 — Middle data; anything above it comes out first.', event)">30</div></div>
+          <div class="cell" style="min-width: 120px;"><div class="cell-box" onclick="selectCell(this, '途中のデータ。 — Middle data.', event)">20</div></div>
+          <div class="cell" style="min-width: 120px;"><div class="cell-box" onclick="selectCell(this, '最初に入れたデータ＝一番下。最後に取り出される。 — The first data pushed = the bottom; it comes out last.', event)">10（最初）</div></div>
+        </div>
+        <div class="cell-info">行やボックスをタップして解説を表示 — Tap rows or boxes to see explanations</div>
+        <div class="formula-note">Push stacks data on top; pop takes the newest data from the top — LIFO, like an elevator.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ SECTION F ============ -->
+  <div class="section" id="sectionF">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-chevron">▾</span><span class="section-badge">Section F</span>
+      <h2>木（き）構造（Tree）</h2>
+      <div class="heading-translation">Tree Structures</div>
+    </div>
+    <div class="section-content">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>木構造<rt>きこうぞう</rt></ruby><span class="meaning">tree structure</span></span>
+          <span class="word" onclick="toggleWord(this, event)">は<span class="meaning">topic marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)">、<span class="meaning">comma</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>植物<rt>しょくぶつ</rt></ruby><span class="meaning">plant</span></span>
+          <span class="word" onclick="toggleWord(this, event)">の<span class="meaning">connection particle (of)</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>木<rt>き</rt></ruby><span class="meaning">tree</span></span>
+          <span class="word" onclick="toggleWord(this, event)">の<span class="meaning">like</span></span>
+          <span class="word" onclick="toggleWord(this, event)">ように<span class="meaning">in the manner of</span></span>
+          <span class="word answer-word" onclick="toggleWord(this, event)">
+            <span class="answer-text">「<ruby>階層<rt>かいそう</rt></ruby><ruby>構造<rt>こうぞう</rt></ruby>」</span>
+            <span class="answer-num">（22）</span>
+            <span class="blank">＿＿＿＿</span>
+            <span class="meaning">hierarchical structure</span>
+          </span>
+          <span class="word" onclick="toggleWord(this, event)">で<span class="meaning">by means of</span></span>
+          <span class="word" onclick="toggleWord(this, event)">データ<span class="meaning">data</span></span>
+          <span class="word" onclick="toggleWord(this, event)">を<span class="meaning">object marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>管理<rt>かんり</rt></ruby><span class="meaning">manage</span></span>
+          <span class="word" onclick="toggleWord(this, event)">する<span class="meaning">to do</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>数据構造<rt>データこうぞう</rt></ruby><span class="meaning">data structure</span></span>
+          <span class="word" onclick="toggleWord(this, event)">です<span class="meaning">is (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>A tree structure is a data structure that manages data in a "hierarchy," like the branches of a tree.</p>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>要素<rt>ようそ</rt></ruby><span class="meaning">element</span></span>
+          <span class="word" onclick="toggleWord(this, event)">（<ruby>節<rt>ふし</rt></ruby>）<span class="meaning">(node)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">：<span class="meaning">colon</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>木構造<rt>きこうぞう</rt></ruby><span class="meaning">tree structure</span></span>
+          <span class="word" onclick="toggleWord(this, event)">を<span class="meaning">object marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>構成<rt>こうせい</rt></ruby><span class="meaning">compose</span></span>
+          <span class="word" onclick="toggleWord(this, event)">する<span class="meaning">to do</span></span>
+          <span class="word answer-word" onclick="toggleWord(this, event)">
+            <span class="answer-text">「<ruby>節<rt>ふし</rt></ruby>（ノード）」</span>
+            <span class="answer-num">（23）</span>
+            <span class="blank">＿＿＿＿</span>
+            <span class="meaning">node</span>
+          </span>
+          <span class="word" onclick="toggleWord(this, event)">と<span class="meaning">quotation marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>呼<rt>よ</rt></ruby>びます<span class="meaning">is called (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>丸<rt>まる</rt></ruby><span class="meaning">circle</span></span>
+          <span class="word" onclick="toggleWord(this, event)">など<span class="meaning">and so on</span></span>
+          <span class="word" onclick="toggleWord(this, event)">の<span class="meaning">connection particle (of)</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>要素<rt>ようそ</rt></ruby><span class="meaning">element</span></span>
+          <span class="word" onclick="toggleWord(this, event)">です<span class="meaning">is</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>Node: The elements (such as circles) that make up a tree structure are called "nodes."</p>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>根<rt>ね</rt></ruby><span class="meaning">root</span></span>
+          <span class="word" onclick="toggleWord(this, event)">（ルート）<span class="meaning">(root)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">：<span class="meaning">colon</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>親<rt>おや</rt></ruby><span class="meaning">parent</span></span>
+          <span class="word" onclick="toggleWord(this, event)">を<span class="meaning">object marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>持<rt>も</rt></ruby>たない<span class="meaning">does not have</span></span>
+          <span class="word" onclick="toggleWord(this, event)">、<span class="meaning">comma</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>最上位<rt>さいじょうい</rt></ruby><span class="meaning">topmost / highest</span></span>
+          <span class="word" onclick="toggleWord(this, event)">に<span class="meaning">at</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>有<rt>あ</rt></ruby>る<span class="meaning">exists</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>一番<rt>いちばん</rt></ruby><span class="meaning">the most</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>大元<rt>おおもと</rt></ruby><span class="meaning">origin / root source</span></span>
+          <span class="word" onclick="toggleWord(this, event)">の<span class="meaning">connection particle (of)</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>節<rt>ふし</rt></ruby><span class="meaning">node</span></span>
+          <span class="word" onclick="toggleWord(this, event)">の<span class="meaning">connection particle (of)</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>事<rt>こと</rt></ruby><span class="meaning">thing</span></span>
+          <span class="word" onclick="toggleWord(this, event)">です<span class="meaning">is (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>Root: The topmost node, which has no parent and is the ultimate origin of the tree.</p>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>葉<rt>は</rt></ruby><span class="meaning">leaf</span></span>
+          <span class="word" onclick="toggleWord(this, event)">（リーフ）<span class="meaning">(leaf)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">：<span class="meaning">colon</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>子<rt>こ</rt></ruby><span class="meaning">child</span></span>
+          <span class="word" onclick="toggleWord(this, event)">を<span class="meaning">object marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>持<rt>も</rt></ruby>たない<span class="meaning">does not have</span></span>
+          <span class="word" onclick="toggleWord(this, event)">、<span class="meaning">comma</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>一番<rt>いちばん</rt></ruby><span class="meaning">the most</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>末端<rt>まったん</rt></ruby><span class="meaning">terminal / end point</span></span>
+          <span class="word" onclick="toggleWord(this, event)">に<span class="meaning">at</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>有<rt>あ</rt></ruby>る<span class="meaning">exists</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>節<rt>ふし</rt></ruby><span class="meaning">node</span></span>
+          <span class="word" onclick="toggleWord(this, event)">の<span class="meaning">connection particle (of)</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>事<rt>こと</rt></ruby><span class="meaning">thing</span></span>
+          <span class="word" onclick="toggleWord(this, event)">です<span class="meaning">is (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>Leaf: The nodes at the very ends of the tree, which have no children.</p>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>枝<rt>えだ</rt></ruby><span class="meaning">branch / edge</span></span>
+          <span class="word" onclick="toggleWord(this, event)">（エッジ）<span class="meaning">(edge)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">：<span class="meaning">colon</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>節<rt>ふし</rt></ruby><span class="meaning">node</span></span>
+          <span class="word" onclick="toggleWord(this, event)">と<span class="meaning">and</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>節<rt>ふし</rt></ruby><span class="meaning">node</span></span>
+          <span class="word" onclick="toggleWord(this, event)">を<span class="meaning">object marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>繋<rt>つな</rt></ruby>ぐ<span class="meaning">to connect</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>線<rt>せん</rt></ruby><span class="meaning">line</span></span>
+          <span class="word" onclick="toggleWord(this, event)">の<span class="meaning">connection particle (of)</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>事<rt>こと</rt></ruby><span class="meaning">thing</span></span>
+          <span class="word" onclick="toggleWord(this, event)">です<span class="meaning">is (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>Edge: The lines that connect one node to another.</p>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>身近<rt>みぢか</rt></ruby><span class="meaning">familiar / close to daily life</span></span>
+          <span class="word" onclick="toggleWord(this, event)">な<span class="meaning">na-adj. connection</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>例<rt>れい</rt></ruby><span class="meaning">example</span></span>
+          <span class="word" onclick="toggleWord(this, event)">：<span class="meaning">colon</span></span>
+          <span class="word" onclick="toggleWord(this, event)">パソコン<span class="meaning">personal computer</span></span>
+          <span class="word" onclick="toggleWord(this, event)">の<span class="meaning">connection particle (of)</span></span>
+          <span class="word answer-word" onclick="toggleWord(this, event)">
+            <span class="answer-text">「フォルダ（ディレクトリ）のファイルシステム」</span>
+            <span class="answer-num">（24）</span>
+            <span class="blank">＿＿＿＿＿＿</span>
+            <span class="meaning">folder (directory) file system</span>
+          </span>
+          <span class="word" onclick="toggleWord(this, event)">が<span class="meaning">subject marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)">この<span class="meaning">this</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>構造<rt>こうぞう</rt></ruby><span class="meaning">structure</span></span>
+          <span class="word" onclick="toggleWord(this, event)">を<span class="meaning">object marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>使<rt>つか</rt></ruby>っています<span class="meaning">uses (polite, progressive)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+          <span class="word" onclick="toggleWord(this, event)">フォルダ<span class="meaning">folder</span></span>
+          <span class="word" onclick="toggleWord(this, event)">の<span class="meaning">connection particle (in)</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>中<rt>なか</rt></ruby><span class="meaning">inside</span></span>
+          <span class="word" onclick="toggleWord(this, event)">に<span class="meaning">in</span></span>
+          <span class="word" onclick="toggleWord(this, event)">さらに<span class="meaning">furthermore</span></span>
+          <span class="word" onclick="toggleWord(this, event)">フォルダ<span class="meaning">folder</span></span>
+          <span class="word" onclick="toggleWord(this, event)">や<span class="meaning">or / and</span></span>
+          <span class="word" onclick="toggleWord(this, event)">ファイル<span class="meaning">file</span></span>
+          <span class="word" onclick="toggleWord(this, event)">が<span class="meaning">subject marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>下<rt>した</rt></ruby>が<span class="meaning">hang down / branch off</span></span>
+          <span class="word" onclick="toggleWord(this, event)">って<span class="meaning">te-form connective</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>居<rt>い</rt></ruby>る<span class="meaning">exists</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>仕組<rt>しく</rt></ruby>み<span class="meaning">mechanism / system</span></span>
+          <span class="word" onclick="toggleWord(this, event)">です<span class="meaning">is (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>Familiar example: A computer's "folder (directory) file system" uses this structure — further folders and files hang beneath each folder.</p>
+        </div>
+      </div>
+
+      <div class="formula-block">
+        <h3>木構造のイメージ — Tree Structure Example（ボックスをタップ！）</h3>
+        <div class="diagram">
+          <div class="cell">
+            <div class="cell-label"><ruby>根<rt>ね</rt></ruby>（ルート）</div>
+            <div class="cell-box top" onclick="selectCell(this, '根（ルート）＝親を持たない最上位の節。一番大元！ — The root is the topmost node with no parent — the ultimate origin.', event)">📁 ルート</div>
+          </div>
+        </div>
+        <div class="diagram" style="margin-top: 4px;">
+          <div class="cell">
+            <div class="cell-label"><ruby>節<rt>ふし</rt></ruby>（ノード）</div>
+            <div class="cell-box" onclick="selectCell(this, '節（ノード）＝ 木構造を構成する丸などの要素。 — A node is an element (such as a circle) that makes up the tree.', event)">📁 A</div>
+          </div>
+          <div class="cell">
+            <div class="cell-label">節（ノード）</div>
+            <div class="cell-box" onclick="selectCell(this, '中間のノード。上は親、下は子。 — An intermediate node: it has a parent above and children below.', event)">📁 B</div>
+          </div>
+        </div>
+        <div class="diagram" style="margin-top: 4px;">
+          <div class="cell">
+            <div class="cell-label"><ruby>葉<rt>は</rt></ruby>（リーフ）</div>
+            <div class="cell-box found" onclick="selectCell(this, '葉（リーフ）＝ 子を持たない末端の節。 — A leaf is a terminal node with no children.', event)">📄 file1</div>
+          </div>
+          <div class="cell">
+            <div class="cell-label">葉（リーフ）</div>
+            <div class="cell-box found" onclick="selectCell(this, '葉（リーフ）の例。フォルダの中のファイルがこれに当たる。 — Another leaf; files inside folders correspond to leaves.', event)">📄 file2</div>
+          </div>
+          <div class="cell">
+            <div class="cell-label">葉（リーフ）</div>
+            <div class="cell-box found" onclick="selectCell(this, '葉（リーフ）の例。 — Another leaf.', event)">📄 file3</div>
+          </div>
+        </div>
+        <div class="cell-info">ボックスをタップして説明を表示 — Tap any box to see its explanation</div>
+        <div class="formula-note">The top folder is the root, folders in between are nodes, files at the ends are leaves, and the lines connecting them are edges.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ GLOSSARY ============ -->
+  <div class="glossary">
+    <h2>Key Terms — 重要用語</h2>
+    <div class="glossary-subtitle">
+      カードをタップして「習得済み」にする — Tap a card to mark it as learned ✓ ·
+      <span id="learnedCount">0</span> / <span id="learnedTotal">0</span> learned ·
+      <span class="reset-link" onclick="resetLearned()">Reset</span>
+    </div>
+    <div class="glossary-grid">
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp"><ruby>データ構造<rt>データこうぞう</rt></ruby></div>
+        <div class="term-en">data structure (No. 1)</div>
+        <div class="term-def">A "container"-like structure used to organize and store multiple pieces of data — arrays, lists, queues, stacks, and trees.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp"><ruby>配列<rt>はいれつ</rt></ruby>（Array）</div>
+        <div class="term-en">array (No. 2, 7)</div>
+        <div class="term-def">A data structure in which data is arranged contiguously. Each element is identified by an index starting at 0.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp"><ruby>添字<rt>そえじ</rt></ruby></div>
+        <div class="term-en">index / subscript (No. 8)</div>
+        <div class="term-def">The number assigned to each array element, starting from 0 at the head. Used to access elements, e.g., a[2].</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp"><ruby>要素番号<rt>ようそばんごう</rt></ruby></div>
+        <div class="term-en">element number</div>
+        <div class="term-def">The position number of an element in an array; numbering starts at 0 from the beginning.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp">リスト（List）</div>
+        <div class="term-en">list (No. 3, 10)</div>
+        <div class="term-def">A structure of linked elements, each made of a data part + pointer part. Adding, inserting, and deleting is easy.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp"><ruby>指示子<rt>ポインタ</rt></ruby></div>
+        <div class="term-en">pointer (No. 10, 11)</div>
+        <div class="term-def">The part of a list element that shows where the next element is located in memory, linking the data together.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp">キュー（Queue）</div>
+        <div class="term-en">queue (No. 4, 13)</div>
+        <div class="term-def">First data in is the first data out (FIFO). Like a line of people at a shop or checkout register.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp"><ruby>先入<rt>せんにゅう</rt></ruby>れ<ruby>先出<rt>せんだし</rt></ruby>し（FIFO）</div>
+        <div class="term-en">First-In, First-Out (No. 14)</div>
+        <div class="term-def">The rule of queues: the first data stored is the first retrieved.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp"><ruby>入<rt>い</rt></ruby>キュー（Enqueue）</div>
+        <div class="term-en">enqueue (No. 15)</div>
+        <div class="term-def">The operation of adding data to the rear of a queue.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp"><ruby>出<rt>で</rt></ruby>キュー（Dequeue）</div>
+        <div class="term-en">dequeue (No. 16)</div>
+        <div class="term-def">The operation of removing data from the front of a queue.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp">スタック（Stack）</div>
+        <div class="term-en">stack (No. 5, 17)</div>
+        <div class="term-def">Last data in is the first data out (LIFO). Like an elevator where the last person on gets off first.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp"><ruby>後入<rt>ごい</rt></ruby>れ<ruby>先出<rt>せんだし</rt></ruby>し（LIFO）</div>
+        <div class="term-en">Last-In, First-Out (No. 18)</div>
+        <div class="term-def">The rule of stacks: the most recently stored data is retrieved first.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp">プッシュ（Push）</div>
+        <div class="term-en">push (No. 20)</div>
+        <div class="term-def">The operation of adding data to the top of a stack, stacking it up in order.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp">ポップ（Pop）</div>
+        <div class="term-en">pop (No. 21)</div>
+        <div class="term-def">The operation of retrieving data from the top of a stack — the newest data comes out first.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp"><ruby>木構造<rt>きこうぞう</rt></ruby>（Tree）</div>
+        <div class="term-en">tree structure (No. 6, 22)</div>
+        <div class="term-def">A structure that manages data in a hierarchy (階層構造). Used in PC folder file systems.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp"><ruby>階層<rt>かいそう</rt></ruby><ruby>構造<rt>こうぞう</rt></ruby></div>
+        <div class="term-en">hierarchical structure (No. 22)</div>
+        <div class="term-def">A structure organized into levels, like folders within folders.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp"><ruby>節<rt>ふし</rt></ruby>（ノード）</div>
+        <div class="term-en">node (No. 23)</div>
+        <div class="term-def">Each element (such as a circle) that makes up a tree structure.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp"><ruby>根<rt>ね</rt></ruby>（ルート）</div>
+        <div class="term-en">root</div>
+        <div class="term-def">The topmost node, with no parent — the origin of the tree.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp"><ruby>葉<rt>は</rt></ruby>（リーフ）</div>
+        <div class="term-en">leaf</div>
+        <div class="term-def">A terminal node at the very end of a tree, with no children.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp"><ruby>枝<rt>えだ</rt></ruby>（エッジ）</div>
+        <div class="term-en">edge / branch</div>
+        <div class="term-def">The line connecting one node to another in a tree.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ CONTENT QUIZ ============ -->
+  <div class="quiz-block" id="quizBlock">
+    <h2>Content Quiz — 内容クイズ</h2>
+    <div class="quiz-sub">
+      質問・選択肢・解説の<span class="word" onclick="toggleWord(this, event)"><ruby>単語<rt>たんご</rt></ruby><span class="meaning">words</span></span>はタップで<span class="word" onclick="toggleWord(this, event)"><ruby>意味<rt>いみ</rt></ruby><span class="meaning">meaning</span></span>を表示できます！<br>
+      Tap any word in the questions, choices, or explanations to reveal its meaning. English translation shown below each question.
+    </div>
+    <div class="quiz-progress" id="quizProgress"></div>
+    <div class="quiz-question" id="quizQuestion">「Start Quiz」を押してください — Press Start to begin</div>
+    <div class="quiz-translation" id="quizTranslation"></div>
+    <div class="quiz-choices" id="quizChoices"></div>
+    <div class="quiz-feedback" id="quizFeedback"></div>
+    <div class="quiz-btns">
+      <button class="answer-btn" id="quizNextBtn" onclick="quizNext()">Start Quiz</button>
+      <button class="mini-btn" onclick="startQuiz()">Restart</button>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+  </div>
+
+  <div class="footer">
+    ITパスポート 第7章 テクノロジー系 — データ構造 対策学習ワークシート Part 1
+  </div>
+
+</div>
+
+<script>
+  /* ---------- Word meanings (event passed explicitly — works in all browsers) ---------- */
+  function toggleWord(el, ev) {
+    ev = ev || window.event;
+    if (ev && ev.stopPropagation) ev.stopPropagation();
+    el.classList.toggle('revealed');
+  }
+
+  /* Build an interactive word span: [japanese, furigana-or-null, english] */
+  function w(jp, kana, en) {
+    return '<span class="word" onclick="toggleWord(this, event)">' +
+      (kana ? '<ruby>' + jp + '<rt>' + kana + '</rt></ruby>' : jp) +
+      '<span class="meaning">' + en + '</span></span>';
+  }
+  function seg(arr) { return w(arr[0], arr[1], arr[2]); }
+  function segs(list) { return list.map(seg).join(''); }
+
+  /* ---------- Answers ---------- */
+  function toggleAnswers() {
+    var body = document.body;
+    var btn = document.getElementById('answerBtn');
+    body.classList.toggle('hide-answers');
+    if (body.classList.contains('hide-answers')) {
+      btn.textContent = 'Show Answers ✓';
+      btn.classList.add('active');
+    } else {
+      btn.textContent = 'Hide Answers ✗';
+      btn.classList.remove('active');
+    }
+  }
+
+  /* ---------- Furigana / Translations ---------- */
+  function toggleFurigana(ev) {
+    ev = ev || window.event;
+    document.body.classList.toggle('hide-furigana');
+    var btn = ev.target || ev.srcElement;
+    btn.textContent = document.body.classList.contains('hide-furigana')
+      ? 'Furigana OFF' : 'Furigana ON';
+    btn.classList.toggle('off');
+  }
+  function toggleTranslations(ev) {
+    ev = ev || window.event;
+    document.body.classList.toggle('hide-translations');
+    var btn = ev.target || ev.srcElement;
+    btn.textContent = document.body.classList.contains('hide-translations')
+      ? 'Translations OFF' : 'Translations ON';
+    btn.classList.toggle('off');
+  }
+
+  /* ---------- Sections ---------- */
+  function toggleSection(header) {
+    var section = header.closest('.section');
+    if (section) section.classList.toggle('collapsed');
+  }
+  function goToSection(id) {
+    var target = document.getElementById(id);
+    if (target) {
+      target.classList.remove('collapsed');
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+  function scrollTo0(id) {
+    var target = document.getElementById(id);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /* ---------- Clickable cells / formula rows ---------- */
+  function selectCell(el, text, ev) {
+    ev = ev || window.event;
+    if (ev && ev.stopPropagation) ev.stopPropagation();
+    var block = el.closest('.formula-block');
+    if (!block) return;
+    block.querySelectorAll('.selected').forEach(function (c) {
+      c.classList.remove('selected');
+    });
+    el.classList.add('selected');
+    var info = block.querySelector('.cell-info');
+    if (info) info.textContent = text;
+  }
+
+  /* ---------- Glossary learned tracking ---------- */
+  function toggleLearned(card) {
+    card.classList.toggle('learned');
+    updateLearnedCount();
+  }
+  function updateLearnedCount() {
+    var total = document.querySelectorAll('.glossary-card').length;
+    var learned = document.querySelectorAll('.glossary-card.learned').length;
+    document.getElementById('learnedCount').textContent = learned;
+    document.getElementById('learnedTotal').textContent = total;
+  }
+  function resetLearned() {
+    document.querySelectorAll('.glossary-card.learned').forEach(function (c) {
+      c.classList.remove('learned');
+    });
+    updateLearnedCount();
+  }
+
+  /* ==================================================
+     CONTENT QUIZ — fully interactive (furigana + tap meanings + translations)
+     ================================================== */
+  var QUIZ = [
+
+    {
+      q: [
+        ['データ構造', 'データこうぞう', 'data structure'],
+        ['とは', null, 'as for ~ (definition)'],
+        ['、', null, ','],
+        ['複数', 'ふくすう', 'multiple'],
+        ['の', null, 'of'],
+        ['データ', null, 'data'],
+        ['を', null, 'object marker'],
+        ['整理', 'せいり', 'organize'],
+        ['して', null, 'and'],
+        ['格納', 'かくのう', 'store'],
+        ['する', null, 'to do'],
+        ['何', null, 'what'],
+        ['のような', null, 'like what'],
+        ['物', 'もの', 'thing'],
+        ['ですか', null, 'is it?']
+      ],
+      qEn: "A data structure is like what kind of thing, used to organize and store multiple pieces of data?",
+      choices: [
+        [['「計算」', 'けいさん', '"calculation"'], ['のような', null, 'like a'], ['物', 'もの', 'thing']],
+        [['「入れ物」', 'いれもの', '"container / box"'], ['のような', null, 'like a'], ['物', 'もの', 'thing']],
+        [['「順序」', 'じゅんじょ', '"order / sequence"'], ['のような', null, 'like'], ['物', 'もの', 'thing']],
+        [['「番号」', 'ばんごう', '"number"'], ['のような', null, 'like a'], ['物', 'もの', 'thing']]
+      ],
+      correct: 1,
+      exp: [
+        ['データ構造', 'データこうぞう', 'data structure'], ['とは', null, 'as for'],
+        ['、', null, ','], ['複数', 'ふくすう', 'multiple'], ['の', null, 'of'],
+        ['データ', null, 'data'], ['を', null, 'object marker'],
+        ['整理', 'せいり', 'organize'], ['して', null, 'and'],
+        ['格納', 'かくのう', 'store'], ['する', null, 'to do'],
+        ['「入れ物」', 'いれもの', '"container"'], ['のような', null, 'like a'],
+        ['物', 'もの', 'thing'], ['です', null, 'is'], ['。', null, '.']
+      ],
+      expEn: "A data structure is like a 'container' (入れ物) used to organize and store multiple pieces of data."
+    },
+
+    {
+      q: [
+        ['主な', 'おもな', 'main'],
+        ['データ構造', 'データこうぞう', 'data structures'],
+        ['として', null, 'as'],
+        ['、', null, ','],
+        ['次', 'つぎ', 'next'], ['の', null, 'of'],
+        ['どれ', null, 'which one'],
+        ['が', null, 'subject marker'],
+        ['含まれます', 'ふくまれます', 'is included'],
+        ['か', null, '?']
+      ],
+      qEn: 'Which of the following is NOT one of the five main data structures?',
+      choices: [
+        [['配列', 'はいれつ', 'array'], ['・', null, 'and'], ['リスト', null, 'list'], ['・', null, 'and'], ['キュー', null, 'queue']],
+        [['スタック', null, 'stack'], ['・', null, 'and'], ['木構造', 'きこうぞう', 'tree structure']],
+        [['二分木', 'にぶんぎ', 'binary tree'], ['だけ', null, 'only']],
+        [['キュー', null, 'queue'], ['・', null, 'and'], ['スタック', null, 'stack']]
+      ],
+      correct: 2,
+      exp: [
+        ['主な', 'おもな', 'main'], ['データ構造', 'データこうぞう', 'data structures'],
+        ['は', null, 'topic marker'], ['①', null, 'no.1'], ['配列', 'はいれつ', 'array'],
+        ['②', null, 'no.2'], ['リスト', null, 'list'], ['③', null, 'no.3'],
+        ['キュー', null, 'queue'], ['④', null, 'no.4'], ['スタック', null, 'stack'],
+        ['⑤', null, 'no.5'], ['木構造', 'きこうぞう', 'tree'], ['の', null, 'of'],
+        ['5つ', 'いつつ', 'five'], ['です', null, 'is'], ['。', null, '.'],
+        ['二分木', 'にぶんぎ', 'binary tree'], ['は', null, 'topic marker'],
+        ['木構造', 'きこうぞう', 'tree'], ['の', null, 'of'],
+        ['一種', 'いっしゅ', 'a kind'], ['です', null, 'is']
+      ],
+      expEn: 'The five main structures are array, list, queue, stack, and tree. (A binary tree is just one kind of tree, not a separate main category in this worksheet.)'
+    },
+
+    {
+      q: [
+        ['配列', 'はいれつ', 'array'],
+        ['とは', null, 'as for'],
+        ['、', null, ','],
+        ['複数', 'ふくすう', 'multiple'],
+        ['の', null, 'of'],
+        ['データ', null, 'data'],
+        ['を', null, 'object marker'],
+        ['どう', null, 'how'],
+        ['並べた', 'ならべた', 'arranged'],
+        ['データ構造', 'データこうぞう', 'data structure'],
+        ['ですか', null, 'is it?']
+      ],
+      qEn: 'In an array, how is the multiple data arranged?',
+      choices: [
+        [['ランダム', null, 'random'], ['に', null, 'randomly'], ['並べた', 'ならべた', 'arranged']],
+        [['連続', 'れんぞく', 'contiguous'], ['的', null, '(adj.)'], ['に', null, 'contiguously'], ['並べた', 'ならべた', 'arranged']],
+        [['逆順', 'ぎゃくじゅん', 'reverse order'], ['に', null, 'in reverse'], ['並べた', 'ならべた', 'arranged']],
+        [['階層', 'かいそう', 'hierarchical'], ['に', null, 'hierarchically'], ['並べた', 'ならべた', 'arranged']]
+      ],
+      correct: 1,
+      exp: [
+        ['配列', 'はいれつ', 'array'], ['は', null, 'topic marker'],
+        ['、', null, ','], ['データ', null, 'data'], ['を', null, 'object marker'],
+        ['連続的', 'れんぞくてき', 'contiguous'], ['に', null, 'contiguously'],
+        ['並べた', 'ならべた', 'arranged'], ['構造', 'こうぞう', 'structure'],
+        ['です', null, 'is'], ['。', null, '.'],
+        ['メモリ', null, 'memory'], ['上', 'じょう', 'on'], ['で', null, 'at'],
+        ['隣り合って', 'となりあって', 'side by side'], ['格納', 'かくのう', 'store'],
+        ['されます', null, 'is done']
+      ],
+      expEn: "An array arranges data 'contiguously' (連続的) — side by side in memory."
+    },
+
+    {
+      q: [
+        ['配列', 'はいれつ', 'array'],
+        ['の', null, 'of'],
+        ['添字', 'そえじ', 'index'],
+        ['は', null, 'topic marker'],
+        ['何', 'なに', 'what'],
+        ['から', null, 'from'],
+        ['始まります', 'はじまります', 'begins'],
+        ['か', null, '?']
+      ],
+      qEn: 'Array indexes begin from what number?',
+      choices: [
+        [['0', null, 'zero'], ['から', null, 'from']],
+        [['1', null, 'one'], ['から', null, 'from']],
+        [['−1', null, 'negative one'], ['から', null, 'from']],
+        [['先頭', 'せんとう', 'the head'], ['の', null, 'of'], ['データ', null, 'data'], ['の', null, 'of'], ['値', 'あたい', 'value'], ['から', null, 'from']]
+      ],
+      correct: 0,
+      exp: [
+        ['配列', 'はいれつ', 'array'], ['の', null, 'of'],
+        ['各', 'かく', 'each'], ['データ', null, 'data'],
+        ['に', null, 'to'], ['は', null, 'topic marker'],
+        ['、', null, ','], ['先頭', 'せんとう', 'head'], ['から', null, 'from'],
+        ['0→1→2→3→4→…', null, '0, 1, 2, 3, 4, ...'],
+        ['という', null, 'called'], ['添字', 'そえじ', 'index'],
+        ['が', null, 'subject marker'],
+        ['付けられます', 'つけられます', 'is assigned'], ['。', null, '.']
+      ],
+      expEn: 'Each element gets an index numbered from the head: 0 → 1 → 2 → 3 → 4 → … (starting at 0, not 1!).'
+    },
+
+    {
+      q: [
+        ['配列', 'はいれつ', 'array'], ['a', null, 'the array named a'],
+        ['に', null, 'in'],
+        ['要素番号', 'ようそばんごう', 'element numbers'],
+        ['0〜3', null, '0 to 3'],
+        ['で', null, 'at'],
+        ['データ', null, 'data'],
+        ['10、20、30、40', null, '10, 20, 30, 40'],
+        ['が', null, 'subject marker'],
+        ['入って', 'はいって', 'is contained'],
+        ['いる', null, 'existing'],
+        ['とき', 'とき', 'when'],
+        ['、', null, ','],
+        ['a［2］', null, 'a[2]'],
+        ['で', null, 'by'],
+        ['取り出せる', 'とりだせる', 'can retrieve'],
+        ['データ', null, 'data'],
+        ['は', null, 'topic marker'], ['？', null, '?']
+      ],
+      qEn: 'If array a holds 10, 20, 30, 40 at element numbers 0-3, what data does a[2] retrieve?',
+      choices: [
+        [['10', null, 'the value 10']],
+        [['20', null, 'the value 20']],
+        [['30', null, 'the value 30']],
+        [['40', null, 'the value 40']]
+      ],
+      correct: 2,
+      exp: [
+        ['添字', 'そえじ', 'index'], ['は', null, 'topic marker'],
+        ['0', null, 'zero'], ['から', null, 'from'],
+        ['始まる', 'はじまる', 'begins'], ['ので', null, 'so / because'],
+        ['、', null, ','], ['a［2］', null, 'a[2]'],
+        ['は', null, 'topic marker'], ['3番目', 'さんばんめ', '3rd'],
+        ['の', null, 'of'], ['要素', 'ようそ', 'element'],
+        ['＝', null, 'equals'], ['30', null, 'thirty'],
+        ['です', null, 'is'], ['。', null, '.']
+      ],
+      expEn: 'Since indexes start at 0, a[2] is the 3rd element = 30.'
+    },
+
+    {
+      q: [
+        ['リスト', null, 'list'],
+        ['は', null, 'topic marker'],
+        ['、', null, ','],
+        ['何', null, 'what'],
+        ['と', null, 'and'],
+        ['何', null, 'what'],
+        ['で', null, 'by means of'],
+        ['構成', 'こうせい', 'composed'],
+        ['されます', null, 'is (passive)'],
+        ['か', null, '?']
+      ],
+      qEn: 'A list is composed of what two parts?',
+      choices: [
+        [['「データ部」', null, '"data part"'], ['＋', null, 'plus'], ['「ポインタ部」', null, '"pointer part"']],
+        [['「先頭部」', 'せんとうぶ', '"head part"'], ['＋', null, 'plus'], ['「末尾部」', 'まつびぶ', '"tail part"']],
+        [['「番号部」', 'ばんごうぶ', '"number part"'], ['＋', null, 'plus'], ['「名前部」', 'なまえぶ', '"name part"']],
+        [['「枝部」', 'えだぶ', '"branch part"'], ['＋', null, 'plus'], ['「葉部」', 'はぶ', '"leaf part"']]
+      ],
+      correct: 0,
+      exp: [
+        ['リスト', null, 'list'], ['は', null, 'topic marker'],
+        ['「データ部」', null, '"data part"'], ['＋', null, 'plus'],
+        ['「ポインタ部」', null, '"pointer part"'], ['で', null, 'by means of'],
+        ['構成', 'こうせい', 'composed'], ['されます', null, 'is done'],
+        ['。', null, '.'],
+        ['ポインタ', null, 'pointer'], ['を', null, 'object marker'],
+        ['たどる', null, 'to trace'], ['こと', null, 'the act of'],
+        ['で', null, 'by'], ['、', null, ','],
+        ['データ', null, 'data'], ['を', null, 'object marker'],
+        ['つなぐ', null, 'to link'], ['こと', null, 'the act of'],
+        ['が', null, 'subject marker'], ['できます', null, 'is possible']
+      ],
+      expEn: "A list = 'data part' + 'pointer part.' Following the pointers links the data together."
+    },
+
+    {
+      q: [
+        ['リスト', null, 'list'],
+        ['の', null, 'of'],
+        ['特徴', 'とくちょう', 'characteristic'],
+        ['として', null, 'as'],
+        ['正しい', 'ただしい', 'correct'],
+        ['もの', null, 'one'],
+        ['は', null, 'topic marker'],
+        ['？', null, '?']
+      ],
+      qEn: 'Which is a key characteristic of lists?',
+      choices: [
+        [
+          ['データ', null, 'data'], ['の', null, 'of'],
+          ['読み出し', 'よみだし', 'reading out'], ['だけ', null, 'only'],
+          ['が', null, 'subject marker'], ['速い', 'はやい', 'is fast']
+        ],
+        [
+          ['データ', null, 'data'], ['の', null, 'of'],
+          ['追加', 'ついか', 'addition'], ['・', null, 'and'],
+          ['挿入', 'そうにゅう', 'insertion'], ['・', null, 'and'],
+          ['削除', 'さくじょ', 'deletion'], ['が', null, 'subject marker'],
+          ['簡単', 'かんたん', 'easy']
+        ],
+        [
+          ['決して', 'けっして', 'never'], ['順番', 'じゅんばん', 'order'],
+          ['が', null, 'subject marker'], ['変わらない', 'かわらない', 'never changes']
+        ],
+        [
+          ['全て', 'すべて', 'all'], ['の', null, 'of'],
+          ['データ', null, 'data'], ['に', null, 'to'],
+          ['添字', 'そえじ', 'index'], ['が', null, 'subject marker'],
+          ['付く', 'つく', 'is attached']
+        ]
+      ],
+      correct: 1,
+      exp: [
+        ['リスト', null, 'list'], ['の', null, 'of'],
+        ['特徴', 'とくちょう', 'characteristic'], ['は', null, 'topic marker'],
+        ['、', null, ','], ['データ', null, 'data'], ['の', null, 'of'],
+        ['追加', 'ついか', 'addition'], ['・', null, 'and'],
+        ['挿入', 'そうにゅう', 'insertion'], ['・', null, 'and'],
+        ['削除', 'さくじょ', 'deletion'], ['が', null, 'subject marker'],
+        ['簡単', 'かんたん', 'easy'], ['である', null, 'is'],
+        ['点', 'てん', 'point'], ['です', null, 'is'], ['。', null, '.'],
+        ['ポインタ', null, 'pointer'], ['の', null, 'of'],
+        ['付け替え', 'つけかえ', 'rewiring'], ['だけ', null, 'only'],
+        ['で', null, 'by means of'], ['済みます', 'すみます', 'suffices']
+      ],
+      expEn: "Lists' key feature: adding, inserting, and deleting data is easy — only the pointers need rewiring."
+    },
+
+    {
+      q: [
+        ['キュー', null, 'queue'],
+        ['の', null, 'of'],
+        ['方式', 'ほうしき', 'method'],
+        ['を', null, 'object marker'],
+        ['表す', 'あらわす', 'expresses'],
+        ['英語', 'えいご', 'English'],
+        ['の', null, 'of'],
+        ['略語', 'りゃくご', 'abbreviation'],
+        ['は', null, 'topic marker'],
+        ['？', null, '?']
+      ],
+      qEn: 'Which English abbreviation describes how a queue works?',
+      choices: [
+        [['LIFO', null, 'Last-In, First-Out']],
+        [['FIFO', null, 'First-In, First-Out']],
+        [['FILO', null, 'First-In, Last-Out']],
+        [['LILO', null, 'Last-In, Last-Out']]
+      ],
+      correct: 1,
+      exp: [
+        ['キュー', null, 'queue'], ['は', null, 'topic marker'],
+        ['「先に入れたデータから順番に取り出す」', 'さきにいれたデータからじゅんばんにとりだす', '"retrieve in order, starting with the first data stored"'],
+        ['構造', 'こうぞう', 'structure'], ['です', null, 'is'],
+        ['。', null, '.'],
+        ['これ', null, 'this'], ['を', null, 'object marker'],
+        ['「先入れ先出し（FIFO：First-In First-Out）」', 'せんいれせんだし', 'First-In, First-Out'],
+        ['と', null, 'quotation'], ['呼びます', 'よびます', 'is called'],
+        ['。', null, '.']
+      ],
+      expEn: "A queue retrieves the first-stored data first — 'First-In, First-Out' (FIFO), like a line at a shop."
+    },
+
+    {
+      q: [
+        ['エンキュー（Enqueue）', null, 'enqueue'],
+        ['と', null, 'and'],
+        ['デキュー（Dequeue）', null, 'dequeue'],
+        ['の', null, 'of'],
+        ['説明', 'せつめい', 'explanation'],
+        ['として', null, 'as'],
+        ['正しい', 'ただしい', 'correct'],
+        ['もの', null, 'one'],
+        ['は', null, 'topic marker'],
+        ['？', null, '?']
+      ],
+      qEn: 'Which correctly describes enqueue and dequeue?',
+      choices: [
+        [
+          ['エンキュー', null, 'enqueue'], ['＝', null, 'equals'],
+          ['先頭', 'せんとう', 'front'], ['から', null, 'from'],
+          ['追加', 'ついか', 'add'], ['／', null, '/'],
+          ['デキュー', null, 'dequeue'], ['＝', null, 'equals'],
+          ['最後尾', 'さいごび', 'rear'], ['から', null, 'from'],
+          ['取出', 'とりだし', 'remove']
+        ],
+        [
+          ['エンキュー', null, 'enqueue'], ['＝', null, 'equals'],
+          ['最後尾', 'さいごび', 'rear'], ['に', null, 'to'],
+          ['追加', 'ついか', 'add'], ['／', null, '/'],
+          ['デキュー', null, 'dequeue'], ['＝', null, 'equals'],
+          ['先頭', 'せんとう', 'front'], ['から', null, 'from'],
+          ['取出', 'とりだし', 'remove']
+        ],
+        [
+          ['両方', 'りょうほう', 'both'], ['とも', null, 'also'],
+          ['先頭', 'せんとう', 'front'], ['で', null, 'at'],
+          ['行う', 'おこなう', 'perform']
+        ],
+        [
+          ['両方', 'りょうほう', 'both'], ['とも', null, 'also'],
+          ['最後尾', 'さいごび', 'rear'], ['で', null, 'at'],
+          ['行う', 'おこなう', 'perform']
+        ]
+      ],
+      correct: 1,
+      exp: [
+        ['エンキュー', null, 'enqueue'], ['は', null, 'topic marker'],
+        ['キュー', null, 'queue'], ['に', null, 'to'],
+        ['データ', null, 'data'], ['を', null, 'object marker'],
+        ['取り込む', 'とりこむ', 'take in'],
+        ['（最後尾に追加する）', 'さいごびについかする', '(add to the rear)'],
+        ['操作', 'そうさ', 'operation'], ['で', null, 'is'],
+        ['、', null, ','], ['デキュー', null, 'dequeue'],
+        ['は', null, 'topic marker'], ['先頭', 'せんとう', 'front'],
+        ['から', null, 'from'], ['データ', null, 'data'],
+        ['を', null, 'object marker'],
+        ['取り出す', 'とりだす', 'retrieve'],
+        ['操作', 'そうさ', 'operation'], ['です', null, 'is'],
+        ['。', null, '.']
+      ],
+      expEn: 'Enqueue adds data at the rear; dequeue removes data from the front — like people joining the back of a line and leaving from the front.'
+    },
+
+    {
+      q: [
+        ['スタック', null, 'stack'],
+        ['の', null, 'of'],
+        ['方式', 'ほうしき', 'method'],
+        ['を', null, 'object marker'],
+        ['表す', 'あらわす', 'expresses'],
+        ['略語', 'りゃくご', 'abbreviation'],
+        ['と', null, 'and'],
+        ['、', null, ','],
+        ['身近', 'みぢか', 'familiar'],
+        ['な', null, '(adj.)'],
+        ['イメージ', null, 'image'],
+        ['の', null, 'of'],
+        ['例', 'れい', 'example'],
+        ['は', null, 'topic marker'],
+        ['？', null, '?']
+      ],
+      qEn: 'Which abbreviation and everyday image describe a stack?',
+      choices: [
+        [
+          ['FIFO', null, 'First-In, First-Out'], ['／', null, '/'],
+          ['行列', 'ぎょうれつ', 'line of people']
+        ],
+        [
+          ['LIFO', null, 'Last-In, First-Out'], ['／', null, '/'],
+          ['エレベーター', null, 'elevator']
+        ],
+        [
+          ['LIFO', null, 'Last-In, First-Out'], ['／', null, '/'],
+          ['行列', 'ぎょうれつ', 'line of people']
+        ],
+        [
+          ['FIFO', null, 'First-In, First-Out'], ['／', null, '/'],
+          ['エレベーター', null, 'elevator']
+        ]
+      ],
+      correct: 1,
+      exp: [
+        ['スタック', null, 'stack'], ['は', null, 'topic marker'],
+        ['「最後に入れたデータから順番に取り出す」', 'さいごにいれたデータからじゅんばんにとりだす', '"retrieve in order starting with the last data stored"'],
+        ['構造', 'こうぞう', 'structure'], ['で', null, 'is'],
+        ['、', null, ','],
+        ['「後入れ先出し（LIFO：Last-In First-Out）」', 'ごいれせんだし', 'Last-In, First-Out'],
+        ['です', null, 'is'], ['。', null, '.'],
+        ['イメージ', null, 'image'], ['は', null, 'topic marker'],
+        ['、', null, ','], ['最後尾に乗った人から順番に降りていく', 'さいごびにのったひとからじゅんばんにおりていく', 'the last person on gets off first'],
+        ['「エレベーター」', null, '"elevator"'], ['です', null, 'is']
+      ],
+      expEn: "A stack is LIFO — 'Last-In, First-Out' — imagined as an elevator where the last person on gets off first."
+    },
+
+    {
+      q: [
+        ['1、2、3', null, 'the values 1, 2, 3'],
+        ['の', null, 'of'],
+        ['順番', 'じゅんばん', 'order'],
+        ['で', null, 'in'],
+        ['スタック', null, 'stack'],
+        ['に', null, 'to'],
+        ['プッシュ', null, 'push'],
+        ['しました', null, 'did'],
+        ['。', null, '.'],
+        ['ポップ', null, 'pop'],
+        ['を', null, 'object marker'],
+        ['1回', 'いっかい', 'once'],
+        ['行う', 'おこなう', 'perform'],
+        ['と', null, 'when'],
+        ['、', null, ','],
+        ['何', 'なに', 'what'],
+        ['が', null, 'subject marker'],
+        ['出ます', 'でます', 'comes out'],
+        ['か', null, '?']
+      ],
+      qEn: 'Push 1, 2, 3 onto a stack in that order. When you pop once, what comes out?',
+      choices: [
+        [
+          ['1', null, 'the value 1'],
+          ['（最初', 'さいしょ', '(the first'], ['に', null, 'that was'], ['入れた', 'いれた', 'pushed'], ['もの', 'もの', 'one'], ['）', null, ')']
+        ],
+        [['2', null, 'the value 2']],
+        [
+          ['3', null, 'the value 3'],
+          ['（最後', 'さいご', '(the last'], ['に', null, 'that was'], ['入れた', 'いれた', 'pushed'], ['もの', 'もの', 'one'], ['）', null, ')']
+        ],
+        [['何も', 'なにも', 'nothing'], ['出ない', 'でない', 'does not come out']]
+      ],
+      correct: 2,
+      exp: [
+        ['ポップ', null, 'pop'], ['は', null, 'topic marker'],
+        ['一番上', 'いちばんうえ', 'the very top'],
+        ['にある', null, 'located at'],
+        ['最新', 'さいしん', 'newest'], ['の', null, 'of'],
+        ['データ', null, 'data'], ['から', null, 'from'],
+        ['取り出す', 'とりだす', 'retrieves'], ['ので', null, 'so'],
+        ['、', null, ','], ['最後', 'さいご', 'last'],
+        ['に', null, '(ly)'], ['プッシュ', null, 'pushed'],
+        ['した', null, 'did'], ['3', null, 'three'],
+        ['が', null, 'subject marker'], ['出ます', 'でます', 'comes out'],
+        ['。', null, '.']
+      ],
+      expEn: 'Pop takes the newest data from the top — the last value pushed (3) comes out first. LIFO!'
+    },
+
+    {
+      q: [
+        ['木構造', 'きこうぞう', 'tree structure'],
+        ['の', null, 'of'],
+        ['用語', 'ようご', 'terminology'],
+        ['の', null, 'of'],
+        ['組み合わせ', 'くみあわせ', 'pairing'],
+        ['として', null, 'as'],
+        ['正しい', 'ただしい', 'correct'],
+        ['もの', null, 'one'],
+        ['は', null, 'topic marker'],
+        ['？', null, '?']
+      ],
+      qEn: 'Which pairing of tree structure terms is correct?',
+      choices: [
+        [
+          ['根（ルート）', 'ね', 'root'], ['＝', null, 'equals'],
+          ['子を持たない', 'こをもたない', 'has no child'], ['節', 'ふし', 'node']
+        ],
+        [
+          ['葉（リーフ）', 'は', 'leaf'], ['＝', null, 'equals'],
+          ['親を持たない', 'おやをもたない', 'has no parent'], ['節', 'ふし', 'node']
+        ],
+        [
+          ['根（ルート）', 'ね', 'root'], ['＝', null, 'equals'],
+          ['親を持たない最上位の節', 'おやをもたないさいじょういのふし', 'the topmost node with no parent']
+        ],
+        [
+          ['枝（エッジ）', 'えだ', 'edge'], ['＝', null, 'equals'],
+          ['一番末端の節', 'いちばんまったんのふし', 'the most terminal node']
+        ]
+      ],
+      correct: 2,
+      exp: [
+        ['根（ルート）', 'ね', 'root'], ['は', null, 'topic marker'],
+        ['親', 'おや', 'parent'], ['を', null, 'object marker'],
+        ['持たない', 'もたない', 'does not have'],
+        ['、', null, ','], ['最上位', 'さいじょうい', 'topmost'],
+        ['にある', null, 'located at'], ['一番', 'いちばん', 'the most'],
+        ['大元', 'おおもと', 'origin'], ['の', null, 'of'],
+        ['節', 'ふし', 'node'], ['です', null, 'is'],
+        ['。', null, '.'],
+        ['葉（リーフ）', 'は', 'leaf'], ['は', null, 'topic marker'],
+        ['子', 'こ', 'child'], ['を', null, 'object marker'],
+        ['持たない', 'もたない', 'does not have'],
+        ['末端', 'まったん', 'terminal'], ['の', null, 'of'],
+        ['節', 'ふし', 'node'], ['です', null, 'is'],
+        ['。', null, '.'],
+        ['枝（エッジ）', 'えだ', 'edge'], ['は', null, 'topic marker'],
+        ['節と節', 'ふしとふし', 'node and node'], ['を', null, 'object marker'],
+        ['つなぐ', null, 'connects'], ['線', 'せん', 'line'], ['です', null, 'is']
+      ],
+      expEn: 'Root = the topmost node with no parent; leaf = a terminal node with no children; edge = a line connecting two nodes.'
+    },
+
+    {
+      q: [
+        ['木構造', 'きこうぞう', 'tree structure'],
+        ['を', null, 'object marker'],
+        ['使っている', 'つかっている', 'is using'],
+        ['身近', 'みぢか', 'familiar'],
+        ['な', null, '(adj.)'],
+        ['例', 'れい', 'example'],
+        ['は', null, 'topic marker'],
+        ['？', null, '?']
+      ],
+      qEn: 'Which familiar example uses a tree structure?',
+      choices: [
+        [
+          ['パソコン', null, 'PC'], ['の', null, 'of'],
+          ['フォルダ', null, 'folder'], ['（ディレクトリ）', null, '(directory)'],
+          ['の', null, 'of'], ['ファイルシステム', null, 'file system']
+        ],
+        [
+          ['お店', 'みせ', 'shop'], ['に', null, 'at'],
+          ['並ぶ', 'ならぶ', 'lining up'], ['行列', 'ぎょうれつ', 'line of people']
+        ],
+        [
+          ['お買い物', 'おかいもの', 'shopping'], ['の', null, 'of'],
+          ['レジ', null, 'cash register']
+        ],
+        [
+          ['エレベーター', null, 'elevator'], ['の', null, 'of'],
+          ['乗降', 'じょうこう', 'boarding']
+        ]
+      ],
+      correct: 0,
+      exp: [
+        ['パソコン', null, 'PC'], ['の', null, 'of'],
+        ['「フォルダ（ディレクトリ）のファイルシステム」', null, '"folder (directory) file system"'],
+        ['が', null, 'subject marker'],
+        ['木構造', 'きこうぞう', 'tree structure'], ['を', null, 'object marker'],
+        ['使っています', 'つかっています', 'is using'],
+        ['。', null, '.'],
+        ['フォルダ', null, 'folder'], ['の', null, 'of'],
+        ['中', 'なか', 'inside'], ['に', null, 'in'],
+        ['さらに', null, 'furthermore'],
+        ['フォルダ', null, 'folder'], ['や', null, 'or'],
+        ['ファイル', null, 'file'], ['が', null, 'subject marker'],
+        ['ぶら下がっている', 'ぶらさがっている', 'hangs beneath'],
+        ['仕組み', 'しくみ', 'mechanism'], ['です', null, 'is'],
+        ['。', null, '.'],
+        ['※', null, 'note'], ['行列', 'ぎょうれつ', 'line'], ['＝', null, 'equals'],
+        ['キュー', null, 'queue'], ['、', null, ','],
+        ['エレベーター', null, 'elevator'], ['＝', null, 'equals'],
+        ['スタック', null, 'stack'], ['の', null, 'of'],
+        ['イメージ', null, 'image'], ['です', null, 'is']
+      ],
+      expEn: "PC folder/directory file systems use the tree structure — folders and files hang beneath folders. (Note: a line of people = queue; an elevator = stack.)"
+    }
+
+  ];
+
+  var quizOrder = [], quizPos = 0, quizCorrect = 0, quizAnswered = false;
+
+  function startQuiz() {
+    quizOrder = [];
+    for (var i = 0; i < QUIZ.length; i++) quizOrder.push(i);
+    for (var j = quizOrder.length - 1; j > 0; j--) {
+      var r = Math.floor(Math.random() * (j + 1));
+      var tmp = quizOrder[j]; quizOrder[j] = quizOrder[r]; quizOrder[r] = tmp;
+    }
+    quizPos = 0; quizCorrect = 0;
+    document.getElementById('quizNextBtn').textContent = 'Next Question';
+    showQuizQuestion();
+  }
+
+  function showQuizQuestion() {
+    if (quizPos >= quizOrder.length) {
+      document.getElementById('quizProgress').textContent = '';
+      document.getElementById('quizQuestion').innerHTML =
+        segs([['クイズ完了！', 'クイズかんりょう', 'Quiz complete!']]);
+      document.getElementById('quizTranslation').innerHTML =
+        '<div class="translation-title">English Translation</div><p>Quiz complete!</p>';
+      document.getElementById('quizChoices').innerHTML = '';
+      document.getElementById('quizFeedback').innerHTML =
+        '<div class="quiz-result">' + quizCorrect + ' / ' + quizOrder.length +
+        ' 正解 — correct</div>' +
+        (quizCorrect === quizOrder.length
+          ? 'パーフェクト！データ構造完璧です！🎉 — Perfect score!'
+          : '間違えた問題の解説をもう一度読んでみよう！ — Review the explanations above!');
+      document.getElementById('quizNextBtn').textContent = 'Restart';
+      document.getElementById('quizScore').textContent =
+        'Score: ' + quizCorrect + ' / ' + quizOrder.length;
+      return;
+    }
+    var q = QUIZ[quizOrder[quizPos]];
+    quizAnswered = false;
+    document.getElementById('quizProgress').textContent =
+      'Question ' + (quizPos + 1) + ' / ' + quizOrder.length;
+    document.getElementById('quizQuestion').innerHTML = segs(q.q);
+    document.getElementById('quizTranslation').innerHTML =
+      '<div class="translation-title">English Translation</div><p>' + q.qEn + '</p>';
+    var choicesEl = document.getElementById('quizChoices');
+    choicesEl.innerHTML = '';
+    q.choices.forEach(function (choiceSegs, idx) {
+      var btn = document.createElement('button');
+      btn.className = 'quiz-choice';
+      btn.type = 'button';
+      btn.innerHTML = segs(choiceSegs);
+      btn.onclick = function (ev) {
+        ev = ev || window.event;
+        if (ev && ev.stopPropagation) ev.stopPropagation();
+        if (quizAnswered) return; // ignore after answering, but word taps still work
+        answerQuiz(idx, btn);
+      };
+      choicesEl.appendChild(btn);
+    });
+    document.getElementById('quizFeedback').innerHTML = '';
+  }
+
+  function answerQuiz(idx, clickedBtn) {
+    var q = QUIZ[quizOrder[quizPos]];
+    quizAnswered = true;
+    var buttons = document.querySelectorAll('.quiz-choice');
+    buttons.forEach(function (b) { b.classList.add('disabled'); });
+    buttons[q.correct].classList.add('correct');
+    var head;
+    if (idx === q.correct) {
+      quizCorrect++;
+      head = '<strong class="ok">⭕ 正解！ Correct!</strong><br>';
+    } else {
+      clickedBtn.classList.add('wrong');
+      head = '<strong class="ng">❌ 不正解… Incorrect.</strong><br>';
+    }
+    document.getElementById('quizFeedback').innerHTML =
+      head + segs(q.exp) + '<span class="fb-en">' + q.expEn + '</span>';
+    quizPos++;
+    document.getElementById('quizScore').textContent =
+      'Score: ' + quizCorrect + ' correct so far';
+  }
+
+  function quizNext() {
+    if (quizOrder.length === 0) { startQuiz(); return; }
+    if (quizPos >= quizOrder.length) { startQuiz(); return; }
+    if (!quizAnswered) return; // wait for an answer first
+    showQuizQuestion();
+  }
+
+  /* ---------- Init ---------- */
+  document.addEventListener('DOMContentLoaded', updateLearnedCount);
+</script>
+</body>
+</html>

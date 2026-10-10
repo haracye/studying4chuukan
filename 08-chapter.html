@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>擬似言語の基本とトレース — Japanese Study Notes</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", "Meiryo", sans-serif;
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 40px 25px 80px;
+      line-height: 1.6;
+      color: #1a1a2e;
+      background: #f5f6f8;
+    }
+
+    /* ---- Page Header ---- */
+    .page-header {
+      margin-bottom: 36px;
+      padding-bottom: 24px;
+      border-bottom: 2px solid #e2e5ec;
+    }
+
+    .page-header .chapter {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: #8890a6;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 34px;
+      margin-bottom: 8px;
+      letter-spacing: 0.02em;
+      color: #16213e;
+      font-weight: 700;
+    }
+
+    h1 rt {
+      font-size: 12px;
+      color: #a0a4b4;
+      font-weight: 400;
+    }
+
+    .ref {
+      font-size: 14px;
+      color: #8890a6;
+    }
+
+    /* ---- Toolbar ---- */
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 0 -25px 40px;
+      padding: 14px 25px;
+      background: rgba(245, 246, 248, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid #e2e5ec;
+    }
+
+    .hint {
+      font-size: 13px;
+      color: #8890a6;
+      margin-right: auto;
+    }
+
+    .toggle-btn {
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      padding: 8px 20px;
+      border: 2px solid #4a6fa5;
+      border-radius: 999px;
+      background: #fff;
+      color: #4a6fa5;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .toggle-btn:hover {
+      background: #4a6fa5;
+      color: #fff;
+    }
+
+    .toggle-btn.active {
+      background: #4a6fa5;
+      color: #fff;
+    }
+
+    /* ---- Section Headers ---- */
+    .section-header {
+      margin-top: 56px;
+      margin-bottom: 28px;
+    }
+
+    .section-header:first-of-type {
+      margin-top: 0;
+    }
+
+    .section-label {
+      display: inline-block;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #fff;
+      background: #16213e;
+      padding: 4px 14px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #16213e;
+      margin-bottom: 4px;
+      line-height: 1.4;
+    }
+
+    .section-title rt {
+      font-size: 10px;
+      color: #a0a4b4;
+    }
+
+    .section-q {
+      font-size: 15px;
+      color: #8890a6;
+      font-style: italic;
+    }
+
+    /* ---- Breakdown: inline flowing text ---- */
+    .breakdown {
+      font-size: 26px;
+      line-height: 2.8;
+      letter-spacing: 0.02em;
+      margin-bottom: 20px;
+    }
+
+    .word {
+      display: inline;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      border-radius: 6px;
+      padding: 1px 3px;
+      margin: 0 1px;
+    }
+
+    .word:active {
+      background: rgba(74, 111, 165, 0.1);
+    }
+
+    .word ruby {
+      color: #1a1a2e;
+      transition: color 0.2s ease;
+    }
+
+    .word.revealed ruby {
+      color: #4a6fa5;
+    }
+
+    .word.revealed {
+      background: rgba(74, 111, 165, 0.06);
+    }
+
+    rt {
+      font-size: 11px;
+      line-height: 1;
+      color: #a0a4b4;
+      font-weight: 400;
+    }
+
+    /* ---- Meaning: inline pill on tap ---- */
+    .meaning {
+      display: none;
+      font-size: 12px;
+      line-height: 1.3;
+      color: #4a6fa5;
+      background: rgba(74, 111, 165, 0.08);
+      padding: 2px 7px;
+      border-radius: 5px;
+      margin: 0 2px;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .word.revealed .meaning {
+      display: inline;
+    }
+
+    /* ---- Answer words (numbered blanks) ---- */
+    .answer-word .answer-text {
+      display: inline;
+    }
+
+    .answer-word .answer-text ruby {
+      color: #4a6fa5;
+      font-weight: 500;
+    }
+
+    .answer-word .answer-num {
+      display: none;
+      font-size: 18px;
+      color: #e07a5f;
+      font-weight: 600;
+    }
+
+    .answer-word .blank {
+      display: none;
+    }
+
+    body.hide-answers .answer-word .answer-text {
+      display: none;
+    }
+
+    body.hide-answers .answer-word .answer-num {
+      display: inline;
+    }
+
+    body.hide-answers .answer-word .blank {
+      display: inline;
+      letter-spacing: 0.1em;
+      color: #e07a5f;
+      opacity: 0.55;
+    }
+
+    /* ---- Translation ---- */
+    .translation {
+      margin: 16px 0 48px;
+      padding: 16px 20px;
+      font-size: 16px;
+      line-height: 1.7;
+      color: #4a6fa5;
+      background: rgba(74, 111, 165, 0.04);
+      border-radius: 10px;
+    }
+
+    .translation-title {
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      letter-spacing: 0.08em;
+      color: #4a6fa5;
+      text-transform: uppercase;
+    }
+
+    /* ---- Formula ---- */
+    .formula-block {
+      text-align: center;
+      margin: 30px 0 40px;
+      padding: 24px 20px;
+      background: #fff;
+      border-radius: 12px;
+    }
+
+    .formula-enzyme {
+      font-size: 16px;
+      color: #4a6fa5;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .formula-arrow {
+      font-size: 20px;
+      color: #b0b4c4;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    .formula {
+      font-family: "SF Mono", "Fira Code", "Courier New", monospace;
+      font-size: 19px;
+      color: #16213e;
+      overflow-x: auto;
+      white-space: nowrap;
+      line-height: 2;
+    }
+
+    .formula .plus {
+      margin: 0 8px;
+      color: #b0b4c4;
+    }
+
+    .formula .arrow-r {
+      margin: 0 10px;
+      color: #b0b4c4;
+    }
+
+    .answer-inline .answer-text {
+      display: inline;
+      color: #4a6fa5;
+      font-weight: 500;
+    }
+
+    .answer-inline .answer-num {
+      display: none;
+    }
+
+    .answer-inline .blank {
+      display: none;
+    }
+
+    body.hide-answers .answer-inline .answer-text {
+      display: none;
+    }
+
+    body.hide-answers .answer-inline .answer-num {
+      display: inline;
+      color: #e07a5f;
+      font-weight: 600;
+    }
+
+    body.hide-answers .answer-inline .blank {
+      display: inline;
+      letter-spacing: 0.1em;
+      color: #e07a5f;
+      opacity: 0.55;
+    }
+
+    .formula-gloss {
+      font-size: 13px;
+      margin-top: 14px;
+      color: #8890a6;
+      line-height: 1.9;
+    }
+
+    .formula .word,
+    .formula-gloss .word {
+      color: #8890a6;
+    }
+
+    .formula rt,
+    .formula-gloss rt {
+      font-size: 9px;
+    }
+
+    .formula .meaning,
+    .formula-gloss .meaning {
+      font-size: 11px;
+      padding: 1px 5px;
+    }
+
+    /* ---- Divider ---- */
+    .divider {
+      margin: 48px 0;
+      text-align: center;
+      font-size: 13px;
+      letter-spacing: 0.5em;
+      color: #d0d4de;
+      text-indent: 0.5em;
+    }
+
+    /* ---- Tables ---- */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 30px 0 12px;
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .unit-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .unit-table th {
+      background: #16213e;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 10px 14px;
+      text-align: left;
+    }
+
+    .unit-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #e2e5ec;
+      color: #1a1a2e;
+      vertical-align: middle;
+    }
+
+    .unit-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .unit-table rt {
+      font-size: 9px;
+    }
+
+    .unit-table .meaning {
+      font-size: 11px;
+      padding: 1px 5px;
+    }
+
+    .unit-table .word {
+      color: #1a1a2e;
+    }
+
+    .unit-table th .word ruby {
+      color: #fff;
+    }
+
+    .unit-table th .word.revealed {
+      background: rgba(255, 255, 255, 0.10);
+    }
+
+    .unit-table th .word.revealed ruby {
+      color: #cfd8ec;
+    }
+
+    .unit-table th .meaning {
+      background: rgba(255, 255, 255, 0.14);
+      color: #cfd8ec;
+    }
+
+    /* Wrapped description cells */
+    .unit-table td.wrap-cell {
+      white-space: normal;
+      line-height: 2.2;
+      min-width: 220px;
+    }
+
+    /* Multi-line code cells */
+    .unit-table td.code-cell {
+      font-family: "SF Mono", "Fira Code", "Courier New", monospace;
+      white-space: pre;
+      font-size: 13px;
+      line-height: 1.9;
+      color: #16213e;
+      background: #f8fafc;
+    }
+
+    .unit-table td.line-num {
+      font-family: "SF Mono", "Fira Code", "Courier New", monospace;
+      font-weight: 700;
+      color: #8890a6;
+      width: 44px;
+    }
+
+    .table-note {
+      font-size: 13px;
+      color: #8890a6;
+      margin-bottom: 48px;
+      padding: 0 4px;
+      line-height: 2;
+    }
+
+    .table-note .word {
+      color: #8890a6;
+    }
+
+    .table-note rt {
+      font-size: 9px;
+    }
+
+    .table-note .meaning {
+      font-size: 11px;
+      padding: 1px 5px;
+    }
+
+    /* ---- Key Terms Section ---- */
+    .terms-section {
+      margin-top: 60px;
+      padding-top: 40px;
+      border-top: 2px solid #e2e5ec;
+    }
+
+    .terms-heading {
+      font-size: 22px;
+      font-weight: 700;
+      color: #16213e;
+      margin-bottom: 6px;
+    }
+
+    .terms-sub {
+      font-size: 14px;
+      color: #8890a6;
+      margin-bottom: 30px;
+    }
+
+    .term-item {
+      margin-bottom: 20px;
+      padding: 14px 18px;
+      background: #fff;
+      border-radius: 10px;
+    }
+
+    .term-jp {
+      font-size: 18px;
+      font-weight: 600;
+      color: #16213e;
+    }
+
+    .term-jp rt {
+      font-size: 11px;
+      color: #a0a4b4;
+    }
+
+    .term-item .word.revealed {
+      background: rgba(74, 111, 165, 0.06);
+    }
+
+    .term-item .meaning {
+      font-size: 11px;
+      padding: 1px 5px;
+    }
+
+    .term-en {
+      font-size: 14px;
+      color: #4a6fa5;
+      font-weight: 500;
+      margin-left: 8px;
+    }
+
+    .term-def {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #555a6e;
+      margin-top: 6px;
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 600px) {
+      body { padding: 25px 16px 60px; }
+      h1 { font-size: 26px; }
+      .section-title { font-size: 19px; }
+      .breakdown { font-size: 22px; line-height: 2.6; }
+      .formula { font-size: 16px; }
+      .translation { font-size: 14px; padding: 14px 16px; }
+      .hint { display: none; }
+      .toolbar { padding: 12px 16px; margin: 0 -16px 30px; }
+      .term-jp { font-size: 16px; }
+      .unit-table { font-size: 13px; }
+      .unit-table th, .unit-table td { padding: 8px 10px; }
+      .unit-table td.code-cell { font-size: 11.5px; }
+    }
+  
+    /* Added usability improvements: responsive layout, readable controls, and print support. */
+    html { scroll-behavior: smooth; }
+    body { width: min(100% - 28px, 920px); padding-left: 0 !important; padding-right: 0 !important; }
+    img, svg, video, canvas, table { max-width: 100%; }
+    table { display: block; overflow-x: auto; }
+    button, .toggle-btn, input, select { touch-action: manipulation; }
+    button, .toggle-btn { min-height: 40px; cursor: pointer; }
+    :focus-visible { outline: 3px solid #647de8; outline-offset: 3px; }
+    .chapter-nav { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; margin: 0 0 22px; padding: 12px 14px; border:1px solid #dfe3ed; border-radius:12px; background:rgba(255,255,255,.88); font-size:14px; }
+    .chapter-nav a { color:#4257a6; text-decoration:none; font-weight:600; padding:7px 9px; border-radius:8px; }
+    .chapter-nav a:hover { background:#eef1ff; }
+    .chapter-nav .home-link { margin-right:auto; }
+    @media (max-width: 600px) {
+      body { width: calc(100% - 24px); padding-top: 18px !important; padding-bottom: 40px !important; font-size: 15px; }
+      h1 { font-size: clamp(24px, 7vw, 32px) !important; overflow-wrap:anywhere; }
+      .toolbar { margin-left: -12px !important; margin-right: -12px !important; padding: 10px 12px !important; gap:8px !important; }
+      .chapter-nav { gap:5px; padding:8px; }
+      .chapter-nav a { padding:8px 6px; }
+    }
+    @media print {
+      body { width:100%; max-width:none; padding:0 !important; background:#fff !important; color:#000 !important; }
+      .toolbar, .chapter-nav, button, .toggle-btn { display:none !important; }
+      .card, section, table { break-inside:avoid; }
+    }
+    
+  
+/* Study-site polish: shared accessible controls, focus states, themes, and spacing. */
+:root { color-scheme: light; --study-bg:#f5f6fa; --study-card:#fff; --study-text:#20243a; --study-muted:#687089; --study-line:#e1e5ef; --study-accent:#5267b8; --study-soft:#eef1ff; }
+html { scroll-padding-top: 90px; }
+body { background:var(--study-bg); color:var(--study-text); transition:background .18s,color .18s; }
+.page-header { border-color:var(--study-line)!important; }
+.section-header, .section-title, .translation, .table-note, .formula-gloss, .unit-table, .term-card, .example-box, .breakdown, .card { max-width:100%; }
+.translation, .table-note, .term-card, .example-box, .breakdown, .unit-table, table { overflow-wrap:anywhere; }
+.chapter-nav { position:relative; }
+.study-progress { position:fixed; inset:0 0 auto; height:4px; z-index:9999; background:transparent; pointer-events:none; }
+.study-progress span { display:block; width:0; height:100%; background:linear-gradient(90deg,#7487df,#a4b1ff); transition:width .08s linear; }
+.study-tools { display:flex; align-items:center; gap:8px; flex-wrap:wrap; width:100%; }
+.study-tools .tool-spacer { flex:1 1 12px; }
+.study-tools button { appearance:none; border:1px solid #d6dced; border-radius:999px; background:#fff; color:#36436e; font-family:inherit; font-size:13px; font-weight:600; line-height:1.2; padding:10px 13px; min-height:42px; cursor:pointer; }
+.study-tools button:hover { background:#f0f2ff; border-color:#aab5e8; }
+.study-tools button[aria-pressed="true"] { background:#e9edff; border-color:#9aa8eb; }
+.study-tools .font-size-label { font-size:12px; color:var(--study-muted); }
+body.study-large-text { font-size:1.12em; }
+body.study-larger-text { font-size:1.24em; }
+body.study-show-meanings .meaning { display:inline!important; }
+body.study-show-meanings .word { background:rgba(99,119,201,.07); border-radius:5px; }
+body.study-dark { --study-bg:#171a24; --study-card:#222635; --study-text:#edf0fa; --study-muted:#b4bad0; --study-line:#3a4054; --study-accent:#b1bdff; --study-soft:#2c3350; color-scheme:dark; }
+body.study-dark .toolbar, body.study-dark .chapter-nav, body.study-dark .study-tools button { background:#222635!important; color:#edf0fa!important; border-color:#414860!important; }
+body.study-dark .chapter-nav a, body.study-dark .toggle-btn { color:#c6ceff!important; }
+body.study-dark .translation, body.study-dark .table-note, body.study-dark .breakdown, body.study-dark .unit-table, body.study-dark .term-card, body.study-dark .example-box, body.study-dark .card, body.study-dark section { background-color:var(--study-card); color:var(--study-text); border-color:var(--study-line); }
+body.study-dark .page-header h1, body.study-dark h1, body.study-dark h2, body.study-dark h3 { color:var(--study-text)!important; }
+body.study-dark .study-tools button[aria-pressed="true"] { background:#343d61!important; }
+.word[onclick], .answer-word[onclick] { -webkit-tap-highlight-color:transparent; }
+.word:focus-visible { outline:2px solid #7185df; outline-offset:2px; border-radius:4px; }
+@media(max-width:600px){ .study-tools button { flex:1 1 auto; padding:10px 9px; font-size:12px; } .study-tools .tool-spacer { display:none; } .study-progress { height:3px; } }
+@media(prefers-reduced-motion:reduce){ html{scroll-behavior:auto!important} *,*::before,*::after{transition:none!important;animation:none!important} }
+@media print { .study-progress,.study-tools {display:none!important} body {font-size:11pt!important} .meaning {display:inline!important} }
+
+  </style>
+</head>
+
+<body>
+  <nav class="chapter-nav" aria-label="Chapter navigation">
+    <a class="home-link" href="index.html">⌂ All notes</a><a href="07-chapter.html" aria-label="Previous chapter">← Previous</a><span></span>
+  </nav>
+
+
+  <!-- ==================== PAGE HEADER ==================== -->
+  <div class="page-header">
+    <div class="chapter">Unit 4 · IT Fundamentals — <span class="word" onclick="toggleWord(event, this)"><ruby>対策学習<rt>たいさくがくしゅう</rt></ruby>ワークシート<span class="meaning">exam-prep worksheet</span></span></div>
+    <h1><span class="word" onclick="toggleWord(event, this)"><ruby>擬似言語<rt>ぎじげんご</rt></ruby><span class="meaning">pseudo-language (pseudo-code)</span></span>の<span class="word" onclick="toggleWord(event, this)"><ruby>基本<rt>きほん</rt></ruby><span class="meaning">basics</span></span>と<span class="word" onclick="toggleWord(event, this)">トレース<span class="meaning">trace (tracking variable values)</span></span></h1>
+    <div class="ref">教科書 p.215–217 — Pseudo-language Basics, calcMean &amp; Trace Exercises</div>
+  </div>
+
+  <!-- ==================== TOOLBAR ==================== -->
+  <div class="toolbar">
+    <div class="hint">Tap any word to reveal its meaning</div>
+    <div class="toggle-btn active" id="toggleAnswers" onclick="toggleAnswers()">Hide Answers ✓</div>
+  </div>
+
+  <!-- ==================== SECTION 1 ==================== -->
+  <div class="section-header">
+    <span class="section-label">1</span>
+    <div class="section-title"><span class="word" onclick="toggleWord(event, this)"><ruby>擬似言語<rt>ぎじげんご</rt></ruby><span class="meaning">pseudo-language</span></span>の<span class="word" onclick="toggleWord(event, this)"><ruby>基本<rt>きほん</rt></ruby><span class="meaning">basics</span></span>と<span class="word" onclick="toggleWord(event, this)"><ruby>記述規則<rt>きじゅつきそく</rt></ruby><span class="meaning">notation rules</span></span>（p.215）</div>
+    <div class="section-q">What is a pseudo-language, and what rules govern how it is written?</div>
+  </div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)">コンピュータ<span class="meaning">computer</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>に<rt>に</rt></ruby><span class="meaning">to</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>させたい<rt>させたい</rt></ruby><span class="meaning">want to make it do (causative + want)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>処理<rt>しょり</rt></ruby><span class="meaning">processing</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)">プログラミング<span class="meaning">programming</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>言語<rt>げんご</rt></ruby><span class="meaning">language</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>ではなく<rt>ではなく</rt></ruby><span class="meaning">not... but rather</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>人間<rt>にんげん</rt></ruby><span class="meaning">humans</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>読<rt>よ</rt></ruby>みやすい<span class="meaning">easy to read</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>形<rt>かたち</rt></ruby><span class="meaning">form / shape</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>で<rt>で</rt></ruby><span class="meaning">by means of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>表<rt>あらわ</rt></ruby>した<span class="meaning">expressed (past)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>もの<rt>もの</rt></ruby><span class="meaning">thing</span></span>
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    A pseudo-language is a way of expressing the processing you want the computer to do in a human-readable form, rather than in a programming language.
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)"><ruby>擬似言語<rt>ぎじげんご</rt></ruby><span class="meaning">pseudo-language</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>で<rt>で</rt></ruby><span class="meaning">in (means)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>書<rt>か</rt></ruby>かれた<span class="meaning">written (passive, past)</span></span><span class="word" onclick="toggleWord(event, this)">アルゴリズム<span class="meaning">algorithm</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>は<rt>は</rt></ruby><span class="meaning">topic</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>宣言部<rt>せんげんぶ</rt></ruby></span><span class="answer-num">（1）</span><span class="blank">＿＿＿＿</span><span class="meaning">declaration part</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>と<rt>と</rt></ruby><span class="meaning">and</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>処理部<rt>しょりぶ</rt></ruby></span><span class="answer-num">（2）</span><span class="blank">＿＿＿＿</span><span class="meaning">processing part</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>で<rt>で</rt></ruby><span class="meaning">by</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>構成<rt>こうせい</rt></ruby>される<span class="meaning">is composed / structured (passive)</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    An algorithm written in pseudo-language is composed of the (declaration part) and the (processing part).
+  </div>
+
+  <div class="table-note">
+    <span class="word" onclick="toggleWord(event, this)">教科書<span class="meaning">textbook</span></span><span class="word" onclick="toggleWord(event, this)">p.215<span class="meaning">page 215</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>記述形式<rt>きじゅつけいしき</rt></ruby><span class="meaning">notation format</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>一覧表<rt>いちらんひょう</rt></ruby><span class="meaning">summary table</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>確認<rt>かくにん</rt></ruby>しながら<span class="meaning">while checking</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>擬似言語<rt>ぎじげんご</rt></ruby><span class="meaning">pseudo-language</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)">ルール<span class="meaning">rules</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>整理<rt>せいり</rt></ruby>しましょう<span class="meaning">let's organize</span></span>。）
+  </div>
+
+  <!-- ==================== 記述規則 TABLE ==================== -->
+  <div class="table-wrap">
+    <table class="unit-table">
+      <tr>
+        <th><span class="word" onclick="toggleWord(event, this)"><ruby>項目<rt>こうもく</rt></ruby><span class="meaning">item / category</span></span></th>
+        <th><span class="word" onclick="toggleWord(event, this)"><ruby>記述形式<rt>きじゅつけいしき</rt></ruby><span class="meaning">notation format</span></span></th>
+        <th><span class="word" onclick="toggleWord(event, this)"><ruby>内容<rt>ないよう</rt></ruby>・<ruby>意味<rt>いみ</rt></ruby><span class="meaning">content / meaning</span></span></th>
+      </tr>
+      <tr>
+        <td><span class="word" onclick="toggleWord(event, this)"><ruby>変数<rt>へんすう</rt></ruby>の<span class="meaning">variable's</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>宣言<rt>せんげん</rt></ruby><span class="meaning">declaration</span></span></td>
+        <td class="code-cell"><span class="word answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>型名<rt>かためい</rt></ruby></span><span class="answer-num">（3）</span><span class="blank">＿＿＿＿</span><span class="meaning">type name (e.g. 整数型, 実数型)</span></span>：変数名</td>
+        <td class="wrap-cell"><span class="word" onclick="toggleWord(event, this)"><ruby>指定<rt>してい</rt></ruby>した<span class="meaning">specified</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>型<rt>かた</rt></ruby>の<span class="meaning">type's</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>変数<rt>へんすう</rt></ruby><span class="meaning">variable</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>準備<rt>じゅんび</rt></ruby>する<span class="meaning">to prepare</span></span></td>
+      </tr>
+      <tr>
+        <td><span class="word" onclick="toggleWord(event, this)"><ruby>注釈<rt>ちゅうしゃく</rt></ruby><span class="meaning">annotation</span></span>（<span class="word" onclick="toggleWord(event, this)">コメント<span class="meaning">comment</span></span>）</td>
+        <td class="code-cell"><span class="word answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text">/* … */</span><span class="answer-num">（4）</span><span class="blank">＿＿＿＿＿</span><span class="meaning">comment markers: everything inside is ignored</span></span></td>
+        <td class="wrap-cell"><span class="word" onclick="toggleWord(event, this)">プログラム<span class="meaning">program</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>動作<rt>どうさ</rt></ruby><span class="meaning">operation / behavior</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>に<rt>に</rt></ruby><span class="meaning">to</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>影響<rt>えいきょう</rt></ruby>しない<span class="meaning">does not affect</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>説明文<rt>せつめいぶん</rt></ruby><span class="meaning">explanatory text</span></span></td>
+      </tr>
+      <tr>
+        <td><span class="word" onclick="toggleWord(event, this)"><ruby>代入<rt>だいにゅう</rt></ruby><span class="meaning">assignment</span></span></td>
+        <td class="code-cell">変数名 <span class="word answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text">←</span><span class="answer-num">（5）</span><span class="blank">＿＿</span><span class="meaning">assignment arrow (left arrow)</span></span> 式</td>
+        <td class="wrap-cell"><span class="word" onclick="toggleWord(event, this)"><ruby>右辺<rt>うへん</rt></ruby>の<span class="meaning">right-hand side's</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>計算結果<rt>けいさんけっか</rt></ruby><span class="meaning">calculation result</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>左辺<rt>さへん</rt></ruby>の<span class="meaning">left-hand side's</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>変数<rt>へんすう</rt></ruby><span class="meaning">variable</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>に<rt>に</rt></ruby><span class="meaning">into</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>格納<rt>かくのう</rt></ruby>する<span class="meaning">to store</span></span></td>
+      </tr>
+      <tr>
+        <td><span class="word" onclick="toggleWord(event, this)"><ruby>選択構造<rt>せんたくこうぞう</rt></ruby><span class="meaning">selection structure</span></span></td>
+        <td class="code-cell"><span class="word answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text">if</span><span class="answer-num">（6）</span><span class="blank">＿＿＿</span><span class="meaning">if — starts the selection</span></span>（条件式1）
+  処理1
+elseif（条件式2）
+  処理2
+else
+  処理3
+endif</td>
+        <td class="wrap-cell"><span class="word" onclick="toggleWord(event, this)"><ruby>条件<rt>じょうけん</rt></ruby><span class="meaning">condition</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>によって<rt>によって</rt></ruby><span class="meaning">depending on</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>処理<rt>しょり</rt></ruby><span class="meaning">processing</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>分岐<rt>ぶんき</rt></ruby>させる<span class="meaning">to branch (causative)</span></span></td>
+      </tr>
+      <tr>
+        <td><span class="word" onclick="toggleWord(event, this)"><ruby>反復構造<rt>はんぷくこうぞう</rt></ruby><span class="meaning">repetition structure</span></span>（1）</td>
+        <td class="code-cell">while（条件式）
+  処理1
+endwhile</td>
+        <td class="wrap-cell"><span class="word" onclick="toggleWord(event, this)"><ruby>条件式<rt>じょうけんしき</rt></ruby><span class="meaning">condition expression</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>真<rt>しん</rt></ruby></span><span class="answer-num">（7）</span><span class="blank">＿＿</span><span class="meaning">true (as long as the condition holds)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の間<rt>のあいだ</rt></ruby><span class="meaning">during / while</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>処理<rt>しょり</rt></ruby><span class="meaning">processing</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>繰<rt>く</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>す<span class="meaning">to repeat</span></span></td>
+      </tr>
+      <tr>
+        <td><span class="word" onclick="toggleWord(event, this)"><ruby>反復構造<rt>はんぷくこうぞう</rt></ruby><span class="meaning">repetition structure</span></span>（2）</td>
+        <td class="code-cell">do
+  処理1
+while（条件式）</td>
+        <td class="wrap-cell"><span class="word" onclick="toggleWord(event, this)"><ruby>処理<rt>しょり</rt></ruby><span class="meaning">processing</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>実行<rt>じっこう</rt></ruby>し<span class="meaning">execute</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>条件式<rt>じょうけんしき</rt></ruby><span class="meaning">condition</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>真<rt>しん</rt></ruby>の<span class="meaning">true</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>間<rt>あいだ</rt></ruby><span class="meaning">while</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>繰<rt>く</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>す<span class="meaning">repeats</span></span></td>
+      </tr>
+      <tr>
+        <td><span class="word" onclick="toggleWord(event, this)"><ruby>反復構造<rt>はんぷくこうぞう</rt></ruby><span class="meaning">repetition structure</span></span>（3）</td>
+        <td class="code-cell"><span class="word answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text">for</span><span class="answer-num">（8）</span><span class="blank">＿＿＿</span><span class="meaning">for — loop over a range/count</span></span>（<span class="word" onclick="toggleWord(event, this)"><ruby>制御記述<rt>せいぎょきじゅつ</rt></ruby><span class="meaning">control description (loop range)</span></span>）
+  処理1
+endfor</td>
+        <td class="wrap-cell"><span class="word" onclick="toggleWord(event, this)"><ruby>指定<rt>してい</rt></ruby>した<span class="meaning">specified</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>範囲<rt>はんい</rt></ruby><span class="meaning">range</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>や<rt>や</rt></ruby><span class="meaning">and</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>回数<rt>かいすう</rt></ruby><span class="meaning">number of times</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>分<rt>ぶん</rt></ruby><span class="meaning">amount of (per)</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>処理<rt>しょり</rt></ruby><span class="meaning">processing</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>繰<rt>く</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>す<span class="meaning">repeats</span></span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="table-note">
+    Python<span class="word" onclick="toggleWord(event, this)"><ruby>や<rt>や</rt></ruby><span class="meaning">and</span></span>C<span class="word" onclick="toggleWord(event, this)"><ruby>言語<rt>げんご</rt></ruby><span class="meaning">the C language</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>など<rt>など</rt></ruby><span class="meaning">etc.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>多<rt>おお</rt></ruby>くの<span class="meaning">many</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>実用言語<rt>じつようげんご</rt></ruby><span class="meaning">practical languages</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>では<rt>では</rt></ruby><span class="meaning">in</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>配列<rt>はいれつ</rt></ruby><span class="meaning">array</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>添字<rt>そえじ</rt></ruby><span class="meaning">subscript / index</span></span>（<span class="word" onclick="toggleWord(event, this)"><ruby>要素番号<rt>ようそばんごう</rt></ruby><span class="meaning">element number</span></span>）<span class="word" onclick="toggleWord(event, this)"><ruby>は<rt>は</rt></ruby><span class="meaning">topic</span></span>「0」<span class="word" onclick="toggleWord(event, this)"><ruby>から<rt>から</rt></ruby><span class="meaning">from</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>始<rt>はじ</rt></ruby>まります<span class="meaning">begins</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">but</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>教科書<rt>きょうかしょ</rt></ruby><span class="meaning">textbook</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>擬似言語<rt>ぎじげんご</rt></ruby><span class="meaning">pseudo-language</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>では<rt>では</rt></ruby><span class="meaning">in</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text">1</span><span class="answer-num">（9）</span><span class="blank">＿</span><span class="meaning">1 — this textbook starts at 1, not 0</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>から<rt>から</rt></ruby><span class="meaning">from</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>開始<rt>かいし</rt></ruby>される<span class="meaning">is started</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>という<rt>という</rt></ruby><span class="meaning">that is / called</span></span><span class="word" onclick="toggleWord(event, this)">ルール<span class="meaning">rule</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>があります<rt>があります</rt></ruby><span class="meaning">there is</span></span>。<span class="word" onclick="toggleWord(event, this)">トレース<span class="meaning">tracing</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>際<rt>さい</rt></ruby><span class="meaning">occasion / when</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>は<rt>は</rt></ruby><span class="meaning">topic</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>特<rt>とく</rt></ruby>に<span class="meaning">especially</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>注意<rt>ちゅうい</rt></ruby>しましょう<span class="meaning">be careful</span></span>。
+  </div>
+
+  <!-- ==================== SECTION 2 ==================== -->
+  <div class="section-header">
+    <span class="section-label">2</span>
+    <div class="section-title">教科書サンプルの<span class="word" onclick="toggleWord(event, this)"><ruby>読解<rt>どっかい</rt></ruby><span class="meaning">reading / analysis</span></span>：<span class="word" onclick="toggleWord(event, this)"><ruby>平均値<rt>へいきんち</rt></ruby><span class="meaning">average value</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>求<rt>もと</rt></ruby>める<span class="meaning">to find / obtain</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>関数<rt>かんすう</rt></ruby><span class="meaning">function</span></span>（p.215–216）</div>
+    <div class="section-q">Reading the textbook sample: the calcMean function that finds the average of an array</div>
+  </div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)"><ruby>配列<rt>はいれつ</rt></ruby><span class="meaning">array</span></span> <span class="word" onclick="toggleWord(event, this)">dataArray<span class="meaning">dataArray — the array variable's name</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>要素<rt>ようそ</rt></ruby><span class="meaning">elements</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>平均値<rt>へいきんち</rt></ruby><span class="meaning">average</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>求<rt>もと</rt></ruby>める<span class="meaning">to find</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>関数<rt>かんすう</rt></ruby><span class="meaning">function</span></span> <span class="word" onclick="toggleWord(event, this)">calcMean<span class="meaning">calcMean — "calculate the mean (average)"</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)">コード<span class="meaning">code</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>分析<rt>ぶんせき</rt></ruby>し<span class="meaning">analyze</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>各行<rt>かくぎょう</rt></ruby>の<span class="meaning">each line's</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>役割<rt>やくわり</rt></ruby><span class="meaning">role</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>整理<rt>せいり</rt></ruby>しましょう<span class="meaning">let's organize</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    Let's analyze the code of calcMean, the function that finds the average of the elements of the array dataArray, and organize the role of each line.
+  </div>
+
+  <!-- ==================== calcMean CODE TABLE ==================== -->
+  <div class="table-wrap">
+    <table class="unit-table">
+      <tr>
+        <th><span class="word" onclick="toggleWord(event, this)"><ruby>行番号<rt>ぎょうばんごう</rt></ruby><span class="meaning">line number</span></span></th>
+        <th><span class="word" onclick="toggleWord(event, this)"><ruby>擬似言語<rt>ぎじげんご</rt></ruby><span class="meaning">pseudo-language</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)">コード<span class="meaning">code</span></span>（<span class="word" onclick="toggleWord(event, this)"><ruby>抜粋<rt>ばっすい</rt></ruby><span class="meaning">excerpt</span></span>）</th>
+        <th><span class="word" onclick="toggleWord(event, this)"><ruby>処理<rt>しょり</rt></ruby><span class="meaning">processing</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>内容<rt>ないよう</rt></ruby><span class="meaning">content</span></span>（<span class="word" onclick="toggleWord(event, this)"><ruby>穴埋<rt>あなう</rt></ruby>め<span class="meaning">fill in the blanks</span></span>）</th>
+      </tr>
+      <tr>
+        <td class="line-num">01</td>
+        <td class="code-cell"><span class="word" onclick="toggleWord(event, this)"><ruby>実数型<rt>じっすうがた</rt></ruby><span class="meaning">floating-point (real) type</span></span>：calcMean（<span class="word" onclick="toggleWord(event, this)">実数型のdataArray<span class="meaning">a parameter: a real-type array named dataArray</span></span>）</td>
+        <td class="wrap-cell"><span class="word" onclick="toggleWord(event, this)"><ruby>関数<rt>かんすう</rt></ruby><span class="meaning">function</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>宣言<rt>せんげん</rt></ruby></span><span class="answer-num">（10）</span><span class="blank">＿＿＿＿</span><span class="meaning">declaration — the function is declared here</span></span></td>
+      </tr>
+      <tr>
+        <td class="line-num">02</td>
+        <td class="code-cell"><span class="word" onclick="toggleWord(event, this)">実数型<span class="meaning">real type</span></span>：sum</td>
+        <td class="wrap-cell"><span class="word" onclick="toggleWord(event, this)"><ruby>処理<rt>しょり</rt></ruby><span class="meaning">processing</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>で<rt>で</rt></ruby><span class="meaning">in</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>使用<rt>しよう</rt></ruby>する<span class="meaning">used</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>変数<rt>へんすう</rt></ruby>の<span class="answer-text"><ruby>宣言<rt>せんげん</rt></ruby></span><span class="answer-num">（11）</span><span class="blank">＿＿＿＿＿＿</span><span class="meaning">declaration of variables</span></span></td>
+      </tr>
+      <tr>
+        <td class="line-num">03</td>
+        <td class="code-cell"><span class="word" onclick="toggleWord(event, this)">実数型<span class="meaning">real type</span></span>：mean</td>
+        <td class="wrap-cell"><span class="word" onclick="toggleWord(event, this)"><ruby>同<rt>おな</rt></ruby>じく<span class="meaning">likewise</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>変数<rt>へんすう</rt></ruby>（mean）<span class="meaning">the variable mean</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>宣言<rt>せんげん</rt></ruby><span class="meaning">declaration</span></span></td>
+      </tr>
+      <tr>
+        <td class="line-num">04</td>
+        <td class="code-cell"><span class="word" onclick="toggleWord(event, this)">整数型<span class="meaning">integer type</span></span>：i</td>
+        <td class="wrap-cell"><span class="word" onclick="toggleWord(event, this)"><ruby>繰<rt>く</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>し<span class="meaning">loop</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>用<rt>よう</rt></ruby><span class="meaning">for</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>変数<rt>へんすう</rt></ruby>（i）<span class="meaning">the variable i</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>宣言<rt>せんげん</rt></ruby><span class="meaning">declaration</span></span></td>
+      </tr>
+      <tr>
+        <td class="line-num">05</td>
+        <td class="code-cell">sum ← 0</td>
+        <td class="wrap-cell"><span class="word" onclick="toggleWord(event, this)"><ruby>合計<rt>ごうけい</rt></ruby><span class="meaning">total / sum</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>格納<rt>かくのう</rt></ruby>する<span class="meaning">to store</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>変数<rt>へんすう</rt></ruby><span class="meaning">variable</span></span> <span class="word" onclick="toggleWord(event, this)">sum<span class="meaning">sum</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>初期化<rt>しょきか</rt></ruby></span><span class="answer-num">（12）</span><span class="blank">＿＿＿＿</span><span class="meaning">initialization (set to 0 first)</span></span></td>
+      </tr>
+      <tr>
+        <td class="line-num">06</td>
+        <td class="code-cell">for（<span class="word" onclick="toggleWord(event, this)">i<span class="meaning">i — the loop counter</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)">1<span class="meaning">from 1</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>から<rt>から</rt></ruby><span class="meaning">from</span></span><span class="word" onclick="toggleWord(event, this)">dataArray<span class="meaning">the array</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>要素数<rt>ようそすう</rt></ruby><span class="meaning">number of elements</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>まで<rt>まで</rt></ruby><span class="meaning">until / to</span></span>）</td>
+        <td class="wrap-cell"><span class="word" onclick="toggleWord(event, this)"><ruby>繰<rt>く</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>し<span class="meaning">repetition</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>処理<rt>しょり</rt></ruby><span class="meaning">processing</span></span>（ループ）<span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>制御変数<rt>せいぎょへんすう</rt></ruby>と<span class="answer-text"><ruby>制御条件<rt>せいぎょじょうけん</rt></ruby></span><span class="answer-num">（13）</span><span class="blank">＿＿＿＿＿＿＿＿＿＿</span><span class="meaning">control variable and control condition</span></span></td>
+      </tr>
+      <tr>
+        <td class="line-num">07</td>
+        <td class="code-cell">sum ← sum + dataArray[i]</td>
+        <td class="wrap-cell"><span class="word" onclick="toggleWord(event, this)"><ruby>配列<rt>はいれつ</rt></ruby><span class="meaning">array</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>要素<rt>ようそ</rt></ruby><span class="meaning">element</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>変数<rt>へんすう</rt></ruby><span class="meaning">variable</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text">sum</span><span class="answer-num">（14）</span><span class="blank">＿＿＿＿</span><span class="meaning">sum — the running total</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>に<rt>に</rt></ruby><span class="meaning">into</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>加算<rt>かさん</rt></ruby><span class="meaning">addition</span></span>（<span class="word" onclick="toggleWord(event, this)"><ruby>累積<rt>るいせき</rt></ruby><span class="meaning">accumulate</span></span>）<span class="word" onclick="toggleWord(event, this)"><ruby>する<rt>する</rt></ruby><span class="meaning">do</span></span></td>
+      </tr>
+      <tr>
+        <td class="line-num">08</td>
+        <td class="code-cell">endfor</td>
+        <td class="wrap-cell"><span class="word" onclick="toggleWord(event, this)"><ruby>反復処理<rt>はんぷくしょり</rt></ruby><span class="meaning">repetition processing</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>終了<rt>しゅうりょう</rt></ruby><span class="meaning">end</span></span></td>
+      </tr>
+      <tr>
+        <td class="line-num">09</td>
+        <td class="code-cell">mean ← sum ÷（<span class="word" onclick="toggleWord(event, this)">dataArray<span class="meaning">the array</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>要素数<rt>ようそすう</rt></ruby><span class="meaning">number of elements</span></span>）</td>
+        <td class="wrap-cell"><span class="word" onclick="toggleWord(event, this)"><ruby>合計<rt>ごうけい</rt></ruby><span class="meaning">total</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>要素数<rt>ようそすう</rt></ruby><span class="meaning">element count</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>で<rt>で</rt></ruby><span class="meaning">by</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>割<rt>わ</rt></ruby>り<span class="meaning">divide</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>平均値<rt>へいきんち</rt></ruby></span><span class="answer-num">（15）</span><span class="blank">＿＿＿＿＿</span><span class="meaning">average value</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>求<rt>もと</rt></ruby>める<span class="meaning">to obtain</span></span></td>
+      </tr>
+      <tr>
+        <td class="line-num">10</td>
+        <td class="code-cell"><span class="word" onclick="toggleWord(event, this)">return<span class="meaning">return — send the result back</span></span> mean</td>
+        <td class="wrap-cell"><span class="word" onclick="toggleWord(event, this)"><ruby>計算<rt>けいさん</rt></ruby>した<span class="meaning">calculated</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>平均値<rt>へいきんち</rt></ruby><span class="meaning">average</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>戻<rt>もど</rt></ruby>り<span class="answer-text"><ruby>値<rt>ち</rt></ruby></span><span class="answer-num">（16）</span><span class="blank">＿＿＿＿＿</span><span class="meaning">return value</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>として<rt>として</rt></ruby><span class="meaning">as</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>返<rt>かえ</rt></ruby>す<span class="meaning">to return</span></span></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ==================== 累積の仕組み FORMULA ==================== -->
+  <div class="formula-block">
+    <div class="formula-enzyme"><span class="word" onclick="toggleWord(event, this)">07<span class="meaning">line 07</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>行目<rt>ぎょうめ</rt></ruby><span class="meaning">(line)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>累積<rt>るいせき</rt></ruby><span class="meaning">accumulation</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>仕組<rt>しく</rt></ruby>み<span class="meaning">mechanism</span></span></div>
+    <div class="formula-arrow">↓</div>
+    <div class="formula">
+      sum <span class="arrow-r">←</span> sum <span class="plus">＋</span> dataArray[i]
+    </div>
+    <div class="formula">
+      sum<span class="arrow-r">：</span> 0 <span class="arrow-r">→</span> 2.0 <span class="arrow-r">→</span> 5.0 <span class="arrow-r">→</span> 10.0 <span class="arrow-r">→</span> 12.8
+    </div>
+    <div class="formula-gloss">
+      <span class="word" onclick="toggleWord(event, this)"><ruby>毎回<rt>まいかい</rt></ruby><span class="meaning">each time</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>配列<rt>はいれつ</rt></ruby><span class="meaning">array</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)">1つ<span class="meaning">one</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>要素<rt>ようそ</rt></ruby><span class="meaning">element</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>足<rt>た</rt></ruby>し<span class="meaning">adding</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>込<rt>こ</rt></ruby>む<span class="meaning">in</span></span>→<span class="word" onclick="toggleWord(event, this)"><ruby>合計<rt>ごうけい</rt></ruby><span class="meaning">total</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>育<rt>そだ</rt></ruby>っていく<span class="meaning">grows step by step</span></span>
+    </div>
+  </div>
+
+  <!-- ==================== SECTION 3 ==================== -->
+  <div class="section-header">
+    <span class="section-label">3</span>
+    <div class="section-title">トレース（<span class="word" onclick="toggleWord(event, this)"><ruby>追跡<rt>ついせき</rt></ruby><span class="meaning">tracking / tracing</span></span>）<span class="word" onclick="toggleWord(event, this)"><ruby>演習<rt>えんしゅう</rt></ruby><span class="meaning">exercise</span></span>（p.216–217）</div>
+    <div class="section-q">Trace how each variable changes, step by step</div>
+  </div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)"><ruby>実際<rt>じっさい</rt></ruby>に<span class="meaning">actually</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>配列<rt>はいれつ</rt></ruby><span class="meaning">array</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>に<rt>に</rt></ruby><span class="meaning">in</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>数値<rt>すうち</rt></ruby><span class="meaning">numbers</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>入<rt>はい</rt></ruby>った<span class="meaning">entered</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>場合<rt>ばあい</rt></ruby><span class="meaning">case</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>変数<rt>へんすう</rt></ruby><span class="meaning">variables</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>値<rt>あたい</rt></ruby><span class="meaning">values</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>どのよう<rt>どのよう</rt></ruby><span class="meaning">how</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>に<rt>に</rt></ruby><span class="meaning">(manner)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>変化<rt>へんか</rt></ruby>するか<span class="meaning">change</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>追跡<rt>ついせき</rt></ruby>してみましょう<span class="meaning">let's trace</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    When the array actually contains numbers, let's trace how the values of the variables change.
+  </div>
+
+  <!-- ==================== ARRAY DATA TABLE ==================== -->
+  <div class="table-wrap">
+    <table class="unit-table">
+      <tr>
+        <th><span class="word" onclick="toggleWord(event, this)"><ruby>対象<rt>たいしょう</rt></ruby><span class="meaning">target</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>データ<rt>データ</rt></ruby><span class="meaning">data</span></span>：<span class="word" onclick="toggleWord(event, this)"><ruby>配列<rt>はいれつ</rt></ruby><span class="meaning">array</span></span> dataArray</th>
+        <th><span class="word" onclick="toggleWord(event, this)"><ruby>要素番号<rt>ようそばんごう</rt></ruby>［1］<span class="meaning">element number [1]</span></span></th>
+        <th><span class="word" onclick="toggleWord(event, this)"><ruby>要素番号<rt>ようそばんごう</rt></ruby>［2］<span class="meaning">element number [2]</span></span></th>
+        <th><span class="word" onclick="toggleWord(event, this)"><ruby>要素番号<rt>ようそばんごう</rt></ruby>［3］<span class="meaning">element number [3]</span></span></th>
+        <th><span class="word" onclick="toggleWord(event, this)"><ruby>要素番号<rt>ようそばんごう</rt></ruby>［4］<span class="meaning">element number [4]</span></span></th>
+      </tr>
+      <tr>
+        <td><span class="word" onclick="toggleWord(event, this)"><ruby>値<rt>あたい</rt></ruby><span class="meaning">value</span></span></td>
+        <td class="unit-bin"><span class="word" onclick="toggleWord(event, this)">2.0<span class="meaning">dataArray[1] = 2.0</span></span></td>
+        <td class="unit-bin"><span class="word" onclick="toggleWord(event, this)">3.0<span class="meaning">dataArray[2] = 3.0</span></span></td>
+        <td class="unit-bin"><span class="word" onclick="toggleWord(event, this)">5.0<span class="meaning">dataArray[3] = 5.0</span></span></td>
+        <td class="unit-bin"><span class="word" onclick="toggleWord(event, this)">2.8<span class="meaning">dataArray[4] = 2.8</span></span></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ==================== TRACE TABLE ==================== -->
+  <div class="table-wrap">
+    <table class="unit-table">
+      <tr>
+        <th><span class="word" onclick="toggleWord(event, this)">ステップ<span class="meaning">step</span></span></th>
+        <th><span class="word" onclick="toggleWord(event, this)"><ruby>変数<rt>へんすう</rt></ruby><span class="meaning">variable</span></span> i</th>
+        <th>dataArray[i]</th>
+        <th><span class="word" onclick="toggleWord(event, this)"><ruby>変数<rt>へんすう</rt></ruby><span class="meaning">variable</span></span> sum</th>
+        <th><span class="word" onclick="toggleWord(event, this)"><ruby>変数<rt>へんすう</rt></ruby><span class="meaning">variable</span></span> mean</th>
+      </tr>
+      <tr>
+        <td><span class="word" onclick="toggleWord(event, this)"><ruby>初期状態<rt>しょきじょうたい</rt></ruby><span class="meaning">initial state (before the loop)</span></span></td>
+        <td>—</td>
+        <td>—</td>
+        <td class="unit-bin"><span class="word" onclick="toggleWord(event, this)">0<span class="meaning">sum is initialized to 0 (line 05)</span></span></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><span class="word" onclick="toggleWord(event, this)">1<span class="meaning">1st</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>回目<rt>かいめ</rt></ruby><span class="meaning">(first time)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>繰<rt>く</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>し<span class="meaning">repetition</span></span></td>
+        <td class="unit-bin">1</td>
+        <td class="unit-bin"><span class="word" onclick="toggleWord(event, this)">2.0<span class="meaning">i = 1 → dataArray[1]</span></span></td>
+        <td class="unit-bin"><span class="word answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text">2.0</span><span class="answer-num">（17）</span><span class="blank">＿＿＿＿</span><span class="meaning">0 + 2.0 = 2.0</span></span></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><span class="word" onclick="toggleWord(event, this)">2<span class="meaning">2nd</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>回目<rt>かいめ</rt></ruby><span class="meaning">(second time)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>繰<rt>く</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>し<span class="meaning">repetition</span></span></td>
+        <td class="unit-bin">2</td>
+        <td class="unit-bin"><span class="word" onclick="toggleWord(event, this)">3.0<span class="meaning">i = 2 → dataArray[2]</span></span></td>
+        <td class="unit-bin"><span class="word answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text">5.0</span><span class="answer-num">（18）</span><span class="blank">＿＿＿＿</span><span class="meaning">2.0 + 3.0 = 5.0</span></span></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><span class="word" onclick="toggleWord(event, this)">3<span class="meaning">3rd</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>回目<rt>かいめ</rt></ruby><span class="meaning">(third time)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>繰<rt>く</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>し<span class="meaning">repetition</span></span></td>
+        <td class="unit-bin">3</td>
+        <td class="unit-bin"><span class="word" onclick="toggleWord(event, this)">5.0<span class="meaning">i = 3 → dataArray[3]</span></span></td>
+        <td class="unit-bin"><span class="word answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text">10.0</span><span class="answer-num">（19）</span><span class="blank">＿＿＿＿＿</span><span class="meaning">5.0 + 5.0 = 10.0</span></span></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><span class="word" onclick="toggleWord(event, this)">4<span class="meaning">4th</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>回目<rt>かいめ</rt></ruby><span class="meaning">(fourth time)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>繰<rt>く</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>し<span class="meaning">repetition</span></span></td>
+        <td class="unit-bin">4</td>
+        <td class="unit-bin"><span class="word" onclick="toggleWord(event, this)">2.8<span class="meaning">i = 4 → dataArray[4]</span></span></td>
+        <td class="unit-bin"><span class="word answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text">12.8</span><span class="answer-num">（20）</span><span class="blank">＿＿＿＿＿</span><span class="meaning">10.0 + 2.8 = 12.8</span></span></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><span class="word" onclick="toggleWord(event, this)"><ruby>繰<rt>く</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>し<span class="meaning">repetition</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>終了後<rt>しゅうりょうご</rt></ruby><span class="meaning">after finishing</span></span></td>
+        <td>—</td>
+        <td>—</td>
+        <td class="unit-bin"><span class="word" onclick="toggleWord(event, this)">12.8<span class="meaning">the final total</span></span></td>
+        <td class="unit-bin"><span class="word answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text">12.8÷4＝3.2</span><span class="answer-num">（21）</span><span class="blank">＿＿＿＿＿＿＿＿</span><span class="meaning">12.8 ÷ 4 elements = 3.2 — the average</span></span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="table-note">
+    <span class="word" onclick="toggleWord(event, this)">ヒント<span class="meaning">hint</span></span>：07<span class="word" onclick="toggleWord(event, this)"><ruby>行目<rt>ぎょうめ</rt></ruby><span class="meaning">(line 07)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>処理<rt>しょり</rt></ruby><span class="meaning">processing</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>は<rt>は</rt></ruby><span class="meaning">topic</span></span> sum ＝ sum ＋ dataArray[i] <span class="word" onclick="toggleWord(event, this)"><ruby>です<rt>です</rt></ruby><span class="meaning">is</span></span>。<span class="word" onclick="toggleWord(event, this)"><ruby>各<rt>かく</rt></ruby><span class="meaning">each</span></span>ステップ<span class="word" onclick="toggleWord(event, this)"><ruby>で<rt>で</rt></ruby><span class="meaning">at</span></span><span class="word" onclick="toggleWord(event, this)">sum<span class="meaning">the variable sum</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>以前<rt>いぜん</rt></ruby>の<span class="meaning">previous</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>値<rt>あたい</rt></ruby><span class="meaning">value</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>＋<rt>＋</rt></ruby><span class="meaning">plus</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>要素<rt>ようそ</rt></ruby><span class="meaning">element</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>に<rt>に</rt></ruby><span class="meaning">into</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>更新<rt>こうしん</rt></ruby>される<span class="meaning">is updated</span></span>。
+  </div>
+
+  <!-- ==================== 平均計算 FORMULA ==================== -->
+  <div class="formula-block">
+    <div class="formula-enzyme"><span class="word" onclick="toggleWord(event, this)"><ruby>平均値<rt>へいきんち</rt></ruby><span class="meaning">average</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>計算<rt>けいさん</rt></ruby><span class="meaning">calculation</span></span>（09<span class="word" onclick="toggleWord(event, this)"><ruby>行目<rt>ぎょうめ</rt></ruby><span class="meaning">(line 09)</span></span>）</div>
+    <div class="formula-arrow">↓</div>
+    <div class="formula">
+      mean <span class="arrow-r">←</span> sum <span class="arrow-r">÷</span> <span class="word" onclick="toggleWord(event, this)"><ruby>要素数<rt>ようそすう</rt></ruby><span class="meaning">number of elements (4)</span></span> <span class="arrow-r">＝</span> 12.8 <span class="arrow-r">÷</span> 4 <span class="arrow-r">＝</span> <span class="answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text">3.2</span><span class="answer-num">（21）</span><span class="blank">＿＿＿＿</span><span class="meaning">3.2 — the mean of the four values</span></span>
+    </div>
+    <div class="formula-gloss">
+      <span class="word" onclick="toggleWord(event, this)"><ruby>合計<rt>ごうけい</rt></ruby><span class="meaning">total</span></span>（sum）÷ <span class="word" onclick="toggleWord(event, this)"><ruby>要素数<rt>ようそすう</rt></ruby><span class="meaning">element count</span></span>（4）＝ <span class="word" onclick="toggleWord(event, this)"><ruby>平均値<rt>へいきんち</rt></ruby><span class="meaning">average</span></span>（mean）——<span class="word" onclick="toggleWord(event, this)">return<span class="meaning">returned by line 10</span></span> <span class="word" onclick="toggleWord(event, this)">mean<span class="meaning">the variable mean</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>で<rt>で</rt></ruby><span class="meaning">by</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>返<rt>かえ</rt></ruby>される<span class="meaning">is returned</span></span>
+    </div>
+  </div>
+
+  <!-- ==================== KEY TERMS ==================== -->
+  <div class="terms-section">
+    <div class="terms-heading"><span class="word" onclick="toggleWord(event, this)">Key Terms<span class="meaning">重要用語</span></span> — <span class="word" onclick="toggleWord(event, this)"><ruby>重要用語<rt>じゅうようようご</rt></ruby><span class="meaning">key terms</span></span></div>
+    <div class="terms-sub">Glossary of terms from this unit</div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">擬似言語<rt>ぎじげんご</rt></ruby><span class="meaning">pseudo-language</span></span>
+      <span class="term-en">pseudo-language (pseudo-code)</span>
+      <div class="term-def">A human-readable way of writing algorithms, used instead of a real programming language.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">宣言部<rt>せんげんぶ</rt></ruby><span class="meaning">declaration part</span></span>
+      <span class="term-en">declaration part (No. 1)</span>
+      <div class="term-def">The part of a pseudo-language program where functions and variables are declared.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">処理部<rt>しょりぶ</rt></ruby><span class="meaning">processing part</span></span>
+      <span class="term-en">processing part (No. 2)</span>
+      <div class="term-def">The part of the program where the actual processing is written.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">型名<rt>かためい</rt></ruby><span class="meaning">type name</span></span>
+      <span class="term-en">type name (No. 3)</span>
+      <div class="term-def">The data type written before a variable declaration, e.g. 整数型 or 実数型. Format: 型名：変数名.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">注釈<rt>ちゅうしゃく</rt></ruby>／コメント<span class="meaning">annotation / comment</span></span>
+      <span class="term-en">comment (No. 4)</span>
+      <div class="term-def">An explanatory note that does not affect the program's behavior. Written between /* and */.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">代入<rt>だいにゅう</rt></ruby><span class="meaning">assignment</span></span>
+      <span class="term-en">assignment (No. 5)</span>
+      <div class="term-def">Storing the result of the right-hand expression into the left-hand variable, using the ← operator: 変数名 ← 式.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">選択構造<rt>せんたくこうぞう</rt></ruby><span class="meaning">selection structure</span></span>
+      <span class="term-en">selection structure — if (No. 6)</span>
+      <div class="term-def">Branching between processes by condition: if → elseif → else → endif.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">真<rt>しん</rt></ruby><span class="meaning">true</span></span>
+      <span class="term-en">true (No. 7)</span>
+      <div class="term-def">When a condition expression holds. A while loop repeats as long as the condition is 真 (true).</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)">for<span class="meaning">for loop keyword</span></span>
+      <span class="term-en">for (No. 8)</span>
+      <div class="term-def">A repetition structure that loops for a specified range or count, ending with endfor.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">添字<rt>そえじ</rt></ruby><span class="meaning">subscript</span></span>
+      <span class="term-en">subscript / index (No. 9)</span>
+      <div class="term-def">The element number of an array. Python and C start at 0, but this textbook's pseudo-language starts at 1 — a key trace trap.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">関数の宣言<rt>かんすうのせんげん</rt></ruby><span class="meaning">function declaration</span></span>
+      <span class="term-en">function declaration (No. 10)</span>
+      <div class="term-def">Defining a function's name, return type, and parameters — line 01 of calcMean.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">変数の宣言<rt>へんすうのせんげん</rt></ruby><span class="meaning">variable declaration</span></span>
+      <span class="term-en">variable declaration (No. 11)</span>
+      <div class="term-def">Preparing the variables used in the processing: sum, mean, and the counter i.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">初期化<rt>しょきか</rt></ruby><span class="meaning">initialization</span></span>
+      <span class="term-en">initialization (No. 12)</span>
+      <div class="term-def">Setting a variable's starting value — e.g. sum ← 0 before accumulating.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">制御変数<rt>せいぎょへんすう</rt></ruby><span class="meaning">control variable</span></span>
+      <span class="term-en">control variable &amp; condition (No. 13)</span>
+      <div class="term-def">The counter (i) that drives the loop, and the condition controlling its range (1 to the element count).</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">累積<rt>るいせき</rt></ruby><span class="meaning">accumulation</span></span>
+      <span class="term-en">accumulation (No. 14)</span>
+      <div class="term-def">Repeatedly adding elements to a running total: sum ← sum + dataArray[i].</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">平均値<rt>へいきんち</rt></ruby><span class="meaning">average value</span></span>
+      <span class="term-en">average / mean (No. 15)</span>
+      <div class="term-def">The total divided by the element count: mean ← sum ÷ (number of elements).</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">戻り値<rt>もどりち</rt></ruby><span class="meaning">return value</span></span>
+      <span class="term-en">return value (No. 16)</span>
+      <div class="term-def">The value a function sends back to its caller — return mean on line 10.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">トレース<rt>トレース</rt></ruby><span class="meaning">trace</span></span>
+      <span class="term-en">trace / tracking (No. 17–21)</span>
+      <div class="term-def">Following a program line by line, recording how each variable's value changes at each step.</div>
+    </div>
+  </div>
+
+  <div class="table-note">
+    <strong>注記 Note:</strong> The source material contained heavy transcription (OCR) errors; corrections were made
+    only where the intended wording was clear: 「ブログラミング言語」→「プログラミング言語」, 「（①宜伝部）」→「宣言部」,
+    「(4)*」→「/* … */」（the comment format was damaged in OCR; restored to the standard pseudo-language comment
+    markers — verify against textbook p.215）, 「変数名（⑤、）式」→「変数名 ← 式」,
+    選択構造「）（条件式1）」→「if（条件式1）」, 「条件（⑦直）の間」→「条件式が真の間」, 「(8）（制御記述）」→「for（制御記述）」,
+    「o実数型：calcMean（字数型のdateArray）」→「実数型：calcMean（実数型のdataArray）」, 「関数の（1 盆）」→「関数の（宣言）」,
+    「（①本補する種）の言」→「変数の宣言」, 「sum +0」→「sum ← 0」, 「sum - sum +」→「sum ← sum +」,
+    「sum→（dataArrayの要素数）」→「sum ÷（dataArrayの要素数）」, 「for（を1から…）」→「for（iを1から…）」,
+    「国変数と制街」→「制御変数と制御条件」, 「（四初期化）」→「初期化」, 「④SUM」→「sum」, 「（個個戻り値）」→「戻り値」.
+    The array data row (OCR: 12.0／13.0／15.0／12.8) was corrected to 2.0／3.0／5.0／2.8, as confirmed by the trace
+    totals (2.0 → 5.0 → 10.0 → 12.8); 「12.8:2=312」→「12.8÷4＝3.2」. The original's blank numbering was continuous
+    ①〜㉑; it is preserved here as （1）〜（21）, with lines 03–04 given the natural "variable declaration" description
+    (the original worksheet left their description cells for the same fill-in task). Verify the comment format
+    （4） against the textbook before the exam.
+  </div>
+
+  <script>
+    function toggleWord(event, el) {
+      if (event && event.stopPropagation) event.stopPropagation();
+      el.classList.toggle('revealed');
+    }
+    function toggleAnswers() {
+      var hidden = document.body.classList.toggle('hide-answers');
+      var btn = document.getElementById('toggleAnswers');
+      if (btn) { btn.classList.toggle('active', !hidden); btn.textContent = hidden ? 'Show Answers' : 'Hide Answers'; btn.setAttribute('aria-pressed', String(hidden)); }
+    }
+  </script>
+
+<script>
+(function(){
+  const body=document.body;
+  const toolbar=document.querySelector('.toolbar');
+  const progress=document.createElement('div'); progress.className='study-progress'; progress.setAttribute('aria-hidden','true'); progress.innerHTML='<span></span>'; document.body.prepend(progress);
+  const progressBar=progress.firstElementChild;
+  function updateProgress(){const max=document.documentElement.scrollHeight-window.innerHeight;progressBar.style.width=(max>0?Math.min(100,window.scrollY/max*100):100)+'%';}
+  window.addEventListener('scroll',updateProgress,{passive:true}); window.addEventListener('resize',updateProgress); updateProgress();
+  if(toolbar){
+    const tools=document.createElement('div'); tools.className='study-tools'; tools.setAttribute('aria-label','Study display controls');
+    tools.innerHTML='<button type="button" id="meaningsToggle" aria-pressed="false">Show all meanings</button><button type="button" id="themeToggle" aria-pressed="false">Dark mode</button><span class="tool-spacer"></span><span class="font-size-label">Text size</span><button type="button" id="fontNormal" aria-pressed="true" aria-label="Normal text size">A</button><button type="button" id="fontLarge" aria-pressed="false" aria-label="Large text size">A+</button><button type="button" id="fontLarger" aria-pressed="false" aria-label="Extra large text size">A++</button><button type="button" id="resetWords">Reset revealed words</button>';
+    toolbar.appendChild(tools);
+    const meanings=document.getElementById('meaningsToggle');
+    meanings.addEventListener('click',()=>{const on=body.classList.toggle('study-show-meanings');meanings.setAttribute('aria-pressed',String(on));meanings.textContent=on?'Hide all meanings':'Show all meanings';});
+    const theme=document.getElementById('themeToggle'); theme.addEventListener('click',()=>{const on=body.classList.toggle('study-dark');theme.setAttribute('aria-pressed',String(on));theme.textContent=on?'Light mode':'Dark mode';});
+    function setFont(size){body.classList.remove('study-large-text','study-larger-text');if(size===1)body.classList.add('study-large-text');if(size===2)body.classList.add('study-larger-text');[['fontNormal',0],['fontLarge',1],['fontLarger',2]].forEach(([id,n])=>document.getElementById(id).setAttribute('aria-pressed',String(n===size)));}
+    document.getElementById('fontNormal').addEventListener('click',()=>setFont(0));document.getElementById('fontLarge').addEventListener('click',()=>setFont(1));document.getElementById('fontLarger').addEventListener('click',()=>setFont(2));
+    document.getElementById('resetWords').addEventListener('click',()=>{body.querySelectorAll('.word.revealed').forEach(el=>el.classList.remove('revealed'));});
+  }
+  // Make existing word-by-word glossary items keyboard accessible.
+  document.querySelectorAll('.word[onclick], .answer-word[onclick]').forEach(el=>{if(!el.hasAttribute('tabindex'))el.setAttribute('tabindex','0');if(!el.hasAttribute('role'))el.setAttribute('role','button');el.addEventListener('keydown',ev=>{if((ev.key==='Enter'||ev.key===' ')&&ev.target===el){ev.preventDefault();el.click();}});});
+})();
+</script>
+</body>
+</html>

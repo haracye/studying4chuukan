@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>1 基数変換（10進数・2進数・16進数の世界） — Japanese Study Notes</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", "Meiryo", sans-serif;
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 40px 25px 80px;
+      line-height: 1.6;
+      color: #1a1a2e;
+      background: #f5f6f8;
+    }
+
+    /* ---- Page Header ---- */
+    .page-header {
+      margin-bottom: 36px;
+      padding-bottom: 24px;
+      border-bottom: 2px solid #e2e5ec;
+    }
+
+    .page-header .chapter {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: #8890a6;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 34px;
+      margin-bottom: 8px;
+      letter-spacing: 0.02em;
+      color: #16213e;
+      font-weight: 700;
+    }
+
+    h1 rt {
+      font-size: 12px;
+      color: #a0a4b4;
+      font-weight: 400;
+    }
+
+    .ref {
+      font-size: 14px;
+      color: #8890a6;
+    }
+
+    /* ---- Toolbar ---- */
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 0 -25px 40px;
+      padding: 14px 25px;
+      background: rgba(245, 246, 248, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid #e2e5ec;
+    }
+
+    .hint {
+      font-size: 13px;
+      color: #8890a6;
+      margin-right: auto;
+    }
+
+    .toggle-btn {
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      padding: 8px 20px;
+      border: 2px solid #4a6fa5;
+      border-radius: 999px;
+      background: #fff;
+      color: #4a6fa5;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .toggle-btn:hover {
+      background: #4a6fa5;
+      color: #fff;
+    }
+
+    .toggle-btn.active {
+      background: #4a6fa5;
+      color: #fff;
+    }
+
+    /* ---- Section Headers ---- */
+    .section-header {
+      margin-top: 56px;
+      margin-bottom: 28px;
+    }
+
+    .section-header:first-of-type {
+      margin-top: 0;
+    }
+
+    .section-label {
+      display: inline-block;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #fff;
+      background: #16213e;
+      padding: 4px 14px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #16213e;
+      margin-bottom: 4px;
+      line-height: 1.4;
+    }
+
+    .section-title rt {
+      font-size: 10px;
+      color: #a0a4b4;
+    }
+
+    .section-q {
+      font-size: 15px;
+      color: #8890a6;
+      font-style: italic;
+    }
+
+    /* ---- Breakdown: inline flowing text ---- */
+    .breakdown {
+      font-size: 26px;
+      line-height: 2.8;
+      letter-spacing: 0.02em;
+      margin-bottom: 20px;
+    }
+
+    .word {
+      display: inline;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      border-radius: 6px;
+      padding: 1px 3px;
+      margin: 0 1px;
+    }
+
+    .word:active {
+      background: rgba(74, 111, 165, 0.1);
+    }
+
+    .word ruby {
+      color: #1a1a2e;
+      transition: color 0.2s ease;
+    }
+
+    .word.revealed ruby {
+      color: #4a6fa5;
+    }
+
+    .word.revealed {
+      background: rgba(74, 111, 165, 0.06);
+    }
+
+    rt {
+      font-size: 11px;
+      line-height: 1;
+      color: #a0a4b4;
+      font-weight: 400;
+    }
+
+    /* ---- Meaning: inline pill on tap ---- */
+    .meaning {
+      display: none;
+      font-size: 12px;
+      line-height: 1.3;
+      color: #4a6fa5;
+      background: rgba(74, 111, 165, 0.08);
+      padding: 2px 7px;
+      border-radius: 5px;
+      margin: 0 2px;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .word.revealed .meaning {
+      display: inline;
+    }
+
+    /* ---- Answer words (numbered blanks) ---- */
+    .answer-word .answer-text {
+      display: inline;
+    }
+
+    .answer-word .answer-text ruby {
+      color: #4a6fa5;
+      font-weight: 500;
+    }
+
+    .answer-word .answer-num {
+      display: none;
+      font-size: 18px;
+      color: #e07a5f;
+      font-weight: 600;
+    }
+
+    .answer-word .blank {
+      display: none;
+    }
+
+    body.hide-answers .answer-word .answer-text {
+      display: none;
+    }
+
+    body.hide-answers .answer-word .answer-num {
+      display: inline;
+    }
+
+    body.hide-answers .answer-word .blank {
+      display: inline;
+      letter-spacing: 0.1em;
+      color: #e07a5f;
+      opacity: 0.55;
+    }
+
+    /* ---- Translation ---- */
+    .translation {
+      margin: 16px 0 48px;
+      padding: 16px 20px;
+      font-size: 16px;
+      line-height: 1.7;
+      color: #4a6fa5;
+      background: rgba(74, 111, 165, 0.04);
+      border-radius: 10px;
+    }
+
+    .translation-title {
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      letter-spacing: 0.08em;
+      color: #4a6fa5;
+      text-transform: uppercase;
+    }
+
+    /* ---- Formula ---- */
+    .formula-block {
+      text-align: center;
+      margin: 30px 0 40px;
+      padding: 24px 20px;
+      background: #fff;
+      border-radius: 12px;
+    }
+
+    .formula-enzyme {
+      font-size: 16px;
+      color: #4a6fa5;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .formula-arrow {
+      font-size: 20px;
+      color: #b0b4c4;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    .formula {
+      font-family: "SF Mono", "Fira Code", "Courier New", monospace;
+      font-size: 19px;
+      color: #16213e;
+      overflow-x: auto;
+      white-space: nowrap;
+      line-height: 2;
+    }
+
+    .formula .plus {
+      margin: 0 8px;
+      color: #b0b4c4;
+    }
+
+    .formula .arrow-r {
+      margin: 0 10px;
+      color: #b0b4c4;
+    }
+
+    .answer-inline .answer-text {
+      display: inline;
+      color: #4a6fa5;
+      font-weight: 500;
+    }
+
+    .answer-inline .answer-num {
+      display: none;
+    }
+
+    .answer-inline .blank {
+      display: none;
+    }
+
+    body.hide-answers .answer-inline .answer-text {
+      display: none;
+    }
+
+    body.hide-answers .answer-inline .answer-num {
+      display: inline;
+      color: #e07a5f;
+      font-weight: 600;
+    }
+
+    body.hide-answers .answer-inline .blank {
+      display: inline;
+      letter-spacing: 0.1em;
+      color: #e07a5f;
+      opacity: 0.55;
+    }
+
+    .formula-gloss {
+      font-size: 13px;
+      margin-top: 14px;
+      color: #8890a6;
+      line-height: 1.9;
+    }
+
+    /* Words inside formula glosses (smaller scale) */
+    .formula-gloss .word {
+      color: #8890a6;
+    }
+
+    .formula-gloss rt {
+      font-size: 9px;
+    }
+
+    .formula-gloss .meaning {
+      font-size: 11px;
+      padding: 1px 5px;
+    }
+
+    /* ---- Divider ---- */
+    .divider {
+      margin: 48px 0;
+      text-align: center;
+      font-size: 13px;
+      letter-spacing: 0.5em;
+      color: #d0d4de;
+      text-indent: 0.5em;
+    }
+
+    /* ---- Unit Table ---- */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 30px 0 12px;
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .unit-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .unit-table th {
+      background: #16213e;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 10px 14px;
+      text-align: left;
+    }
+
+    .unit-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #e2e5ec;
+      color: #1a1a2e;
+      vertical-align: middle;
+    }
+
+    .unit-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .unit-table .unit-sym {
+      font-family: "SF Mono", "Fira Code", "Courier New", monospace;
+      font-weight: 700;
+      color: #16213e;
+      font-size: 16px;
+    }
+
+    .unit-table .unit-bin {
+      font-family: "SF Mono", "Fira Code", "Courier New", monospace;
+    }
+
+    /* Words inside table cells (smaller scale) */
+    .unit-table rt {
+      font-size: 9px;
+    }
+
+    .unit-table .meaning {
+      font-size: 11px;
+      padding: 1px 5px;
+    }
+
+    .unit-table .word {
+      color: #1a1a2e;
+    }
+
+    /* Header words: light styling on dark background */
+    .unit-table th .word ruby {
+      color: #fff;
+    }
+
+    .unit-table th .word.revealed {
+      background: rgba(255, 255, 255, 0.10);
+    }
+
+    .unit-table th .word.revealed ruby {
+      color: #cfd8ec;
+    }
+
+    .unit-table th .meaning {
+      background: rgba(255, 255, 255, 0.14);
+      color: #cfd8ec;
+    }
+
+    .table-note {
+      font-size: 13px;
+      color: #8890a6;
+      margin-bottom: 48px;
+      padding: 0 4px;
+      line-height: 2;
+    }
+
+    .table-note .word {
+      color: #8890a6;
+    }
+
+    .table-note rt {
+      font-size: 9px;
+    }
+
+    .table-note .meaning {
+      font-size: 11px;
+      padding: 1px 5px;
+    }
+
+    /* ---- Key Terms Section ---- */
+    .terms-section {
+      margin-top: 60px;
+      padding-top: 40px;
+      border-top: 2px solid #e2e5ec;
+    }
+
+    .terms-heading {
+      font-size: 22px;
+      font-weight: 700;
+      color: #16213e;
+      margin-bottom: 6px;
+    }
+
+    .terms-sub {
+      font-size: 14px;
+      color: #8890a6;
+      margin-bottom: 30px;
+    }
+
+    .term-item {
+      margin-bottom: 20px;
+      padding: 14px 18px;
+      background: #fff;
+      border-radius: 10px;
+    }
+
+    .term-jp {
+      font-size: 18px;
+      font-weight: 600;
+      color: #16213e;
+    }
+
+    .term-jp rt {
+      font-size: 11px;
+      color: #a0a4b4;
+    }
+
+    .term-en {
+      font-size: 14px;
+      color: #4a6fa5;
+      font-weight: 500;
+      margin-left: 8px;
+    }
+
+    .term-def {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #555a6e;
+      margin-top: 6px;
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 600px) {
+      body { padding: 25px 16px 60px; }
+      h1 { font-size: 26px; }
+      .section-title { font-size: 19px; }
+      .breakdown { font-size: 22px; line-height: 2.6; }
+      .formula { font-size: 16px; }
+      .translation { font-size: 14px; padding: 14px 16px; }
+      .hint { display: none; }
+      .toolbar { padding: 12px 16px; margin: 0 -16px 30px; }
+      .term-jp { font-size: 16px; }
+      .unit-table { font-size: 13px; }
+      .unit-table th, .unit-table td { padding: 8px 10px; }
+    }
+  
+    /* Added usability improvements: responsive layout, readable controls, and print support. */
+    html { scroll-behavior: smooth; }
+    body { width: min(100% - 28px, 920px); padding-left: 0 !important; padding-right: 0 !important; }
+    img, svg, video, canvas, table { max-width: 100%; }
+    table { display: block; overflow-x: auto; }
+    button, .toggle-btn, input, select { touch-action: manipulation; }
+    button, .toggle-btn { min-height: 40px; cursor: pointer; }
+    :focus-visible { outline: 3px solid #647de8; outline-offset: 3px; }
+    .chapter-nav { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; margin: 0 0 22px; padding: 12px 14px; border:1px solid #dfe3ed; border-radius:12px; background:rgba(255,255,255,.88); font-size:14px; }
+    .chapter-nav a { color:#4257a6; text-decoration:none; font-weight:600; padding:7px 9px; border-radius:8px; }
+    .chapter-nav a:hover { background:#eef1ff; }
+    .chapter-nav .home-link { margin-right:auto; }
+    @media (max-width: 600px) {
+      body { width: calc(100% - 24px); padding-top: 18px !important; padding-bottom: 40px !important; font-size: 15px; }
+      h1 { font-size: clamp(24px, 7vw, 32px) !important; overflow-wrap:anywhere; }
+      .toolbar { margin-left: -12px !important; margin-right: -12px !important; padding: 10px 12px !important; gap:8px !important; }
+      .chapter-nav { gap:5px; padding:8px; }
+      .chapter-nav a { padding:8px 6px; }
+    }
+    @media print {
+      body { width:100%; max-width:none; padding:0 !important; background:#fff !important; color:#000 !important; }
+      .toolbar, .chapter-nav, button, .toggle-btn { display:none !important; }
+      .card, section, table { break-inside:avoid; }
+    }
+    
+  
+/* Study-site polish: shared accessible controls, focus states, themes, and spacing. */
+:root { color-scheme: light; --study-bg:#f5f6fa; --study-card:#fff; --study-text:#20243a; --study-muted:#687089; --study-line:#e1e5ef; --study-accent:#5267b8; --study-soft:#eef1ff; }
+html { scroll-padding-top: 90px; }
+body { background:var(--study-bg); color:var(--study-text); transition:background .18s,color .18s; }
+.page-header { border-color:var(--study-line)!important; }
+.section-header, .section-title, .translation, .table-note, .formula-gloss, .unit-table, .term-card, .example-box, .breakdown, .card { max-width:100%; }
+.translation, .table-note, .term-card, .example-box, .breakdown, .unit-table, table { overflow-wrap:anywhere; }
+.chapter-nav { position:relative; }
+.study-progress { position:fixed; inset:0 0 auto; height:4px; z-index:9999; background:transparent; pointer-events:none; }
+.study-progress span { display:block; width:0; height:100%; background:linear-gradient(90deg,#7487df,#a4b1ff); transition:width .08s linear; }
+.study-tools { display:flex; align-items:center; gap:8px; flex-wrap:wrap; width:100%; }
+.study-tools .tool-spacer { flex:1 1 12px; }
+.study-tools button { appearance:none; border:1px solid #d6dced; border-radius:999px; background:#fff; color:#36436e; font-family:inherit; font-size:13px; font-weight:600; line-height:1.2; padding:10px 13px; min-height:42px; cursor:pointer; }
+.study-tools button:hover { background:#f0f2ff; border-color:#aab5e8; }
+.study-tools button[aria-pressed="true"] { background:#e9edff; border-color:#9aa8eb; }
+.study-tools .font-size-label { font-size:12px; color:var(--study-muted); }
+body.study-large-text { font-size:1.12em; }
+body.study-larger-text { font-size:1.24em; }
+body.study-show-meanings .meaning { display:inline!important; }
+body.study-show-meanings .word { background:rgba(99,119,201,.07); border-radius:5px; }
+body.study-dark { --study-bg:#171a24; --study-card:#222635; --study-text:#edf0fa; --study-muted:#b4bad0; --study-line:#3a4054; --study-accent:#b1bdff; --study-soft:#2c3350; color-scheme:dark; }
+body.study-dark .toolbar, body.study-dark .chapter-nav, body.study-dark .study-tools button { background:#222635!important; color:#edf0fa!important; border-color:#414860!important; }
+body.study-dark .chapter-nav a, body.study-dark .toggle-btn { color:#c6ceff!important; }
+body.study-dark .translation, body.study-dark .table-note, body.study-dark .breakdown, body.study-dark .unit-table, body.study-dark .term-card, body.study-dark .example-box, body.study-dark .card, body.study-dark section { background-color:var(--study-card); color:var(--study-text); border-color:var(--study-line); }
+body.study-dark .page-header h1, body.study-dark h1, body.study-dark h2, body.study-dark h3 { color:var(--study-text)!important; }
+body.study-dark .study-tools button[aria-pressed="true"] { background:#343d61!important; }
+.word[onclick], .answer-word[onclick] { -webkit-tap-highlight-color:transparent; }
+.word:focus-visible { outline:2px solid #7185df; outline-offset:2px; border-radius:4px; }
+@media(max-width:600px){ .study-tools button { flex:1 1 auto; padding:10px 9px; font-size:12px; } .study-tools .tool-spacer { display:none; } .study-progress { height:3px; } }
+@media(prefers-reduced-motion:reduce){ html{scroll-behavior:auto!important} *,*::before,*::after{transition:none!important;animation:none!important} }
+@media print { .study-progress,.study-tools {display:none!important} body {font-size:11pt!important} .meaning {display:inline!important} }
+
+  </style>
+</head>
+
+
+
+<body>
+  <nav class="chapter-nav" aria-label="Chapter navigation">
+    <a class="home-link" href="index.html">⌂ All notes</a><span></span><a href="02-chapter.html" aria-label="Next chapter">Next →</a>
+  </nav>
+
+
+  <!-- ==================== PAGE HEADER ==================== -->
+  <div class="page-header">
+    <div class="chapter">Unit 2 · IT Fundamentals</div>
+    <h1><ruby>基数変換<rt>きすうへんかん</rt></ruby>（10<ruby>進数<rt>しんすう</rt></ruby>・2<ruby>進数<rt>しんすう</rt></ruby>・16<ruby>進数<rt>しんすう</rt></ruby>の<ruby>世界<rt>せかい</rt></ruby>）</h1>
+    <div class="ref">基礎講義 1 — Radix Conversion: Decimal, Binary &amp; Hexadecimal</div>
+  </div>
+
+  <!-- ==================== TOOLBAR ==================== -->
+  <div class="toolbar">
+    <div class="hint">Tap any word to reveal its meaning</div>
+    <div class="toggle-btn active" id="toggleAnswers" onclick="toggleAnswers()">Hide Answers ✓</div>
+  </div>
+
+  <!-- ==================== SECTION 1 ==================== -->
+  <div class="section-header">
+    <span class="section-label">1</span>
+    <div class="section-title"><ruby>計算機<rt>けいさんき</rt></ruby>は<ruby>何故<rt>なぜ</rt></ruby>2<ruby>進数<rt>しんすう</rt></ruby>を<ruby>使<rt>つか</rt></ruby>うのか？</div>
+    <div class="section-q">Why do computers use binary numbers?</div>
+  </div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)"><ruby>人間<rt>にんげん</rt></ruby><span class="meaning">humans / people</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>日常生活<rt>にちじょうせいかつ</rt></ruby><span class="meaning">daily life</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>で<rt>で</rt></ruby><span class="meaning">in (means/place)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>用<rt>もち</rt></ruby>いる<span class="meaning">use</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>数値表現<rt>すうちひょうげん</rt></ruby><span class="meaning">number representation</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>は<rt>は</rt></ruby><span class="meaning">topic</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)">0<ruby>から<rt>から</rt></ruby>9<ruby>まで<rt>まで</rt></ruby><span class="meaning">from 0 to 9</span></span><span class="word" onclick="toggleWord(event, this)">の<span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)">10<ruby>個<rt>こ</rt></ruby>の<span class="meaning">10 (counter for things)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>記号<rt>きごう</rt></ruby><span class="meaning">symbols / digits</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>使<rt>つか</rt></ruby>い<span class="meaning">use (linking form)</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)">9の<ruby>次<rt>つぎ</rt></ruby>に<span class="meaning">after 9</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>桁<rt>けた</rt></ruby><span class="meaning">digit place</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>上<rt>あ</rt></ruby>がる<span class="meaning">rises / carries over</span></span><span class="word answer-word" onclick="toggleWord(event, this)">【<span class="answer-text">10<ruby>進数<rt>しんすう</rt></ruby></span><span class="answer-num">（①）</span><span class="blank">＿＿＿＿＿</span><span class="meaning">decimal number (base 10)</span></span>】<span class="word" onclick="toggleWord(event, this)"><ruby>です<rt>です</rt></ruby><span class="meaning">is</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    The number representation humans use in daily life is the (decimal system), which uses the ten symbols 0 through 9, with the digit carrying over after 9.
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)"><ruby>しかし<rt>しかし</rt></ruby><span class="meaning">however</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)">コンピューターの<span class="meaning">computer's</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>電子回路<rt>でんしかいろ</rt></ruby><span class="meaning">electronic circuit</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>は<rt>は</rt></ruby><span class="meaning">topic</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>電気信号<rt>でんきしんごう</rt></ruby><span class="meaning">electric signal</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span>「<span class="word" onclick="toggleWord(event, this)"><ruby>オン<rt>オン</rt></ruby><span class="meaning">ON</span></span>」<span class="word" onclick="toggleWord(event, this)"><ruby>と<rt>と</rt></ruby><span class="meaning">and</span></span>「<span class="word" onclick="toggleWord(event, this)"><ruby>オフ<rt>オフ</rt></ruby><span class="meaning">OFF</span></span>」（<span class="word" onclick="toggleWord(event, this)"><ruby>または<rt>または</rt></ruby><span class="meaning">or</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>電圧<rt>でんあつ</rt></ruby><span class="meaning">voltage</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span>「<span class="word" onclick="toggleWord(event, this)"><ruby>高<rt>たか</rt></ruby>い<span class="meaning">high</span></span>」<span class="word" onclick="toggleWord(event, this)"><ruby>と<rt>と</rt></ruby><span class="meaning">and</span></span>「<span class="word" onclick="toggleWord(event, this)"><ruby>低<rt>ひく</rt></ruby>い<span class="meaning">low</span></span>」）<span class="word" onclick="toggleWord(event, this)"><ruby>という<rt>という</rt></ruby><span class="meaning">that is / called</span></span><span class="word" onclick="toggleWord(event, this)">2つの<span class="meaning">two</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>状態<rt>じょうたい</rt></ruby><span class="meaning">states</span></span>（＝<span class="word" onclick="toggleWord(event, this)"><ruby>切<rt>き</rt></ruby>り<ruby>替<rt>か</rt></ruby>え<span class="meaning">switching</span></span>）<span class="word" onclick="toggleWord(event, this)"><ruby>しか<rt>しか</rt></ruby><span class="meaning">only (with neg. verb)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>直接<rt>ちょくせつ</rt></ruby><span class="meaning">directly</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>理解<rt>りかい</rt></ruby>できません<span class="meaning">cannot understand</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    However, a computer's electronic circuits can directly understand nothing but two states of electric signals: "ON" and "OFF" (or voltage "high" and "low") — in other words, the switching of a switch.
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)"><ruby>このため<rt>このため</rt></ruby><span class="meaning">for this reason</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)">ITの<span class="meaning">of IT</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>世界<rt>せかい</rt></ruby><span class="meaning">world</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>では<rt>では</rt></ruby><span class="meaning">in (place + topic)</span></span><span class="word" onclick="toggleWord(event, this)">「0」<span class="word" onclick="toggleWord(event, this)"><ruby>と<rt>と</rt></ruby><span class="meaning">and</span></span>「1」<span class="word" onclick="toggleWord(event, this)"><ruby>だけ<rt>だけ</rt></ruby><span class="meaning">only</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>で<rt>で</rt></ruby><span class="meaning">by means of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>すべて<rt>すべて</rt></ruby><span class="meaning">all</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>数値<rt>すうち</rt></ruby><span class="meaning">numbers</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>表<rt>あらわ</rt></ruby>す<span class="meaning">express</span></span><span class="word answer-word" onclick="toggleWord(event, this)">【<span class="answer-text">2<ruby>進数<rt>しんすう</rt></ruby></span><span class="answer-num">（②）</span><span class="blank">＿＿＿＿</span><span class="meaning">binary number (base 2)</span></span>】<span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>基本単位<rt>きほんたんい</rt></ruby><span class="meaning">basic unit</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>として<rt>として</rt></ruby><span class="meaning">as</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>用<rt>もち</rt></ruby>いられます<span class="meaning">is used (passive)</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    For this reason, in the world of IT, the (binary system) — which expresses all numbers using only "0" and "1" — is used as the basic unit.
+  </div>
+
+  <!-- ==================== SECTION 2 ==================== -->
+  <div class="section-header">
+    <span class="section-label">2</span>
+    <div class="section-title">2<ruby>進数<rt>しんすう</rt></ruby>と10<ruby>進数<rt>しんすう</rt></ruby>の<ruby>桁<rt>けた</rt></ruby>の<ruby>重<rt>おも</rt></ruby>み（8ビット・1バイトの<ruby>構造<rt>こうぞう</rt></ruby>）</div>
+    <div class="section-q">What weights do the digits carry — and how do 8 bits make a byte?</div>
+  </div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)">2<ruby>進数<rt>しんすう</rt></ruby><span class="meaning">binary</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>では<rt>では</rt></ruby><span class="meaning">in (place + topic)</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)">1つの<span class="meaning">one</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>桁<rt>けた</rt></ruby><span class="meaning">digit place</span></span>（<span class="word" onclick="toggleWord(event, this)">ビット<span class="meaning">bit</span></span>）<span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>右<rt>みぎ</rt></ruby><ruby>から<rt>から</rt></ruby><span class="meaning">from the right</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>順<rt>じゅん</rt></ruby>に<span class="meaning">in order</span></span><span class="word" onclick="toggleWord(event, this)">2の0<ruby>乗<rt>じょう</rt></ruby>（＝1）<span class="meaning">2 to the 0th power (= 1)</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)">2の1<ruby>乗<rt>じょう</rt></ruby>（＝2）<span class="meaning">2 to the 1st power (= 2)</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)">2の2<ruby>乗<rt>じょう</rt></ruby>（＝4）<span class="meaning">2 to the 2nd power (= 4)</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)">2の3<ruby>乗<rt>じょう</rt></ruby>（＝8）……<span class="meaning">2 to the 3rd power (= 8)... (and so on)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>という<rt>という</rt></ruby><span class="meaning">that is / called</span></span>「<span class="word" onclick="toggleWord(event, this)"><ruby>重<rt>おも</rt></ruby>み<span class="meaning">weight</span></span>」（<span class="word unit-bin" onclick="toggleWord(event, this)">11111111<span class="meaning">11111111 — all 8 bits set to 1</span></span>）<span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>持<rt>も</rt></ruby>っています<span class="meaning">has / holds</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    In binary, each digit (bit) holds a "weight" — in order from the right: 2 to the 0th power (= 1), 2 to the 1st (= 2), 2 to the 2nd (= 4), 2 to the 3rd (= 8), and so on (as in 11111111).
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)">IT<span class="meaning">IT</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>システム<rt>システム</rt></ruby><span class="meaning">system</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>では<rt>では</rt></ruby><span class="meaning">in (place + topic)</span></span><span class="word" onclick="toggleWord(event, this)">8ビット<span class="meaning">8 bits</span></span><span class="word" onclick="toggleWord(event, this)">＝<span class="meaning">equals</span></span><span class="word answer-word" onclick="toggleWord(event, this)">（<span class="answer-text">1バイト</span><span class="answer-num">（③）</span><span class="blank">＿＿＿＿</span><span class="meaning">1 byte</span></span>）<span class="word" onclick="toggleWord(event, this)">…<span class="meaning">… (the source text is cut off here)</span></span>
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    In IT systems, 8 bits = (1 byte) … [the source material is cut off after this point]
+  </div>
+
+  <!-- ==================== BIT WEIGHT FORMULA ==================== -->
+  <div class="formula-block">
+    <div class="formula-enzyme"><span class="word" onclick="toggleWord(event, this)"><ruby>桁<rt>けた</rt></ruby>の<span class="meaning">digit's</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>重<rt>おも</rt></ruby>み<span class="meaning">weight</span></span> — 8ビットの<span class="word" onclick="toggleWord(event, this)"><ruby>構造<rt>こうぞう</rt></ruby><span class="meaning">structure</span></span></div>
+    <div class="formula-arrow">↓</div>
+    <div class="formula">
+      2<span class="arrow-r">⁰</span>1 <span class="plus">→</span> 2<span class="arrow-r">¹</span>2 <span class="plus">→</span> 2<span class="arrow-r">²</span>4 <span class="plus">→</span> 2<span class="arrow-r">³</span>8 <span class="plus">→</span> …（<ruby>右<rt>みぎ</rt></ruby>から<ruby>順<rt>じゅん</rt></ruby>に）
+    </div>
+    <div class="formula">
+      8ビット<span class="arrow-r">＝</span><span class="answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text">1バイト</span><span class="answer-num">（③）</span><span class="blank">＿＿＿＿</span><span class="meaning">1 byte</span></span>
+    </div>
+    <div class="formula-gloss">
+      <span class="word" onclick="toggleWord(event, this)"><ruby>各桁<rt>かくけた</rt></ruby><span class="meaning">each digit place</span></span>は<span class="word" onclick="toggleWord(event, this)">2の<span class="meaning">of 2 (power)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>累乗<rt>るいじょう</rt></ruby><span class="meaning">power</span></span>の<span class="word" onclick="toggleWord(event, this)"><ruby>重<rt>おも</rt></ruby>みを<span class="meaning">weight</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>持<rt>も</rt></ruby>つ<span class="meaning">holds</span></span>。<span class="word unit-bin" onclick="toggleWord(event, this)">11111111<span class="meaning">11111111 — every bit is 1</span></span>は8ビットすべてが1の<span class="word" onclick="toggleWord(event, this)"><ruby>状態<rt>じょうたい</rt></ruby><span class="meaning">state</span></span>
+    </div>
+  </div>
+
+  <!-- ==================== BIT WEIGHT TABLE ==================== -->
+  <div class="table-wrap">
+    <table class="unit-table">
+      <tr>
+        <th><span class="word" onclick="toggleWord(event, this)"><ruby>桁位置<rt>けたいち</rt></ruby><span class="meaning">digit position</span></span>（<span class="word" onclick="toggleWord(event, this)"><ruby>右<rt>みぎ</rt></ruby>から<span class="meaning">from the right</span></span>）</th>
+        <th><span class="word" onclick="toggleWord(event, this)"><ruby>重<rt>おも</rt></ruby>み<span class="meaning">weight</span></span>（2の<span class="word" onclick="toggleWord(event, this)"><ruby>累乗<rt>るいじょう</rt></ruby><span class="meaning">power of 2</span></span>）</th>
+        <th>10<span class="word" onclick="toggleWord(event, this)"><ruby>進数<rt>しんすう</rt></ruby><span class="meaning">decimal</span></span>での<span class="word" onclick="toggleWord(event, this)"><ruby>値<rt>あたい</rt></ruby><span class="meaning">value</span></span></th>
+        <th>2<span class="word" onclick="toggleWord(event, this)"><ruby>進数<rt>しんすう</rt></ruby><span class="meaning">binary</span></span>での<span class="word" onclick="toggleWord(event, this)"><ruby>表記例<rt>ひょうきれい</rt></ruby><span class="meaning">example notation</span></span></th>
+      </tr>
+      <tr>
+        <td>1<span class="word" onclick="toggleWord(event, this)"><ruby>桁目<rt>けため</rt></ruby><span class="meaning">1st digit</span></span></td>
+        <td><span class="word" onclick="toggleWord(event, this)">2の0<ruby>乗<rt>じょう</rt></ruby><span class="meaning">2 to the 0th</span></span></td>
+        <td class="unit-bin">1</td>
+        <td class="unit-bin">00000001</td>
+      </tr>
+      <tr>
+        <td>2<span class="word" onclick="toggleWord(event, this)"><ruby>桁目<rt>けため</rt></ruby><span class="meaning">2nd digit</span></span></td>
+        <td><span class="word" onclick="toggleWord(event, this)">2の1<ruby>乗<rt>じょう</rt></ruby><span class="meaning">2 to the 1st</span></span></td>
+        <td class="unit-bin">2</td>
+        <td class="unit-bin">00000010</td>
+      </tr>
+      <tr>
+        <td>3<span class="word" onclick="toggleWord(event, this)"><ruby>桁目<rt>けため</rt></ruby><span class="meaning">3rd digit</span></span></td>
+        <td><span class="word" onclick="toggleWord(event, this)">2の2<ruby>乗<rt>じょう</rt></ruby><span class="meaning">2 to the 2nd</span></span></td>
+        <td class="unit-bin">4</td>
+        <td class="unit-bin">00000100</td>
+      </tr>
+      <tr>
+        <td>4<span class="word" onclick="toggleWord(event, this)"><ruby>桁目<rt>けため</rt></ruby><span class="meaning">4th digit</span></span></td>
+        <td><span class="word" onclick="toggleWord(event, this)">2の3<ruby>乗<rt>じょう</rt></ruby><span class="meaning">2 to the 3rd</span></span></td>
+        <td class="unit-bin">8</td>
+        <td class="unit-bin">00001000</td>
+      </tr>
+      <tr>
+        <td>5<span class="word" onclick="toggleWord(event, this)"><ruby>桁目<rt>けため</rt></ruby><span class="meaning">5th digit</span></span></td>
+        <td><span class="word" onclick="toggleWord(event, this)">2の4<ruby>乗<rt>じょう</rt></ruby><span class="meaning">2 to the 4th</span></span></td>
+        <td class="unit-bin">16</td>
+        <td class="unit-bin">00010000</td>
+      </tr>
+      <tr>
+        <td>6<span class="word" onclick="toggleWord(event, this)"><ruby>桁目<rt>けため</rt></ruby><span class="meaning">6th digit</span></span></td>
+        <td><span class="word" onclick="toggleWord(event, this)">2の5<ruby>乗<rt>じょう</rt></ruby><span class="meaning">2 to the 5th</span></span></td>
+        <td class="unit-bin">32</td>
+        <td class="unit-bin">00100000</td>
+      </tr>
+      <tr>
+        <td>7<span class="word" onclick="toggleWord(event, this)"><ruby>桁目<rt>けため</rt></ruby><span class="meaning">7th digit</span></span></td>
+        <td><span class="word" onclick="toggleWord(event, this)">2の6<ruby>乗<rt>じょう</rt></ruby><span class="meaning">2 to the 6th</span></span></td>
+        <td class="unit-bin">64</td>
+        <td class="unit-bin">01000000</td>
+      </tr>
+      <tr>
+        <td>8<span class="word" onclick="toggleWord(event, this)"><ruby>桁目<rt>けため</rt></ruby><span class="meaning">8th digit</span></span></td>
+        <td><span class="word" onclick="toggleWord(event, this)">2の7<ruby>乗<rt>じょう</rt></ruby><span class="meaning">2 to the 7th</span></span></td>
+        <td class="unit-bin">128</td>
+        <td class="unit-bin">10000000</td>
+      </tr>
+      <tr>
+        <td><span class="word" onclick="toggleWord(event, this)"><ruby>全桁<rt>ぜんけた</rt></ruby>が1<span class="meaning">all digits are 1</span></span></td>
+        <td class="unit-bin">—</td>
+        <td class="unit-bin"><span class="word" onclick="toggleWord(event, this)"><ruby>参照<rt>さんしょう</rt></ruby><span class="meaning">refer</span></span></td>
+        <td class="unit-bin"><span class="word" onclick="toggleWord(event, this)">11111111<span class="meaning">11111111 — all 8 bits are 1</span></span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="table-note">
+    <span class="word" onclick="toggleWord(event, this)"><ruby>重<rt>おも</rt></ruby>み<span class="meaning">weights</span></span>は<span class="word" onclick="toggleWord(event, this)"><ruby>右<rt>みぎ</rt></ruby><span class="meaning">right</span></span>から<span class="word" onclick="toggleWord(event, this)"><ruby>順<rt>じゅん</rt></ruby>に<span class="meaning">in order</span></span> 2の0<span class="word" onclick="toggleWord(event, this)"><ruby>乗<rt>じょう</rt></ruby><span class="meaning">power</span></span>（＝1）、2の1<span class="word" onclick="toggleWord(event, this)"><ruby>乗<rt>じょう</rt></ruby>（＝2）<span class="meaning">power (= 2)</span></span>、2の2<span class="word" onclick="toggleWord(event, this)"><ruby>乗<rt>じょう</rt></ruby>（＝4）<span class="meaning">power (= 4)</span></span>、2の3<span class="word" onclick="toggleWord(event, this)"><ruby>乗<rt>じょう</rt></ruby>（＝8）……<span class="meaning">power (= 8)...</span></span>と<span class="word" onclick="toggleWord(event, this)"><ruby>続<rt>つづ</rt></ruby>きます<span class="meaning">continues</span></span>。8ビット<span class="word" onclick="toggleWord(event, this)">＝<span class="meaning">=</span></span><span class="answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text">1バイト</span><span class="answer-num">（③）</span><span class="blank">＿＿＿＿</span></span>。
+  </div>
+
+  <!-- ==================== KEY TERMS ==================== -->
+  <div class="terms-section">
+    <div class="terms-heading">Key Terms — <ruby>重要用語<rt>じゅうようようご</rt></ruby></div>
+    <div class="terms-sub">Glossary of terms from this unit</div>
+
+    <div class="term-item">
+      <ruby class="term-jp">基数変換<rt>きすうへんかん</rt></ruby>
+      <span class="term-en">radix / base conversion</span>
+      <div class="term-def">Converting numbers between bases, e.g. between decimal, binary, and hexadecimal.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">10進数<rt>じゅっしんすう</rt></ruby>
+      <span class="term-en">decimal number (No. ①)</span>
+      <div class="term-def">Base-10 notation using the ten symbols 0–9; the digit carries over after 9. Used in human daily life.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">2進数<rt>にしんすう</rt></ruby>
+      <span class="term-en">binary number (No. ②)</span>
+      <div class="term-def">Base-2 notation expressing all numbers with only 0 and 1. The basic unit of the IT world.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">16進数<rt>じゅうろくしんすう</rt></ruby>
+      <span class="term-en">hexadecimal number</span>
+      <div class="term-def">Base-16 notation. It appears in this chapter's title, but the provided material is cut off before its explanation.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">電子回路<rt>でんしかいろ</rt></ruby>
+      <span class="term-en">electronic circuit</span>
+      <div class="term-def">The physical circuits inside a computer. They can directly understand only two signal states, ON/OFF.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">電気信号<rt>でんきしんごう</rt></ruby>
+      <span class="term-en">electric signal</span>
+      <div class="term-def">The electrical on/off (high/low voltage) signals that electronic circuits work with.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">電圧<rt>でんあつ</rt></ruby>
+      <span class="term-en">voltage</span>
+      <div class="term-def">Electrical pressure. Its "high" and "low" states are one way to represent the two states a circuit understands.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">桁<rt>けた</rt></ruby>
+      <span class="term-en">digit place</span>
+      <div class="term-def">A position in a number. In decimal it carries over after 9; in binary after 1.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">重み<rt>おもみ</rt></ruby>
+      <span class="term-en">weight</span>
+      <div class="term-def">The value each binary digit carries: from the right, 2⁰(=1), 2¹(=2), 2²(=4), 2³(=8), and so on.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">ビット<rt>ビット</rt></ruby>
+      <span class="term-en">bit</span>
+      <div class="term-def">One digit of a binary number — one ON/OFF state. In binary, each 桁 is one bit.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">バイト<rt>バイト</rt></ruby>
+      <span class="term-en">byte (No. ③)</span>
+      <div class="term-def">8 bits grouped together. In IT systems, 8 bits = 1 byte.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">数値表現<rt>すうちひょうげん</rt></ruby>
+      <span class="term-en">number representation</span>
+      <div class="term-def">The way numbers are written, such as decimal in daily life or binary in computers.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">記号<rt>きごう</rt></ruby>
+      <span class="term-en">symbol / digit</span>
+      <div class="term-def">A written character representing a value, e.g. the ten symbols 0 through 9 in decimal.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">基本単位<rt>きほんたんい</rt></ruby>
+      <span class="term-en">basic unit</span>
+      <div class="term-def">The fundamental unit something is built on — binary serves as the basic unit of the IT world.</div>
+    </div>
+  </div>
+
+  <div class="table-note">
+    <strong>注記 Note:</strong> The source material is cut off mid-sentence at 「ITシステムでは8ビット=（1B」— this was
+    restored as 「8ビット=（1バイト）」 and labeled answer （③）. Answers ①10進数 and ②2進数 come from the original
+    【①】【②】 markers. Minor OCR fixes: 「つ進数」→「2進数」, 「2 3乗」→「2の3乗」. The heading mentions
+    16進数 and 変換 methods, but the provided text ends before that content — no 16進数 material was invented; only
+    the bit-weight table (2⁰〜2⁷) was expanded from the sentence's 「2の0乗（=1）、2の1乗（=2）、2の2乗（=4）、2の3乗（=8）……」.
+    Send the rest of the chapter and I'll extend the page.
+  </div>
+
+  <script>
+    function toggleWord(event, el) {
+      if (event && event.stopPropagation) event.stopPropagation();
+      el.classList.toggle('revealed');
+    }
+    function toggleAnswers() {
+      var hidden = document.body.classList.toggle('hide-answers');
+      var btn = document.getElementById('toggleAnswers');
+      if (btn) { btn.classList.toggle('active', !hidden); btn.textContent = hidden ? 'Show Answers' : 'Hide Answers'; btn.setAttribute('aria-pressed', String(hidden)); }
+    }
+  </script>
+
+<script>
+(function(){
+  const body=document.body;
+  const toolbar=document.querySelector('.toolbar');
+  const progress=document.createElement('div'); progress.className='study-progress'; progress.setAttribute('aria-hidden','true'); progress.innerHTML='<span></span>'; document.body.prepend(progress);
+  const progressBar=progress.firstElementChild;
+  function updateProgress(){const max=document.documentElement.scrollHeight-window.innerHeight;progressBar.style.width=(max>0?Math.min(100,window.scrollY/max*100):100)+'%';}
+  window.addEventListener('scroll',updateProgress,{passive:true}); window.addEventListener('resize',updateProgress); updateProgress();
+  if(toolbar){
+    const tools=document.createElement('div'); tools.className='study-tools'; tools.setAttribute('aria-label','Study display controls');
+    tools.innerHTML='<button type="button" id="meaningsToggle" aria-pressed="false">Show all meanings</button><button type="button" id="themeToggle" aria-pressed="false">Dark mode</button><span class="tool-spacer"></span><span class="font-size-label">Text size</span><button type="button" id="fontNormal" aria-pressed="true" aria-label="Normal text size">A</button><button type="button" id="fontLarge" aria-pressed="false" aria-label="Large text size">A+</button><button type="button" id="fontLarger" aria-pressed="false" aria-label="Extra large text size">A++</button><button type="button" id="resetWords">Reset revealed words</button>';
+    toolbar.appendChild(tools);
+    const meanings=document.getElementById('meaningsToggle');
+    meanings.addEventListener('click',()=>{const on=body.classList.toggle('study-show-meanings');meanings.setAttribute('aria-pressed',String(on));meanings.textContent=on?'Hide all meanings':'Show all meanings';});
+    const theme=document.getElementById('themeToggle'); theme.addEventListener('click',()=>{const on=body.classList.toggle('study-dark');theme.setAttribute('aria-pressed',String(on));theme.textContent=on?'Light mode':'Dark mode';});
+    function setFont(size){body.classList.remove('study-large-text','study-larger-text');if(size===1)body.classList.add('study-large-text');if(size===2)body.classList.add('study-larger-text');[['fontNormal',0],['fontLarge',1],['fontLarger',2]].forEach(([id,n])=>document.getElementById(id).setAttribute('aria-pressed',String(n===size)));}
+    document.getElementById('fontNormal').addEventListener('click',()=>setFont(0));document.getElementById('fontLarge').addEventListener('click',()=>setFont(1));document.getElementById('fontLarger').addEventListener('click',()=>setFont(2));
+    document.getElementById('resetWords').addEventListener('click',()=>{body.querySelectorAll('.word.revealed').forEach(el=>el.classList.remove('revealed'));});
+  }
+  // Make existing word-by-word glossary items keyboard accessible.
+  document.querySelectorAll('.word[onclick], .answer-word[onclick]').forEach(el=>{if(!el.hasAttribute('tabindex'))el.setAttribute('tabindex','0');if(!el.hasAttribute('role'))el.setAttribute('role','button');el.addEventListener('keydown',ev=>{if((ev.key==='Enter'||ev.key===' ')&&ev.target===el){ev.preventDefault();el.click();}});});
+})();
+</script>
+</body>
+</html>

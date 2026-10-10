@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>集合とベン図の基本 — Japanese Study Notes</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", "Meiryo", sans-serif;
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 40px 25px 80px;
+      line-height: 1.6;
+      color: #1a1a2e;
+      background: #f5f6f8;
+    }
+
+    /* ---- Page Header ---- */
+    .page-header {
+      margin-bottom: 36px;
+      padding-bottom: 24px;
+      border-bottom: 2px solid #e2e5ec;
+    }
+
+    .page-header .chapter {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: #8890a6;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 34px;
+      margin-bottom: 8px;
+      letter-spacing: 0.02em;
+      color: #16213e;
+      font-weight: 700;
+    }
+
+    h1 rt {
+      font-size: 12px;
+      color: #a0a4b4;
+      font-weight: 400;
+    }
+
+    .ref {
+      font-size: 14px;
+      color: #8890a6;
+    }
+
+    /* ---- Toolbar ---- */
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 0 -25px 40px;
+      padding: 14px 25px;
+      background: rgba(245, 246, 248, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid #e2e5ec;
+    }
+
+    .hint {
+      font-size: 13px;
+      color: #8890a6;
+      margin-right: auto;
+    }
+
+    .toggle-btn {
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      padding: 8px 20px;
+      border: 2px solid #4a6fa5;
+      border-radius: 999px;
+      background: #fff;
+      color: #4a6fa5;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .toggle-btn:hover {
+      background: #4a6fa5;
+      color: #fff;
+    }
+
+    .toggle-btn.active {
+      background: #4a6fa5;
+      color: #fff;
+    }
+
+    /* ---- Section Headers ---- */
+    .section-header {
+      margin-top: 56px;
+      margin-bottom: 28px;
+    }
+
+    .section-header:first-of-type {
+      margin-top: 0;
+    }
+
+    .section-label {
+      display: inline-block;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #fff;
+      background: #16213e;
+      padding: 4px 14px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #16213e;
+      margin-bottom: 4px;
+      line-height: 1.4;
+    }
+
+    .section-title rt {
+      font-size: 10px;
+      color: #a0a4b4;
+    }
+
+    .section-title .word.revealed {
+      background: rgba(74, 111, 165, 0.06);
+    }
+
+    .section-title .word.revealed ruby {
+      color: #4a6fa5;
+    }
+
+    .section-title .meaning {
+      font-size: 11px;
+      padding: 1px 6px;
+    }
+
+    .section-q {
+      font-size: 15px;
+      color: #8890a6;
+      font-style: italic;
+    }
+
+    /* ---- Breakdown: inline flowing text ---- */
+    .breakdown {
+      font-size: 26px;
+      line-height: 2.8;
+      letter-spacing: 0.02em;
+      margin-bottom: 20px;
+    }
+
+    .word {
+      display: inline;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      border-radius: 6px;
+      padding: 1px 3px;
+      margin: 0 1px;
+    }
+
+    .word:active {
+      background: rgba(74, 111, 165, 0.1);
+    }
+
+    .word ruby {
+      color: #1a1a2e;
+      transition: color 0.2s ease;
+    }
+
+    .word.revealed ruby {
+      color: #4a6fa5;
+    }
+
+    .word.revealed {
+      background: rgba(74, 111, 165, 0.06);
+    }
+
+    rt {
+      font-size: 11px;
+      line-height: 1;
+      color: #a0a4b4;
+      font-weight: 400;
+    }
+
+    /* ---- Meaning: inline pill on tap ---- */
+    .meaning {
+      display: none;
+      font-size: 12px;
+      line-height: 1.3;
+      color: #4a6fa5;
+      background: rgba(74, 111, 165, 0.08);
+      padding: 2px 7px;
+      border-radius: 5px;
+      margin: 0 2px;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .word.revealed .meaning {
+      display: inline;
+    }
+
+    /* ---- Answer words (numbered blanks) ---- */
+    .answer-word .answer-text {
+      display: inline;
+      color: #e07a5f;
+      font-weight: 700;
+    }
+
+    .answer-word .answer-text ruby {
+      color: #e07a5f;
+      font-weight: 700;
+    }
+
+    .answer-word .answer-num {
+      display: none;
+      font-size: 18px;
+      color: #e07a5f;
+      font-weight: 600;
+    }
+
+    .answer-word .blank {
+      display: none;
+    }
+
+    body.hide-answers .answer-word .answer-text {
+      display: none;
+    }
+
+    body.hide-answers .answer-word .answer-num {
+      display: inline;
+    }
+
+    body.hide-answers .answer-word .blank {
+      display: inline;
+      letter-spacing: 0.1em;
+      color: #e07a5f;
+      opacity: 0.55;
+    }
+
+    /* ---- Translation ---- */
+    .translation {
+      margin: 16px 0 48px;
+      padding: 16px 20px;
+      font-size: 16px;
+      line-height: 1.7;
+      color: #4a6fa5;
+      background: rgba(74, 111, 165, 0.04);
+      border-radius: 10px;
+    }
+
+    .translation-title {
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      letter-spacing: 0.08em;
+      color: #4a6fa5;
+      text-transform: uppercase;
+    }
+
+    /* ---- Formula / diagram cards (kept from original) ---- */
+    .formula-block {
+      text-align: center;
+      margin: 30px 0 40px;
+      padding: 24px 20px;
+      background: #fff;
+      border-radius: 12px;
+    }
+
+    .formula-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #16213e;
+      margin-bottom: 4px;
+    }
+
+    .formula-title .word.revealed {
+      background: rgba(74, 111, 165, 0.06);
+    }
+
+    .formula-title .word.revealed ruby {
+      color: #4a6fa5;
+    }
+
+    .formula-title .meaning {
+      font-size: 11px;
+      padding: 1px 5px;
+    }
+
+    .formula-content {
+      font-size: 22px;
+      font-weight: 700;
+      color: #16213e;
+      overflow-x: auto;
+      white-space: nowrap;
+      padding: 10px 4px;
+      line-height: 2;
+    }
+
+    .formula-content .op {
+      color: #4a6fa5;
+    }
+
+    .formula-content .word {
+      cursor: pointer;
+      border-radius: 6px;
+      padding: 1px 4px;
+      transition: background 0.15s ease;
+    }
+
+    .formula-content .word.revealed {
+      background: rgba(74, 111, 165, 0.08);
+    }
+
+    .formula-content .meaning {
+      font-size: 12px;
+      padding: 1px 6px;
+    }
+
+    .formula-note {
+      font-size: 11.5px;
+      margin-top: 8px;
+      color: #8890a6;
+      line-height: 1.9;
+    }
+
+    .formula-note .word {
+      color: #8890a6;
+    }
+
+    .formula-note rt {
+      font-size: 9px;
+    }
+
+    .formula-note .meaning {
+      font-size: 11px;
+      padding: 1px 5px;
+    }
+
+    .venn {
+      display: block;
+      margin: 8px auto 0;
+      max-width: 100%;
+      height: auto;
+    }
+
+    .vlabel {
+      font-size: 15px;
+      font-weight: 700;
+      fill: #16213e;
+    }
+
+    .vlabel-orange {
+      fill: #e07a5f;
+    }
+
+    /* Tappable SVG labels */
+    text.vlabel {
+      cursor: pointer;
+      transition: fill 0.2s ease;
+    }
+
+    text.vlabel.revealed,
+    text.vlabel-orange.revealed {
+      fill: #4a6fa5;
+    }
+
+    .overline {
+      text-decoration: overline;
+    }
+
+    /* ---- Divider ---- */
+    .divider {
+      margin: 48px 0;
+      text-align: center;
+      font-size: 13px;
+      letter-spacing: 0.5em;
+      color: #d0d4de;
+      text-indent: 0.5em;
+    }
+
+    /* ---- Key Terms Section ---- */
+    .terms-section {
+      margin-top: 60px;
+      padding-top: 40px;
+      border-top: 2px solid #e2e5ec;
+    }
+
+    .terms-heading {
+      font-size: 22px;
+      font-weight: 700;
+      color: #16213e;
+      margin-bottom: 6px;
+    }
+
+    .terms-sub {
+      font-size: 14px;
+      color: #8890a6;
+      margin-bottom: 30px;
+    }
+
+    .term-item {
+      margin-bottom: 20px;
+      padding: 14px 18px;
+      background: #fff;
+      border-radius: 10px;
+    }
+
+    .term-jp {
+      font-size: 18px;
+      font-weight: 600;
+      color: #16213e;
+    }
+
+    .term-jp rt {
+      font-size: 11px;
+      color: #a0a4b4;
+    }
+
+    .term-item .word.revealed {
+      background: rgba(74, 111, 165, 0.06);
+    }
+
+    .term-item .meaning {
+      font-size: 11px;
+      padding: 1px 5px;
+    }
+
+    .term-en {
+      font-size: 14px;
+      color: #4a6fa5;
+      font-weight: 500;
+      margin-left: 8px;
+    }
+
+    .term-def {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #555a6e;
+      margin-top: 6px;
+    }
+
+    /* ---- Table note / source ---- */
+    .table-note {
+      font-size: 13px;
+      color: #8890a6;
+      margin-bottom: 48px;
+      padding: 0 4px;
+      line-height: 2;
+    }
+
+    .table-note .word {
+      color: #8890a6;
+    }
+
+    .table-note rt {
+      font-size: 9px;
+    }
+
+    .table-note .meaning {
+      font-size: 11px;
+      padding: 1px 5px;
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 600px) {
+      body { padding: 25px 16px 60px; }
+      h1 { font-size: 26px; }
+      .section-title { font-size: 19px; }
+      .breakdown { font-size: 22px; line-height: 2.6; }
+      .formula-content { font-size: 18px; }
+      .translation { font-size: 14px; padding: 14px 16px; }
+      .hint { display: none; }
+      .toolbar { padding: 12px 16px; margin: 0 -16px 30px; }
+      .term-jp { font-size: 16px; }
+      .venn { width: 220px; }
+    }
+  
+    /* Added usability improvements: responsive layout, readable controls, and print support. */
+    html { scroll-behavior: smooth; }
+    body { width: min(100% - 28px, 920px); padding-left: 0 !important; padding-right: 0 !important; }
+    img, svg, video, canvas, table { max-width: 100%; }
+    table { display: block; overflow-x: auto; }
+    button, .toggle-btn, input, select { touch-action: manipulation; }
+    button, .toggle-btn { min-height: 40px; cursor: pointer; }
+    :focus-visible { outline: 3px solid #647de8; outline-offset: 3px; }
+    .chapter-nav { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; margin: 0 0 22px; padding: 12px 14px; border:1px solid #dfe3ed; border-radius:12px; background:rgba(255,255,255,.88); font-size:14px; }
+    .chapter-nav a { color:#4257a6; text-decoration:none; font-weight:600; padding:7px 9px; border-radius:8px; }
+    .chapter-nav a:hover { background:#eef1ff; }
+    .chapter-nav .home-link { margin-right:auto; }
+    @media (max-width: 600px) {
+      body { width: calc(100% - 24px); padding-top: 18px !important; padding-bottom: 40px !important; font-size: 15px; }
+      h1 { font-size: clamp(24px, 7vw, 32px) !important; overflow-wrap:anywhere; }
+      .toolbar { margin-left: -12px !important; margin-right: -12px !important; padding: 10px 12px !important; gap:8px !important; }
+      .chapter-nav { gap:5px; padding:8px; }
+      .chapter-nav a { padding:8px 6px; }
+    }
+    @media print {
+      body { width:100%; max-width:none; padding:0 !important; background:#fff !important; color:#000 !important; }
+      .toolbar, .chapter-nav, button, .toggle-btn { display:none !important; }
+      .card, section, table { break-inside:avoid; }
+    }
+    
+  
+/* Study-site polish: shared accessible controls, focus states, themes, and spacing. */
+:root { color-scheme: light; --study-bg:#f5f6fa; --study-card:#fff; --study-text:#20243a; --study-muted:#687089; --study-line:#e1e5ef; --study-accent:#5267b8; --study-soft:#eef1ff; }
+html { scroll-padding-top: 90px; }
+body { background:var(--study-bg); color:var(--study-text); transition:background .18s,color .18s; }
+.page-header { border-color:var(--study-line)!important; }
+.section-header, .section-title, .translation, .table-note, .formula-gloss, .unit-table, .term-card, .example-box, .breakdown, .card { max-width:100%; }
+.translation, .table-note, .term-card, .example-box, .breakdown, .unit-table, table { overflow-wrap:anywhere; }
+.chapter-nav { position:relative; }
+.study-progress { position:fixed; inset:0 0 auto; height:4px; z-index:9999; background:transparent; pointer-events:none; }
+.study-progress span { display:block; width:0; height:100%; background:linear-gradient(90deg,#7487df,#a4b1ff); transition:width .08s linear; }
+.study-tools { display:flex; align-items:center; gap:8px; flex-wrap:wrap; width:100%; }
+.study-tools .tool-spacer { flex:1 1 12px; }
+.study-tools button { appearance:none; border:1px solid #d6dced; border-radius:999px; background:#fff; color:#36436e; font-family:inherit; font-size:13px; font-weight:600; line-height:1.2; padding:10px 13px; min-height:42px; cursor:pointer; }
+.study-tools button:hover { background:#f0f2ff; border-color:#aab5e8; }
+.study-tools button[aria-pressed="true"] { background:#e9edff; border-color:#9aa8eb; }
+.study-tools .font-size-label { font-size:12px; color:var(--study-muted); }
+body.study-large-text { font-size:1.12em; }
+body.study-larger-text { font-size:1.24em; }
+body.study-show-meanings .meaning { display:inline!important; }
+body.study-show-meanings .word { background:rgba(99,119,201,.07); border-radius:5px; }
+body.study-dark { --study-bg:#171a24; --study-card:#222635; --study-text:#edf0fa; --study-muted:#b4bad0; --study-line:#3a4054; --study-accent:#b1bdff; --study-soft:#2c3350; color-scheme:dark; }
+body.study-dark .toolbar, body.study-dark .chapter-nav, body.study-dark .study-tools button { background:#222635!important; color:#edf0fa!important; border-color:#414860!important; }
+body.study-dark .chapter-nav a, body.study-dark .toggle-btn { color:#c6ceff!important; }
+body.study-dark .translation, body.study-dark .table-note, body.study-dark .breakdown, body.study-dark .unit-table, body.study-dark .term-card, body.study-dark .example-box, body.study-dark .card, body.study-dark section { background-color:var(--study-card); color:var(--study-text); border-color:var(--study-line); }
+body.study-dark .page-header h1, body.study-dark h1, body.study-dark h2, body.study-dark h3 { color:var(--study-text)!important; }
+body.study-dark .study-tools button[aria-pressed="true"] { background:#343d61!important; }
+.word[onclick], .answer-word[onclick] { -webkit-tap-highlight-color:transparent; }
+.word:focus-visible { outline:2px solid #7185df; outline-offset:2px; border-radius:4px; }
+@media(max-width:600px){ .study-tools button { flex:1 1 auto; padding:10px 9px; font-size:12px; } .study-tools .tool-spacer { display:none; } .study-progress { height:3px; } }
+@media(prefers-reduced-motion:reduce){ html{scroll-behavior:auto!important} *,*::before,*::after{transition:none!important;animation:none!important} }
+@media print { .study-progress,.study-tools {display:none!important} body {font-size:11pt!important} .meaning {display:inline!important} }
+
+  </style>
+</head>
+
+<body>
+  <nav class="chapter-nav" aria-label="Chapter navigation">
+    <a class="home-link" href="index.html">⌂ All notes</a><a href="02-chapter.html" aria-label="Previous chapter">← Previous</a><a href="04-chapter.html" aria-label="Next chapter">Next →</a>
+  </nav>
+
+
+  <!-- ==================== PAGE HEADER ==================== -->
+  <div class="page-header">
+    <div class="chapter">Unit 1 · IT Fundamentals / Mathematics</div>
+    <h1><span class="word" onclick="toggleWord(event, this)"><ruby>集合<rt>しゅうごう</rt></ruby><span class="meaning">set</span></span>と<span class="word" onclick="toggleWord(event, this)">ベン<ruby>図<rt>ず</rt></ruby><span class="meaning">Venn diagram</span></span>の<span class="word" onclick="toggleWord(event, this)"><ruby>基本<rt>きほん</rt></ruby><span class="meaning">basics</span></span></h1>
+    <div class="ref"><span class="word" onclick="toggleWord(event, this)"><ruby>基礎講義<rt>きそこうぎ</rt></ruby><span class="meaning">fundamentals lecture</span></span> 1 — Basics of Sets and Venn Diagrams</div>
+  </div>
+
+  <!-- ==================== TOOLBAR ==================== -->
+  <div class="toolbar">
+    <div class="hint">Tap any word to reveal its meaning</div>
+    <div class="toggle-btn active" id="toggleAnswers" onclick="toggleAnswers()">Hide Answers ✓</div>
+  </div>
+
+  <!-- ==================== SECTION 1 ==================== -->
+  <div class="section-header">
+    <span class="section-label">1</span>
+    <div class="section-title"><span class="word" onclick="toggleWord(event, this)"><ruby>集合<rt>しゅうごう</rt></ruby><span class="meaning">set</span></span><span class="word" onclick="toggleWord(event, this)">とは<span class="meaning">is defined as</span></span></div>
+    <div class="section-q">What is a set?</div>
+  </div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)"><ruby>集合<rt>しゅうごう</rt></ruby><span class="meaning">set</span></span><span class="word" onclick="toggleWord(event, this)">（Set）<span class="meaning">Set — the English name</span></span><span class="word" onclick="toggleWord(event, this)">とは<span class="meaning">is defined as (「X とは …のこと」)</span></span><span class="word" onclick="toggleWord(event, this)">ある<span class="meaning">a certain</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>一定<rt>いってい</rt></ruby>の<span class="meaning">fixed / specified</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>条件<rt>じょうけん</rt></ruby><span class="meaning">condition</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>満<rt>み</rt></ruby>たす<span class="meaning">to satisfy</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>もの<rt>もの</rt></ruby><span class="meaning">things / items</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">connecting の (of the things)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>集<rt>あつ</rt></ruby>まり<span class="meaning">collection / gathering</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>または<rt>または</rt></ruby><span class="meaning">or</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text">グループ</span><span class="answer-num">（1）</span><span class="blank">＿＿＿＿</span><span class="meaning">group</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">connecting の</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>こと<rt>こと</rt></ruby><span class="meaning">the thing of (…のこと = “refers to …”)</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    A set is a collection — or group — of things that all satisfy a certain fixed condition.
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)"><ruby>代表<rt>だいひょう</rt></ruby>的な<span class="meaning">representative</span></span>4つの<span class="word" onclick="toggleWord(event, this)"><ruby>集合<rt>しゅうごう</rt></ruby><span class="meaning">set relationships</span></span>：① <span class="word" onclick="toggleWord(event, this)"><ruby>積集合<rt>せきしゅうごう</rt></ruby><span class="meaning">intersection</span></span> ② <span class="word" onclick="toggleWord(event, this)"><ruby>和集合<rt>わしゅうごう</rt></ruby><span class="meaning">union</span></span> ③ <span class="word" onclick="toggleWord(event, this)"><ruby>否定<rt>ひてい</rt></ruby><span class="meaning">complement / NOT</span></span> ④ <span class="word" onclick="toggleWord(event, this)"><ruby>部分集合<rt>ぶぶんしゅうごう</rt></ruby><span class="meaning">subset</span></span> — <span class="word" onclick="toggleWord(event, this)"><ruby>以下<rt>いか</rt></ruby><span class="meaning">below / the following</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>で<rt>で</rt></ruby><span class="meaning">in</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>整理<rt>せいり</rt></ruby>します<span class="meaning">will be organized</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    The four representative set relationships: ① intersection, ② union, ③ complement, ④ subset — organized below.
+  </div>
+
+  <!-- ==================== SECTION 2 ==================== -->
+  <div class="section-header">
+    <span class="section-label">2</span>
+    <div class="section-title"><span class="word" onclick="toggleWord(event, this)">ベン<ruby>図<rt>ず</rt></ruby><span class="meaning">Venn diagram</span></span><span class="word" onclick="toggleWord(event, this)">とは<span class="meaning">is defined as</span></span></div>
+    <div class="section-q">What is a Venn diagram — and where does its name come from?</div>
+  </div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)">ベン<ruby>図<rt>ず</rt></ruby><span class="meaning">Venn diagram</span></span><span class="word" onclick="toggleWord(event, this)">（Venn Diagram）<span class="meaning">Venn Diagram — the English name</span></span><span class="word" onclick="toggleWord(event, this)">とは<span class="meaning">is defined as</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>集合<rt>しゅうごう</rt></ruby><span class="meaning">sets</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>同士<rt>どうし</rt></ruby><span class="meaning">each other (集合同士 = sets in relation to one another)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">connecting の (between the sets)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>関係<rt>かんけい</rt></ruby><span class="meaning">relationship</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>図<rt>ず</rt></ruby><span class="meaning">a diagram / picture</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>に<rt>に</rt></ruby><span class="meaning">into / as (result target)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>表<rt>あらわ</rt></ruby>した<span class="meaning">expressed / depicted (past tense)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>図<rt>ず</rt></ruby><span class="meaning">diagram</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">connecting の</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>こと<rt>こと</rt></ruby><span class="meaning">refers to</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    A Venn diagram is a diagram that represents the relationships between sets as a picture.
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)">ベン<ruby>図<rt>ず</rt></ruby><span class="meaning">Venn diagram</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>は<rt>は</rt></ruby><span class="meaning">topic</span></span>、<span class="word" onclick="toggleWord(event, this)">19<ruby>世紀<rt>せいき</rt></ruby><span class="meaning">19th century</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of (possession)</span></span><span class="word" onclick="toggleWord(event, this)">イギリス<span class="meaning">Britain / the UK</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>哲学者<rt>てつがくしゃ</rt></ruby><span class="meaning">philosopher</span></span>・<span class="word" onclick="toggleWord(event, this)"><ruby>論理学者<rt>ろんりがくしゃ</rt></ruby><span class="meaning">logician</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>である<rt>である</rt></ruby><span class="meaning">who is (formal copula)</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text">ジョン・ベン</span><span class="answer-num">（2）</span><span class="blank">＿＿＿＿＿＿</span><span class="meaning">John Venn</span></span><span class="word" onclick="toggleWord(event, this)">（John Venn）<span class="meaning">John Venn (English spelling)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>考案<rt>こうあん</rt></ruby>した<span class="meaning">devised / thought up (past tense)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>こと<rt>こと</rt></ruby><span class="meaning">the fact that</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>から<rt>から</rt></ruby><span class="meaning">from / because (origin)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>その<rt>その</rt></ruby><span class="meaning">its / that</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>名<rt>な</rt></ruby><span class="meaning">name</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>付<rt>つ</rt></ruby>いている<span class="meaning">has been given / is attached</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    The name "Venn diagram" comes from the fact that it was devised by (John Venn), a 19th-century British philosopher and logician.
+  </div>
+
+  <!-- ==================== SECTION 3 ==================== -->
+  <div class="section-header">
+    <span class="section-label">3</span>
+    <div class="section-title">① <span class="word" onclick="toggleWord(event, this)"><ruby>積集合<rt>せきしゅうごう</rt></ruby><span class="meaning">intersection</span></span> — Intersection</div>
+    <div class="section-q">A かつ B — the set satisfying both conditions</div>
+  </div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)">【<ruby>定義<rt>ていぎ</rt></ruby>】<span class="meaning">[definition]</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>2<rt>ふた</rt></ruby>つの<span class="meaning">two</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>条件<rt>じょうけん</rt></ruby><span class="meaning">condition</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">connecting の</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>両方<rt>りょうほう</rt></ruby>を<ruby>満<rt>み</rt></ruby>たす</span><span class="answer-num">（3）</span><span class="blank">＿＿＿＿＿＿</span><span class="meaning">satisfying both</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>集合<rt>しゅうごう</rt></ruby><span class="meaning">set</span></span>。「<span class="word" onclick="toggleWord(event, this)">A<span class="meaning">A (set A)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>かつ<rt>かつ</rt></ruby><span class="meaning">AND — both must hold (logical conjunction)</span></span><span class="word" onclick="toggleWord(event, this)">B<span class="meaning">B (set B)</span></span>」<span class="word" onclick="toggleWord(event, this)"><ruby>と<rt>と</rt></ruby><span class="meaning">quote</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>も<rt>も</rt></ruby><span class="meaning">also</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>言<rt>い</rt></ruby>う<span class="meaning">is called</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    [Definition] The set that satisfies both of two conditions. Also called "A かつ B" (A AND B).
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)">【<ruby>記号<rt>きごう</rt></ruby><ruby>表記<rt>ひょうき</rt></ruby>】<span class="meaning">[notation]</span></span><span class="word" onclick="toggleWord(event, this)">A∩B<span class="meaning">A ∩ B — intersection notation</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)">A・B<span class="meaning">A·B — dot notation</span></span>（<span class="word" onclick="toggleWord(event, this)">ドット<span class="meaning">(dot)</span></span>）<span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)">A AND B<span class="meaning">A AND B</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>など<rt>など</rt></ruby><span class="meaning">etc.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>で<rt>で</rt></ruby><span class="meaning">by means of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>表記<rt>ひょうき</rt></ruby>する<span class="meaning">is written</span></span>（<span class="word" onclick="toggleWord(event, this)"><ruby>どれも<rt>どれも</rt></ruby><span class="meaning">all of them</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>同<rt>おな</rt></ruby>じ<span class="meaning">same</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>意味<rt>いみ</rt></ruby><span class="meaning">meaning</span></span>）。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    [Notation] It is written A∩B, A·B (dot), A AND B, etc. — all of these mean the same thing.
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)">【<ruby>具体例<rt>ぐたいれい</rt></ruby>】<span class="meaning">[example]</span></span><span class="word" onclick="toggleWord(event, this)">A<span class="meaning">A (set A)</span></span>（<span class="word" onclick="toggleWord(event, this)">ITパスポート<span class="meaning">IT Passport (national IT certification)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>所持者<rt>しょじしゃ</rt></ruby><span class="meaning">holder</span></span>）<span class="word" onclick="toggleWord(event, this)"><ruby>かつ<rt>かつ</rt></ruby><span class="meaning">AND</span></span><span class="word" onclick="toggleWord(event, this)">B<span class="meaning">B (set B)</span></span>（<span class="word" onclick="toggleWord(event, this)"><ruby>簿記<rt>ぼき</rt></ruby><span class="meaning">bookkeeping</span></span><span class="word" onclick="toggleWord(event, this)">3<ruby>級<rt>きゅう</rt></ruby><span class="meaning">Grade 3</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>所持者<rt>しょじしゃ</rt></ruby><span class="meaning">holder</span></span>）<span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">connecting の</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>とき<rt>とき</rt></ruby><span class="meaning">when / in the case of</span></span>、<span class="word" onclick="toggleWord(event, this)"><ruby>網<rt>あみ</rt></ruby><ruby>掛<rt>か</rt></ruby>け<ruby>部分<rt>ぶぶん</rt></ruby><span class="meaning">the shaded region</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>は<rt>は</rt></ruby><span class="meaning">topic</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>両方<rt>りょうほう</rt></ruby><ruby>持<rt>も</rt></ruby>っている<ruby>人<rt>ひと</rt></ruby></span><span class="answer-num">（4）</span><span class="blank">＿＿＿＿＿＿＿＿</span><span class="meaning">people who hold both</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>表<rt>あらわ</rt></ruby>す<span class="meaning">represents / shows</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    [Example] When A is (IT Passport holders) and B is (Bookkeeping Grade 3 holders), the shaded region represents (the people who hold both).
+  </div>
+
+  <div class="formula-block">
+    <div class="formula-title"><span class="word" onclick="toggleWord(event, this)"><ruby>積集合<rt>せきしゅうごう</rt></ruby><span class="meaning">intersection</span></span>の<span class="word" onclick="toggleWord(event, this)"><ruby>記号<rt>きごう</rt></ruby><span class="meaning">notation / symbol</span></span> — Intersection Notation</div>
+    <div class="formula-content"><span class="word op" onclick="toggleWord(event, this)">A ∩ B<span class="meaning">A ∩ B — the intersection of A and B</span></span> ＝ <span class="word" onclick="toggleWord(event, this)">A・B<span class="meaning">A·B — dot notation</span></span> ＝ <span class="word" onclick="toggleWord(event, this)">A AND B<span class="meaning">A AND B — logic notation</span></span></div>
+    <svg class="venn" viewBox="0 0 260 150" width="250" role="img"
+         aria-label="Intersection: the overlapping part of circles A and B is shaded">
+      <defs>
+        <clipPath id="clipA-inter"><circle cx="102" cy="80" r="44"/></clipPath>
+      </defs>
+      <g clip-path="url(#clipA-inter)">
+        <circle cx="158" cy="80" r="44" fill="#e07a5f" fill-opacity="0.45"/>
+      </g>
+      <circle cx="102" cy="80" r="44" fill="none" stroke="#4a6fa5" stroke-width="2"/>
+      <circle cx="158" cy="80" r="44" fill="none" stroke="#4a6fa5" stroke-width="2"/>
+      <text x="66" y="86" text-anchor="middle" class="vlabel" onclick="toggleWord(event, this)">A<title>A — set A (circle)</title></text>
+      <text x="194" y="86" text-anchor="middle" class="vlabel" onclick="toggleWord(event, this)">B<title>B — set B (circle)</title></text>
+    </svg>
+    <p class="formula-note">「<span class="word" onclick="toggleWord(event, this)">A<span class="meaning">A</span></span> <span class="word" onclick="toggleWord(event, this)"><ruby>かつ<rt>かつ</rt></ruby><span class="meaning">AND</span></span> <span class="word" onclick="toggleWord(event, this)">B<span class="meaning">B</span></span>」— 2つの<span class="word" onclick="toggleWord(event, this)"><ruby>条件<rt>じょうけん</rt></ruby><span class="meaning">conditions</span></span>の<span class="word" onclick="toggleWord(event, this)"><ruby>両方<rt>りょうほう</rt></ruby><span class="meaning">both</span></span>を<span class="word" onclick="toggleWord(event, this)"><ruby>満<rt>み</rt></ruby>たす<span class="meaning">satisfy</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>集合<rt>しゅうごう</rt></ruby><span class="meaning">set</span></span>（<span class="word" onclick="toggleWord(event, this)"><ruby>重<rt>かさ</rt></ruby>なりの<span class="meaning">overlapping</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>部分<rt>ぶぶん</rt></ruby><span class="meaning">region</span></span>）<br>The set satisfying both A and B (the overlapping region).</p>
+  </div>
+
+  <!-- ==================== SECTION 4 ==================== -->
+  <div class="section-header">
+    <span class="section-label">4</span>
+    <div class="section-title">② <span class="word" onclick="toggleWord(event, this)"><ruby>和集合<rt>わしゅうごう</rt></ruby><span class="meaning">union</span></span> — Union</div>
+    <div class="section-q">A または B — the set satisfying either condition</div>
+  </div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)">【<ruby>定義<rt>ていぎ</rt></ruby>】<span class="meaning">[definition]</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>2<rt>ふた</rt></ruby>つの<span class="meaning">two</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>条件<rt>じょうけん</rt></ruby><span class="meaning">condition</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">connecting の</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text">どちらか</span><span class="answer-num">（5）</span><span class="blank">＿＿＿＿＿</span><span class="meaning">either one</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>満<rt>み</rt></ruby>たす<span class="meaning">to satisfy</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>集合<rt>しゅうごう</rt></ruby><span class="meaning">set</span></span>。「<span class="word" onclick="toggleWord(event, this)">A<span class="meaning">A (set A)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>または<rt>または</rt></ruby><span class="meaning">OR — either one (logical disjunction)</span></span><span class="word" onclick="toggleWord(event, this)">B<span class="meaning">B (set B)</span></span>」<span class="word" onclick="toggleWord(event, this)"><ruby>と<rt>と</rt></ruby><span class="meaning">quote</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>も<rt>も</rt></ruby><span class="meaning">also</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>言<rt>い</rt></ruby>う<span class="meaning">is called</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    [Definition] The set that satisfies (either) of two conditions. Also called "A または B" (A OR B).
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)">【<ruby>記号<rt>きごう</rt></ruby><ruby>表記<rt>ひょうき</rt></ruby>】<span class="meaning">[notation]</span></span><span class="word" onclick="toggleWord(event, this)">A∪B<span class="meaning">A ∪ B — union notation</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)">A+B<span class="meaning">A + B — plus notation</span></span>（<span class="word" onclick="toggleWord(event, this)">プラス<span class="meaning">(plus)</span></span>）<span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)">A OR B<span class="meaning">A OR B</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>など<rt>など</rt></ruby><span class="meaning">etc.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>で<rt>で</rt></ruby><span class="meaning">by means of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>表記<rt>ひょうき</rt></ruby>する<span class="meaning">is written</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    [Notation] It is written A∪B, A + B (plus), A OR B, and so on.
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)">【<ruby>具体例<rt>ぐたいれい</rt></ruby>】<span class="meaning">[example]</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>網<rt>あみ</rt></ruby><ruby>掛<rt>か</rt></ruby>け<ruby>部分<rt>ぶぶん</rt></ruby><span class="meaning">the shaded region</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>は<rt>は</rt></ruby><span class="meaning">topic</span></span>、<span class="word" onclick="toggleWord(event, this)">A<span class="meaning">A (set A)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>と<rt>と</rt></ruby><span class="meaning">and</span></span><span class="word" onclick="toggleWord(event, this)">B<span class="meaning">B (set B)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">connecting の (of A and B)</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text">どちらかを<ruby>満<rt>み</rt></ruby>たす<ruby>人<rt>ひと</rt></ruby></span><span class="answer-num">（6）</span><span class="blank">＿＿＿＿＿＿＿＿</span><span class="meaning">a person who satisfies either one</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>表<rt>あらわ</rt></ruby>す<span class="meaning">represents</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    [Example] The shaded region represents (a person who satisfies either A or B).
+  </div>
+
+  <div class="formula-block">
+    <div class="formula-title"><span class="word" onclick="toggleWord(event, this)"><ruby>和集合<rt>わしゅうごう</rt></ruby><span class="meaning">union</span></span>の<span class="word" onclick="toggleWord(event, this)"><ruby>記号<rt>きごう</rt></ruby><span class="meaning">notation / symbol</span></span> — Union Notation</div>
+    <div class="formula-content"><span class="word op" onclick="toggleWord(event, this)">A ∪ B<span class="meaning">A ∪ B — the union of A and B</span></span> ＝ <span class="word" onclick="toggleWord(event, this)">A + B<span class="meaning">A + B — plus notation</span></span> ＝ <span class="word" onclick="toggleWord(event, this)">A OR B<span class="meaning">A OR B — logic notation</span></span></div>
+    <svg class="venn" viewBox="0 0 260 150" width="250" role="img"
+         aria-label="Union: both circles A and B are shaded, including the overlap">
+      <circle cx="102" cy="80" r="44" fill="#e07a5f" fill-opacity="0.35"/>
+      <circle cx="158" cy="80" r="44" fill="#e07a5f" fill-opacity="0.35"/>
+      <circle cx="102" cy="80" r="44" fill="none" stroke="#4a6fa5" stroke-width="2"/>
+      <circle cx="158" cy="80" r="44" fill="none" stroke="#4a6fa5" stroke-width="2"/>
+      <text x="66" y="86" text-anchor="middle" class="vlabel" onclick="toggleWord(event, this)">A<title>A — set A (circle)</title></text>
+      <text x="194" y="86" text-anchor="middle" class="vlabel" onclick="toggleWord(event, this)">B<title>B — set B (circle)</title></text>
+    </svg>
+    <p class="formula-note">「<span class="word" onclick="toggleWord(event, this)">A<span class="meaning">A</span></span> <span class="word" onclick="toggleWord(event, this)"><ruby>または<rt>または</rt></ruby><span class="meaning">OR</span></span> <span class="word" onclick="toggleWord(event, this)">B<span class="meaning">B</span></span>」— 2つの<span class="word" onclick="toggleWord(event, this)"><ruby>条件<rt>じょうけん</rt></ruby><span class="meaning">conditions</span></span>の<span class="word" onclick="toggleWord(event, this)">どちらか<span class="meaning">either one</span></span>を<span class="word" onclick="toggleWord(event, this)"><ruby>満<rt>み</rt></ruby>たす<span class="meaning">satisfy</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>集合<rt>しゅうごう</rt></ruby><span class="meaning">set</span></span>（<span class="word" onclick="toggleWord(event, this)"><ruby>両方<rt>りょうほう</rt></ruby>も<span class="meaning">both included too</span></span>）<br>The set satisfying A or B (or both).</p>
+  </div>
+
+  <!-- ==================== SECTION 5 ==================== -->
+  <div class="section-header">
+    <span class="section-label">5</span>
+    <div class="section-title">③ <span class="word" onclick="toggleWord(event, this)"><ruby>否定<rt>ひてい</rt></ruby><span class="meaning">complement / NOT</span></span> — Complement / NOT</div>
+    <div class="section-q">A 以外 — the set not satisfying a condition</div>
+  </div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)">【<ruby>定義<rt>ていぎ</rt></ruby>】<span class="meaning">[definition]</span></span><span class="word" onclick="toggleWord(event, this)">ある<span class="meaning">a certain</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>条件<rt>じょうけん</rt></ruby><span class="meaning">condition</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>満<rt>み</rt></ruby>たさない</span><span class="answer-num">（7）</span><span class="blank">＿＿＿＿＿</span><span class="meaning">does not satisfy (negative of 満たす)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>集合<rt>しゅうごう</rt></ruby><span class="meaning">set</span></span>。「<span class="word" onclick="toggleWord(event, this)">A<span class="meaning">A</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>以外<rt>いがい</rt></ruby><span class="meaning">except / other than</span></span>」、「<span class="word" onclick="toggleWord(event, this)">A<span class="meaning">A</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">possession ('s)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>補集合<rt>ほしゅうごう</rt></ruby><span class="meaning">complement (set)</span></span>」<span class="word" onclick="toggleWord(event, this)"><ruby>と<rt>と</rt></ruby><span class="meaning">quote</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>も<rt>も</rt></ruby><span class="meaning">also</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>言<rt>い</rt></ruby>う<span class="meaning">is called</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    [Definition] The set that does not satisfy a given condition. Also called "A 以外" (everything except A) or "A の補集合" (the complement of A).
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)">【<ruby>記号<rt>きごう</rt></ruby><ruby>表記<rt>ひょうき</rt></ruby>】<span class="meaning">[notation]</span></span><span class="word" onclick="toggleWord(event, this)"><span class="overline">A</span><span class="meaning">A-bar — complement notation (overline)</span></span>（<span class="word" onclick="toggleWord(event, this)">バー<span class="meaning">(bar)</span></span>）<span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)">A<sup>c</sup><span class="meaning">Aᶜ — c superscript notation</span></span>（<span class="word" onclick="toggleWord(event, this)">c<span class="meaning">c (the letter c)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>は<rt>は</rt></ruby><span class="meaning">topic</span></span><span class="word" onclick="toggleWord(event, this)">Complement<span class="meaning">Complement (the English word)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>頭文字<rt>かしらもじ</rt></ruby><span class="meaning">initial / first letter</span></span>）<span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)">NOT A<span class="meaning">NOT A</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>など<rt>など</rt></ruby><span class="meaning">etc.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>で<rt>で</rt></ruby><span class="meaning">by means of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>表記<rt>ひょうき</rt></ruby>する<span class="meaning">is written</span></span>（<span class="word" onclick="toggleWord(event, this)"><ruby>本講義<rt>ほんこうぎ</rt></ruby><span class="meaning">this lecture</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>では<rt>では</rt></ruby><span class="meaning">in</span></span><span class="word" onclick="toggleWord(event, this)">2<span class="meaning">two</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>種類<rt>しゅるい</rt></ruby><span class="meaning">kinds</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>紹介<rt>しょうかい</rt></ruby><span class="meaning">are introduced</span></span>）。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    [Notation] It is written Ā (bar), Aᶜ (the c is the first letter of Complement), NOT A, etc. — two of these notations are introduced in this lecture.
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)">【<ruby>具体例<rt>ぐたいれい</rt></ruby>】<span class="meaning">[example]</span></span><span class="word" onclick="toggleWord(event, this)">A<span class="meaning">A</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span>「<span class="word" onclick="toggleWord(event, this)">ITパスポート<span class="meaning">IT Passport</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>所持者<rt>しょじしゃ</rt></ruby><span class="meaning">holder</span></span>」<span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">connecting の</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>とき<rt>とき</rt></ruby><span class="meaning">when</span></span>、<span class="word" onclick="toggleWord(event, this)"><ruby>網<rt>あみ</rt></ruby><ruby>掛<rt>か</rt></ruby>け<ruby>部分<rt>ぶぶん</rt></ruby><span class="meaning">the shaded region</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>は<rt>は</rt></ruby><span class="meaning">topic</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text">パスポートを<ruby>持<rt>も</rt></ruby>っていない<ruby>人<rt>ひと</rt></ruby></span><span class="answer-num">（8）</span><span class="blank">＿＿＿＿＿＿＿＿＿＿</span><span class="meaning">people who do not hold the passport</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>表<rt>あらわ</rt></ruby>す<span class="meaning">represents</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    [Example] When A is "IT Passport holders", the shaded region represents (the people who do not have the passport).
+  </div>
+
+  <div class="formula-block">
+    <div class="formula-title"><span class="word" onclick="toggleWord(event, this)"><ruby>否定<rt>ひてい</rt></ruby><span class="meaning">complement / NOT</span></span>の<span class="word" onclick="toggleWord(event, this)"><ruby>記号<rt>きごう</rt></ruby><span class="meaning">notation / symbol</span></span> — Complement (NOT) Notation</div>
+    <div class="formula-content"><span class="word op" onclick="toggleWord(event, this)"><span class="overline">A</span><span class="meaning">A-bar — A with an overline (complement)</span></span> ／ <span class="word" onclick="toggleWord(event, this)">A<sup>c</sup><span class="meaning">Aᶜ — c superscript (c = Complement)</span></span> ＝ <span class="word" onclick="toggleWord(event, this)">NOT A<span class="meaning">NOT A — logic notation</span></span></div>
+    <svg class="venn" viewBox="0 0 260 150" width="250" role="img"
+         aria-label="Complement: the region outside circle A, inside the universal set, is shaded">
+      <rect x="16" y="16" width="228" height="118" rx="6"
+            fill="#e07a5f" fill-opacity="0.35" stroke="#4a6fa5" stroke-width="1.5"/>
+      <circle cx="130" cy="76" r="40" fill="#ffffff" stroke="#4a6fa5" stroke-width="2"/>
+      <text x="30" y="36" class="vlabel" onclick="toggleWord(event, this)">U<title>U — the universal set (everything)</title></text>
+      <text x="130" y="82" text-anchor="middle" class="vlabel" onclick="toggleWord(event, this)">A<title>A — set A (circle)</title></text>
+      <text x="216" y="86" text-anchor="middle" class="vlabel vlabel-orange" onclick="toggleWord(event, this)">Ā<title>Ā — the complement of A (everything outside A)</title></text>
+    </svg>
+    <p class="formula-note">「<span class="word" onclick="toggleWord(event, this)">A<span class="meaning">A</span></span> <span class="word" onclick="toggleWord(event, this)"><ruby>以外<rt>いがい</rt></ruby><span class="meaning">except</span></span>・A<span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>補集合<rt>ほしゅうごう</rt></ruby><span class="meaning">complement</span></span>」— ある<span class="word" onclick="toggleWord(event, this)"><ruby>条件<rt>じょうけん</rt></ruby><span class="meaning">condition</span></span>を<span class="word" onclick="toggleWord(event, this)"><ruby>満<rt>み</rt></ruby>たさない<span class="meaning">not satisfy</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>集合<rt>しゅうごう</rt></ruby><span class="meaning">set</span></span><br>Everything inside U that does not satisfy A.</p>
+  </div>
+
+  <!-- ==================== SECTION 6 ==================== -->
+  <div class="section-header">
+    <span class="section-label">6</span>
+    <div class="section-title">④ <span class="word" onclick="toggleWord(event, this)"><ruby>部分集合<rt>ぶぶんしゅうごう</rt></ruby><span class="meaning">subset</span></span> — Subset</div>
+    <div class="section-q">A は B に含まれる — a set contained in another set</div>
+  </div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)">【<ruby>定義<rt>ていぎ</rt></ruby>】<span class="meaning">[definition]</span></span><span class="word" onclick="toggleWord(event, this)">ある<span class="meaning">a certain</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>集合<rt>しゅうごう</rt></ruby><span class="meaning">set</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span>、<span class="word" onclick="toggleWord(event, this)"><ruby>もう<rt>もう</rt></ruby>1つの<span class="meaning">one more / another</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>集合<rt>しゅうごう</rt></ruby><span class="meaning">set</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>に<rt>に</rt></ruby><span class="meaning">in / inside</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>含<rt>ふく</rt></ruby>まれる</span><span class="answer-num">（9）</span><span class="blank">＿＿＿＿</span><span class="meaning">is contained / included</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>関係<rt>かんけい</rt></ruby><span class="meaning">relationship</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">connecting の</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>こと<rt>こと</rt></ruby><span class="meaning">refers to</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    [Definition] A relationship in which one set is contained inside another set.
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)">【<ruby>記号<rt>きごう</rt></ruby><ruby>表記<rt>ひょうき</rt></ruby>】<span class="meaning">[notation]</span></span><span class="word" onclick="toggleWord(event, this)">A⊂B<span class="meaning">A ⊂ B — A is contained in B</span></span>（<span class="word" onclick="toggleWord(event, this)">A<span class="meaning">A</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>は<rt>は</rt></ruby><span class="meaning">topic</span></span><span class="word" onclick="toggleWord(event, this)">B<span class="meaning">B</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>に<rt>に</rt></ruby><span class="meaning">in</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>含<rt>ふく</rt></ruby>まれる<span class="meaning">is contained</span></span>）<span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)">A⊆B<span class="meaning">A ⊆ B — A is contained in (or equal to) B</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>と<rt>と</rt></ruby><span class="meaning">as — quote</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>表記<rt>ひょうき</rt></ruby>する<span class="meaning">is written</span></span>（<span class="word" onclick="toggleWord(event, this)"><ruby>記号<rt>きごう</rt></ruby><span class="meaning">symbol</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>逆<rt>ぎゃく</rt></ruby><ruby>向<rt>む</rt></ruby>き<span class="meaning">reversed direction</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>だと<rt>だと</rt></ruby><span class="meaning">if it is</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>意味<rt>いみ</rt></ruby><span class="meaning">meaning</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>も<rt>も</rt></ruby><span class="meaning">also</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>逆<rt>ぎゃく</rt></ruby><span class="meaning">reversed</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>になる<rt>になる</rt></ruby><span class="meaning">becomes</span></span>）。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    [Notation] It is written A⊂B (A is contained in B) or A⊆B — if the symbol points the other way, the meaning is reversed too.
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)">【<ruby>具体例<rt>ぐたいれい</rt></ruby>】<span class="meaning">[example]</span></span><span class="word" onclick="toggleWord(event, this)">A<span class="meaning">A</span></span>（<span class="word" onclick="toggleWord(event, this)">ITパスポート<span class="meaning">IT Passport</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>所持者<rt>しょじしゃ</rt></ruby><span class="meaning">holder</span></span>）<span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)">B<span class="meaning">B</span></span>（<span class="word" onclick="toggleWord(event, this)">IT<ruby>系<rt>けい</rt></ruby><span class="meaning">IT-related</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>資格<rt>しかく</rt></ruby><span class="meaning">qualification</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>所持者<rt>しょじしゃ</rt></ruby><span class="meaning">holder</span></span>）<span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">connecting の</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>とき<rt>とき</rt></ruby><span class="meaning">when</span></span>、<span class="word" onclick="toggleWord(event, this)">A<span class="meaning">A</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>は<rt>は</rt></ruby><span class="meaning">topic</span></span><span class="word" onclick="toggleWord(event, this)">B<span class="meaning">B</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">possession ('s)</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>部分集合<rt>ぶぶんしゅうごう</rt></ruby></span><span class="answer-num">（10）</span><span class="blank">＿＿＿＿＿＿＿</span><span class="meaning">subset</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>である<rt>である</rt></ruby><span class="meaning">is (formal copula)</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    [Example] When A is (IT Passport holders) and B is (holders of IT-related qualifications), A is (a subset) of B.
+  </div>
+
+  <div class="formula-block">
+    <div class="formula-title"><span class="word" onclick="toggleWord(event, this)"><ruby>部分集合<rt>ぶぶんしゅうごう</rt></ruby><span class="meaning">subset</span></span>の<span class="word" onclick="toggleWord(event, this)"><ruby>記号<rt>きごう</rt></ruby><span class="meaning">notation / symbol</span></span> — Subset Notation</div>
+    <div class="formula-content"><span class="word op" onclick="toggleWord(event, this)">A ⊂ B<span class="meaning">A ⊂ B — A is strictly contained in B</span></span> ／ <span class="word" onclick="toggleWord(event, this)">A ⊆ B<span class="meaning">A ⊆ B — A is contained in (or equal to) B</span></span></div>
+    <svg class="venn" viewBox="0 0 260 150" width="250" role="img"
+         aria-label="Subset: small circle A sits shaded inside larger circle B, inside the universal set box">
+      <rect x="16" y="16" width="228" height="118" rx="6"
+            fill="none" stroke="#4a6fa5" stroke-width="1.5"/>
+      <circle cx="130" cy="76" r="52" fill="none" stroke="#4a6fa5" stroke-width="2"/>
+      <circle cx="130" cy="76" r="24" fill="#e07a5f" fill-opacity="0.45" stroke="#4a6fa5" stroke-width="2"/>
+      <text x="30" y="36" class="vlabel" onclick="toggleWord(event, this)">U<title>U — the universal set (everything)</title></text>
+      <text x="130" y="82" text-anchor="middle" class="vlabel" onclick="toggleWord(event, this)">A<title>A — set A, the smaller inner circle</title></text>
+      <text x="162" y="106" text-anchor="middle" class="vlabel" onclick="toggleWord(event, this)">B<title>B — set B, the larger outer circle</title></text>
+    </svg>
+    <p class="formula-note">「<span class="word" onclick="toggleWord(event, this)">A<span class="meaning">A</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>は<rt>は</rt></ruby><span class="meaning">topic</span></span><span class="word" onclick="toggleWord(event, this)">B<span class="meaning">B</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>に<rt>に</rt></ruby><span class="meaning">in</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>含<rt>ふく</rt></ruby>まれる<span class="meaning">is contained</span></span>」— <span class="word" onclick="toggleWord(event, this)"><ruby>記号<rt>きごう</rt></ruby><span class="meaning">symbol</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>逆<rt>ぎゃく</rt></ruby><span class="meaning">reversed</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>向<rt>む</rt></ruby>き<span class="meaning">direction</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>だと<rt>だと</rt></ruby><span class="meaning">if</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>意味<rt>いみ</rt></ruby><span class="meaning">meaning</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>も<rt>も</rt></ruby><span class="meaning">also</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>逆<rt>ぎゃく</rt></ruby><span class="meaning">reversed</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>になる<span class="meaning">becomes</span></span><br>A is contained in B; reversing the direction of the symbol reverses the meaning.</p>
+  </div>
+
+  <!-- ==================== KEY TERMS ==================== -->
+  <div class="terms-section">
+    <div class="terms-heading"><span class="word" onclick="toggleWord(event, this)">Key Terms<span class="meaning">重要用語</span></span> — <span class="word" onclick="toggleWord(event, this)"><ruby>重要用語<rt>じゅうようようご</rt></ruby><span class="meaning">key terms</span></span></div>
+    <div class="terms-sub">Glossary of terms from this unit</div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">集合<rt>しゅうごう</rt></ruby><span class="meaning">set</span></span>
+      <span class="term-en">set</span>
+      <div class="term-def">A collection (group) of things that all satisfy a certain fixed condition.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">ベン図<rt>ベンず</rt></ruby><span class="meaning">Venn diagram</span></span>
+      <span class="term-en">Venn diagram</span>
+      <div class="term-def">A diagram that shows relationships between sets as pictures. Devised by the 19th-century British philosopher and logician John Venn.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">積集合<rt>せきしゅうごう</rt></ruby><span class="meaning">intersection</span></span>
+      <span class="term-en">intersection (No. 3–4)</span>
+      <div class="term-def">The set that satisfies both of two conditions (A かつ B). Written A ∩ B.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">和集合<rt>わしゅうごう</rt></ruby><span class="meaning">union</span></span>
+      <span class="term-en">union (No. 5–6)</span>
+      <div class="term-def">The set that satisfies either of two conditions (A または B). Written A ∪ B.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">否定<rt>ひてい</rt></ruby><span class="meaning">negation</span></span>
+      <span class="term-en">negation / NOT (No. 7–8)</span>
+      <div class="term-def">The set that does not satisfy a given condition. Also called "A 以外" or "A の補集合."</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">補集合<rt>ほしゅうごう</rt></ruby><span class="meaning">complement</span></span>
+      <span class="term-en">complement (set)</span>
+      <div class="term-def">Everything outside a given set — the same idea as 否定. Written Ā or Aᶜ.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">部分集合<rt>ぶぶんしゅうごう</rt></ruby><span class="meaning">subset</span></span>
+      <span class="term-en">subset (No. 9–10)</span>
+      <div class="term-def">A set that is entirely contained inside another set. A ⊂ B means "A is a subset of B."</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">かつ<rt>かつ</rt></ruby><span class="meaning">AND</span></span>
+      <span class="term-en">and (logical AND)</span>
+      <div class="term-def">A connective meaning both conditions must be true at the same time.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">または<rt>または</rt></ruby><span class="meaning">OR</span></span>
+      <span class="term-en">or (logical OR)</span>
+      <div class="term-def">A connective meaning at least one of the conditions is true.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">条件<rt>じょうけん</rt></ruby><span class="meaning">condition</span></span>
+      <span class="term-en">condition</span>
+      <div class="term-def">A requirement used to decide which elements belong to a set.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">所持者<rt>しょじしゃ</rt></ruby><span class="meaning">holder</span></span>
+      <span class="term-en">holder (of a license)</span>
+      <div class="term-def">A person who holds a qualification, e.g. an IT Passport holder.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">網掛け部分<rt>あみかけぶぶん</rt></ruby><span class="meaning">shaded region</span></span>
+      <span class="term-en">shaded region</span>
+      <div class="term-def">The shaded part of a Venn diagram, showing the set being described.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">満たす<rt>みたす</rt></ruby><span class="meaning">to satisfy</span></span>
+      <span class="term-en">to satisfy</span>
+      <div class="term-def">To meet a condition or requirement.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">含まれる<rt>ふくまれる</rt></ruby><span class="meaning">to be contained</span></span>
+      <span class="term-en">to be contained</span>
+      <div class="term-def">To be included inside a set or group.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">表記する<rt>ひょうきする</rt></ruby><span class="meaning">to notate</span></span>
+      <span class="term-en">to notate</span>
+      <div class="term-def">To write something using a symbol or notation.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">記号<rt>きごう</rt></ruby><span class="meaning">symbol</span></span>
+      <span class="term-en">symbol</span>
+      <div class="term-def">A mark such as ∩, ∪, or ⊂ used to express a mathematical idea.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">考案<rt>こうあん</rt></ruby><span class="meaning">to devise</span></span>
+      <span class="term-en">to devise</span>
+      <div class="term-def">To think up and design a new method or idea.</div>
+    </div>
+
+    <div class="term-item">
+      <span class="word" onclick="toggleWord(event, this)"><ruby class="term-jp">頭文字<rt>かしらもじ</rt></ruby><span class="meaning">initial letter</span></span>
+      <span class="term-en">initial letter</span>
+      <div class="term-def">The first letter of a word, such as the c in Complement.</div>
+    </div>
+  </div>
+
+  <div class="table-note">
+    <strong><span class="word" onclick="toggleWord(event, this)"><ruby>注記<rt>ちゅうき</rt></ruby><span class="meaning">note</span></span>:</strong> The original material contained a few obvious transcription (OCR) errors — for example
+    ペン図 → ベン図, AMB → A∩B, AUB → A∪B, ASB → A⊂B, ACB → A⊆B. These were corrected where the intended wording was
+    clear, and a few example sentences that were cut off mid-sentence were restored to their natural completed form.
+    No page numbers or question numbers appear in the original material, so the （1）〜（10） labels are sequential blanks
+    introduced for study purposes, not original numbering.
+  </div>
+
+  <script>
+    function toggleWord(event, el) {
+      if (event && event.stopPropagation) event.stopPropagation();
+      el.classList.toggle('revealed');
+    }
+    function toggleAnswers() {
+      var hidden = document.body.classList.toggle('hide-answers');
+      var btn = document.getElementById('toggleAnswers');
+      if (btn) { btn.classList.toggle('active', !hidden); btn.textContent = hidden ? 'Show Answers' : 'Hide Answers'; btn.setAttribute('aria-pressed', String(hidden)); }
+    }
+  </script>
+
+<script>
+(function(){
+  const body=document.body;
+  const toolbar=document.querySelector('.toolbar');
+  const progress=document.createElement('div'); progress.className='study-progress'; progress.setAttribute('aria-hidden','true'); progress.innerHTML='<span></span>'; document.body.prepend(progress);
+  const progressBar=progress.firstElementChild;
+  function updateProgress(){const max=document.documentElement.scrollHeight-window.innerHeight;progressBar.style.width=(max>0?Math.min(100,window.scrollY/max*100):100)+'%';}
+  window.addEventListener('scroll',updateProgress,{passive:true}); window.addEventListener('resize',updateProgress); updateProgress();
+  if(toolbar){
+    const tools=document.createElement('div'); tools.className='study-tools'; tools.setAttribute('aria-label','Study display controls');
+    tools.innerHTML='<button type="button" id="meaningsToggle" aria-pressed="false">Show all meanings</button><button type="button" id="themeToggle" aria-pressed="false">Dark mode</button><span class="tool-spacer"></span><span class="font-size-label">Text size</span><button type="button" id="fontNormal" aria-pressed="true" aria-label="Normal text size">A</button><button type="button" id="fontLarge" aria-pressed="false" aria-label="Large text size">A+</button><button type="button" id="fontLarger" aria-pressed="false" aria-label="Extra large text size">A++</button><button type="button" id="resetWords">Reset revealed words</button>';
+    toolbar.appendChild(tools);
+    const meanings=document.getElementById('meaningsToggle');
+    meanings.addEventListener('click',()=>{const on=body.classList.toggle('study-show-meanings');meanings.setAttribute('aria-pressed',String(on));meanings.textContent=on?'Hide all meanings':'Show all meanings';});
+    const theme=document.getElementById('themeToggle'); theme.addEventListener('click',()=>{const on=body.classList.toggle('study-dark');theme.setAttribute('aria-pressed',String(on));theme.textContent=on?'Light mode':'Dark mode';});
+    function setFont(size){body.classList.remove('study-large-text','study-larger-text');if(size===1)body.classList.add('study-large-text');if(size===2)body.classList.add('study-larger-text');[['fontNormal',0],['fontLarge',1],['fontLarger',2]].forEach(([id,n])=>document.getElementById(id).setAttribute('aria-pressed',String(n===size)));}
+    document.getElementById('fontNormal').addEventListener('click',()=>setFont(0));document.getElementById('fontLarge').addEventListener('click',()=>setFont(1));document.getElementById('fontLarger').addEventListener('click',()=>setFont(2));
+    document.getElementById('resetWords').addEventListener('click',()=>{body.querySelectorAll('.word.revealed').forEach(el=>el.classList.remove('revealed'));});
+  }
+  // Make existing word-by-word glossary items keyboard accessible.
+  document.querySelectorAll('.word[onclick], .answer-word[onclick]').forEach(el=>{if(!el.hasAttribute('tabindex'))el.setAttribute('tabindex','0');if(!el.hasAttribute('role'))el.setAttribute('role','button');el.addEventListener('keydown',ev=>{if((ev.key==='Enter'||ev.key===' ')&&ev.target===el){ev.preventDefault();el.click();}});});
+})();
+</script>
+</body>
+</html>

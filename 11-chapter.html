@@ -1,0 +1,2018 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ITパスポート 第7章 — プログラミング・プログラム言語（Part 3）</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #f5f6f8;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans",
+      "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif;
+    color: #2c3e50; line-height: 1.8; padding-bottom: 60px;
+  }
+  .container { max-width: 820px; margin: 0 auto; padding: 0 20px; }
+  .header { padding: 50px 0 30px; text-align: center; }
+  .chapter-label {
+    font-size: 13px; letter-spacing: 2px; text-transform: uppercase;
+    color: #8a94a6; margin-bottom: 8px;
+  }
+  .header h1 { font-size: 28px; color: #16213e; margin-bottom: 12px; letter-spacing: 1px; line-height: 1.6; }
+  .header .subtitle { font-size: 14px; color: #8a94a6; }
+  .toolbar {
+    position: sticky; top: 0; background: rgba(245, 246, 248, 0.95);
+    backdrop-filter: blur(8px); padding: 12px 0;
+    border-bottom: 1px solid #e3e6ea; z-index: 100;
+  }
+  .toolbar-inner {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 10px;
+  }
+  .toolbar-instruction { font-size: 13px; color: #8a94a6; }
+  .toolbar-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .answer-btn, .mini-btn {
+    background: #e07a5f; color: white; border: none;
+    padding: 9px 18px; border-radius: 20px; font-size: 13px;
+    cursor: pointer; font-family: inherit;
+    transition: background 0.2s, transform 0.1s; letter-spacing: 0.5px;
+  }
+  .mini-btn { background: #4a6fa5; padding: 8px 14px; }
+  .answer-btn:hover { background: #d06a4f; }
+  .mini-btn:hover { background: #3d5f8f; }
+  .answer-btn:active, .mini-btn:active { transform: scale(0.97); }
+  .answer-btn.active { background: #4a6fa5; }
+  .mini-btn.off { background: #b4bac4; }
+  .section { margin-top: 55px; scroll-margin-top: 120px; }
+  .section-header { cursor: pointer; user-select: none; }
+  .section-chevron {
+    display: inline-block; color: #e07a5f; font-size: 18px;
+    margin-right: 6px; transition: transform 0.25s;
+  }
+  .section.collapsed .section-chevron { transform: rotate(-90deg); }
+  .section-badge {
+    display: inline-block; background: #16213e; color: white;
+    font-size: 13px; padding: 4px 16px; border-radius: 15px;
+    margin-bottom: 12px; letter-spacing: 1px;
+  }
+  .section h2 { font-size: 23px; color: #16213e; margin-bottom: 4px; line-height: 1.9; }
+  .section .heading-translation {
+    font-size: 13px; color: #4a6fa5; margin-bottom: 24px; font-style: italic;
+  }
+  .section.collapsed .section-content { display: none; }
+  .sentence-block { margin-bottom: 8px; }
+  .divider { border: none; border-top: 1px dashed #d9dde3; margin: 28px 0; }
+  .japanese { font-size: 21px; line-height: 2.6; margin-bottom: 14px; }
+  .word {
+    cursor: pointer; border-radius: 4px; padding: 2px 3px;
+    transition: background 0.15s; display: inline;
+  }
+  .word:hover { background: #eef2f7; }
+  .word.revealed { background: #e3eaf4; }
+  .meaning {
+    display: none; font-size: 12px; color: #4a6fa5;
+    margin-left: 3px; vertical-align: middle; font-weight: 500;
+  }
+  .word.revealed .meaning { display: inline; }
+  ruby rt { font-size: 10px; color: #9aa3b0; letter-spacing: 0; line-height: 1; }
+  body.hide-furigana rt { display: none; }
+  .translation {
+    background: #eef2f7; border-left: 3px solid #4a6fa5;
+    padding: 12px 18px; border-radius: 0 8px 8px 0; margin-bottom: 10px;
+  }
+  .translation-title {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px;
+    color: #4a6fa5; margin-bottom: 4px; font-weight: 600;
+  }
+  .translation p { font-size: 14px; color: #4a6fa5; line-height: 1.7; }
+  body.hide-translations .translation { display: none; }
+  .answer-num { font-size: 14px; color: #e07a5f; font-weight: 600; margin: 0 2px; }
+  .blank { display: none; color: #e07a5f; letter-spacing: 1px; }
+  body.hide-answers .answer-text { display: none; }
+  body.hide-answers .blank { display: inline; }
+  body.hide-answers .answer-word { background: #fdf1ed; }
+  .table-block {
+    background: white; border-radius: 12px; padding: 24px;
+    margin: 24px 0; box-shadow: 0 2px 8px rgba(22, 33, 62, 0.06);
+    overflow-x: auto;
+  }
+  .table-block h3 {
+    font-size: 15px; color: #16213e; margin-bottom: 14px;
+    border-bottom: 2px solid #f0f1f3; padding-bottom: 8px;
+  }
+  .table-block .table-hint {
+    font-size: 11px; color: #b4bac4; text-align: center; margin-bottom: 10px;
+  }
+  .data-table { width: 100%; border-collapse: collapse; min-width: 480px; }
+  .data-table th {
+    background: #16213e; color: white; font-size: 13px;
+    padding: 10px 12px; text-align: left; letter-spacing: 1px;
+    font-weight: 600; white-space: nowrap;
+  }
+  .data-table td {
+    border: 1px solid #e3e6ea; font-size: 16px; color: #16213e;
+    padding: 10px 12px; vertical-align: top; line-height: 2;
+  }
+  .data-table tbody tr { cursor: pointer; transition: background 0.15s; }
+  .data-table tbody tr:hover td { background: #f5f8fc; }
+  .data-table tbody tr.selected td { background: #e3eaf4; }
+  .data-table td .word, .data-table th .word { padding: 1px 2px; }
+  .data-table th .word { color: white; }
+  .data-table th .word:hover { background: #2a3d63; }
+  .data-table th .word.revealed { background: #3d5f8f; color: white; }
+  .data-table th .meaning { color: #cdd9ec; }
+  .data-table td.tag-cell {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 15px; font-weight: 600; color: #4a6fa5; white-space: nowrap;
+  }
+  .cell-info {
+    background: #eef2f7; border-radius: 8px; padding: 10px 16px;
+    font-size: 14px; color: #4a6fa5; line-height: 2;
+    margin-top: 12px; min-height: 20px; white-space: normal;
+  }
+  .fb-en {
+    display: block; font-size: 12px; color: #8a94a6;
+    line-height: 1.7; margin-top: 6px;
+  }
+  .table-note {
+    font-size: 12px; color: #8a94a6; text-align: center;
+    margin-top: 12px; line-height: 1.8; white-space: normal;
+  }
+  .glossary { margin-top: 70px; }
+  .glossary h2 { font-size: 24px; color: #16213e; text-align: center; }
+  .glossary .glossary-subtitle { text-align: center; font-size: 13px; color: #8a94a6; margin-bottom: 30px; }
+  .glossary-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px;
+  }
+  .glossary-card {
+    background: white; border-radius: 12px; padding: 20px;
+    box-shadow: 0 2px 8px rgba(22, 33, 62, 0.06);
+    cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+    position: relative;
+  }
+  .glossary-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(22, 33, 62, 0.1); }
+  .learned-badge {
+    position: absolute; top: 12px; right: 14px; font-size: 11px;
+    color: #2e9e6b; font-weight: 700; display: none;
+  }
+  .glossary-card.learned { border: 2px solid #2e9e6b; }
+  .glossary-card.learned .learned-badge { display: block; }
+  .glossary-card .term-jp { font-size: 17px; color: #16213e; margin-bottom: 2px; line-height: 1.9; }
+  .glossary-card .term-jp rt { font-size: 10px; color: #9aa3b0; }
+  .glossary-card .term-en { font-size: 12px; color: #4a6fa5; font-weight: 600; margin-bottom: 8px; }
+  .glossary-card .term-def { font-size: 12.5px; color: #6b7482; line-height: 1.6; }
+  .reset-link { color: #e07a5f; cursor: pointer; text-decoration: underline; }
+  .quiz-block {
+    background: white; border-radius: 12px; padding: 26px;
+    margin-top: 40px; box-shadow: 0 2px 8px rgba(22, 33, 62, 0.06);
+    text-align: center;
+  }
+  .quiz-block h2 { font-size: 22px; color: #16213e; margin-bottom: 6px; }
+  .quiz-sub { font-size: 12px; color: #8a94a6; margin-bottom: 18px; line-height: 1.9; }
+  .quiz-progress { font-size: 12px; color: #e07a5f; font-weight: 600; margin-bottom: 10px; }
+  .quiz-question { font-size: 19px; color: #16213e; line-height: 2.4; margin: 10px 0 6px; min-height: 60px; }
+  .quiz-question rt { font-size: 10px; color: #9aa3b0; }
+  .quiz-translation {
+    background: #eef2f7; border-left: 3px solid #4a6fa5;
+    padding: 10px 16px; border-radius: 0 8px 8px 0;
+    margin: 8px 0 20px; text-align: left;
+  }
+  .quiz-translation .translation-title {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px;
+    color: #4a6fa5; margin-bottom: 4px; font-weight: 600;
+  }
+  .quiz-translation p { font-size: 14px; color: #4a6fa5; line-height: 1.7; }
+  body.hide-translations .quiz-translation { display: none; }
+  .quiz-choices {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    max-width: 560px; margin: 0 auto 16px;
+  }
+  .quiz-choice {
+    background: #f0f3f8; border: 2px solid #d9dfe8; border-radius: 10px;
+    padding: 12px 10px; font-size: 16px; color: #16213e;
+    cursor: pointer; font-family: inherit; line-height: 2;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  }
+  .quiz-choice rt { font-size: 10px; color: #9aa3b0; }
+  .quiz-choice .word { padding: 1px 2px; }
+  .quiz-choice .meaning { font-size: 11px; }
+  .quiz-choice:hover { background: #e3eaf4; border-color: #4a6fa5; }
+  .quiz-choice:active { transform: scale(0.98); }
+  .quiz-choice.correct { background: #e3f4ea; border-color: #2e9e6b; color: #1d6b49; font-weight: 600; }
+  .quiz-choice.wrong { background: #fbe7e2; border-color: #e07a5f; color: #b5533d; font-weight: 600; }
+  .quiz-choice.disabled { cursor: default; }
+  .quiz-choice.disabled:hover { background: #f0f3f8; border-color: #d9dfe8; }
+  .quiz-choice.disabled.correct:hover { background: #e3f4ea; border-color: #2e9e6b; }
+  .quiz-choice.disabled.wrong:hover { background: #fbe7e2; border-color: #e07a5f; }
+  .quiz-feedback {
+    font-size: 14px; color: #4a6fa5; min-height: 60px; margin-bottom: 14px;
+    line-height: 2; padding: 0 10px; text-align: left;
+  }
+  .quiz-feedback rt { font-size: 10px; color: #9aa3b0; }
+  .quiz-feedback .word { padding: 1px 2px; }
+  .quiz-feedback strong.ok { color: #2e9e6b; }
+  .quiz-feedback strong.ng { color: #e07a5f; }
+  .quiz-btns { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+  .quiz-score { font-size: 13px; color: #8a94a6; margin-top: 16px; }
+  .quiz-result { font-size: 20px; color: #16213e; font-weight: 700; margin: 14px 0; }
+  .footer { margin-top: 60px; text-align: center; font-size: 12px; color: #b4bac4; }
+  @media (max-width: 600px) {
+    .header h1 { font-size: 21px; }
+    .section h2 { font-size: 19px; }
+    .japanese { font-size: 18px; }
+    .quiz-question { font-size: 17px; }
+    .quiz-choice { font-size: 14px; }
+    .toolbar-inner { flex-direction: column; align-items: flex-start; }
+    .glossary-grid { grid-template-columns: 1fr; }
+    .quiz-choices { grid-template-columns: 1fr; }
+    .data-table td { font-size: 14px; padding: 8px 10px; }
+  }
+</style>
+
+<style id="library-navigation-style">
+.library-nav{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:0 0 22px;padding:12px 14px;border:1px solid #dfe3ed;border-radius:12px;background:rgba(255,255,255,.92);font:14px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;position:relative;z-index:5}
+.library-nav a{color:#4357a8;text-decoration:none;font-weight:650;padding:7px 9px;border-radius:8px}
+.library-nav a:focus-visible{outline:3px solid #9ba9f3;outline-offset:2px}.library-nav a:hover{background:#eef1ff}
+@media(max-width:600px){.library-nav{gap:4px;padding:9px}.library-nav a{font-size:12px;padding:7px 5px}}
+@media(prefers-color-scheme:dark){.library-nav{background:#222635;border-color:#3a4054}.library-nav a{color:#bdc7ff}.library-nav a:hover{background:#303956}}
+</style>
+</head>
+<body class="hide-answers">
+<nav class="library-nav" aria-label="Chapter navigation"><a href="index.html">← All notes</a><a href="10-chapter.html">← Previous</a><a href="12-chapter.html">Next →</a></nav>
+
+<div class="header">
+  <div class="container">
+    <div class="chapter-label">Chapter 7 · IT Passport · テクノロジー系 · 7-2-3 / 7-2-4</div>
+    <h1>
+      <span class="word" onclick="toggleWord(this, event)">プログラミング<span class="meaning">programming</span></span>・
+      <span class="word" onclick="toggleWord(this, event)">プログラム<span class="meaning">program</span></span>
+      <span class="word" onclick="toggleWord(this, event)"><ruby>言語<rt>げんご</rt></ruby><span class="meaning">language</span></span><br>
+      <span class="word" onclick="toggleWord(this, event)">マークアップ<span class="meaning">markup</span></span>
+      <span class="word" onclick="toggleWord(this, event)"><ruby>言語<rt>げんご</rt></ruby><span class="meaning">language</span></span>
+    </h1>
+    <div class="subtitle">
+      <span class="word" onclick="toggleWord(this, event)"><ruby>対策<rt>たいさく</rt></ruby><span class="meaning">exam prep</span></span>
+      <span class="word" onclick="toggleWord(this, event)"><ruby>学習<rt>がくしゅう</rt></ruby><span class="meaning">study</span></span>
+      ワークシート Part 3 — Programming, Programming Languages &amp; Markup Languages
+    </div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <div class="container toolbar-inner">
+    <span class="toolbar-instruction">
+      Tap any word to reveal its meaning ·
+      <span class="word" onclick="toggleWord(this, event)"><ruby>単語<rt>たんご</rt></ruby><span class="meaning">words</span></span>を
+      <span class="word" onclick="toggleWord(this, event)">タップ<span class="meaning">tap</span></span>して
+      <span class="word" onclick="toggleWord(this, event)"><ruby>意味<rt>いみ</rt></ruby><span class="meaning">meaning</span></span>を
+      <span class="word" onclick="toggleWord(this, event)"><ruby>表示<rt>ひょうじ</rt></ruby><span class="meaning">display</span></span>
+    </span>
+    <div class="toolbar-btns">
+      <button class="mini-btn" onclick="toggleFurigana(event)">Furigana ON</button>
+      <button class="mini-btn" onclick="toggleTranslations(event)">Translations ON</button>
+      <button class="mini-btn" onclick="scrollTo0('quizBlock')">Quiz</button>
+      <button class="answer-btn" id="answerBtn" onclick="toggleAnswers()">Show Answers ✓</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ============ SECTION A ============ -->
+  <div class="section" id="sectionA">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-chevron">▾</span><span class="section-badge">Section A · 7-2-3</span>
+      <h2>
+        <span class="word" onclick="toggleWord(this, event)">プログラミング<span class="meaning">programming</span></span>・
+        <span class="word" onclick="toggleWord(this, event)">プログラム<span class="meaning">program</span></span>
+        <span class="word" onclick="toggleWord(this, event)"><ruby>言語<rt>げんご</rt></ruby><span class="meaning">language</span></span>とは？
+      </h2>
+      <div class="heading-translation">What are Programming &amp; Programming Languages?</div>
+    </div>
+    <div class="section-content">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)">プログラム<span class="meaning">program</span></span>
+          <span class="word" onclick="toggleWord(this, event)">とは<span class="meaning">as for ~ (definition marker)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">、<span class="meaning">comma</span></span>
+          <span class="word" onclick="toggleWord(this, event)">アルゴリズム<span class="meaning">algorithm</span></span>
+          <span class="word" onclick="toggleWord(this, event)">を<span class="meaning">object marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)">コンピュータ<span class="meaning">computer</span></span>
+          <span class="word" onclick="toggleWord(this, event)">に<span class="meaning">to</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>指示<rt>しじ</rt></ruby>する<span class="meaning">to instruct</span></span>
+          <span class="word" onclick="toggleWord(this, event)">ための<span class="meaning">for the purpose of</span></span>
+          <span class="word answer-word" onclick="toggleWord(this, event)">
+            <span class="answer-text">（<ruby>文書<rt>ぶんしょ</rt></ruby>）</span>
+            <span class="answer-num">（1）</span>
+            <span class="blank">＿＿＿＿</span>
+            <span class="meaning">document</span>
+          </span>
+          <span class="word" onclick="toggleWord(this, event)">です<span class="meaning">is (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>A program is a document used to give instructions (an algorithm) to a computer.</p>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)">プログラム<span class="meaning">program</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>言語<rt>げんご</rt></ruby><span class="meaning">language</span></span>
+          <span class="word" onclick="toggleWord(this, event)">とは<span class="meaning">as for ~ (definition marker)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">、<span class="meaning">comma</span></span>
+          <span class="word" onclick="toggleWord(this, event)">プログラム<span class="meaning">program</span></span>
+          <span class="word" onclick="toggleWord(this, event)">を<span class="meaning">object marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>記述<rt>きじゅつ</rt></ruby>する<span class="meaning">to write / describe</span></span>
+          <span class="word" onclick="toggleWord(this, event)">ための<span class="meaning">for the purpose of</span></span>
+          <span class="word answer-word" onclick="toggleWord(this, event)">
+            <span class="answer-text">（<ruby>規則<rt>きそく</rt></ruby>・<ruby>文法<rt>ぶんぽう</rt></ruby>）</span>
+            <span class="answer-num">（2）</span>
+            <span class="blank">＿＿＿＿＿＿</span>
+            <span class="meaning">rules and grammar</span>
+          </span>
+          <span class="word" onclick="toggleWord(this, event)">です<span class="meaning">is (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>A programming language is the set of rules and grammar used to write programs.</p>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)">プログラミング<span class="meaning">programming</span></span>
+          <span class="word" onclick="toggleWord(this, event)">とは<span class="meaning">as for ~ (definition marker)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">、<span class="meaning">comma</span></span>
+          <span class="word" onclick="toggleWord(this, event)">プログラム<span class="meaning">program</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>言語<rt>げんご</rt></ruby><span class="meaning">language</span></span>
+          <span class="word" onclick="toggleWord(this, event)">を<span class="meaning">object marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>使<rt>つか</rt></ruby>って<span class="meaning">using</span></span>
+          <span class="word" onclick="toggleWord(this, event)">アルゴリズム<span class="meaning">algorithm</span></span>
+          <span class="word" onclick="toggleWord(this, event)">を<span class="meaning">object marker</span></span>
+          <span class="word answer-word" onclick="toggleWord(this, event)">
+            <span class="answer-text">（<ruby>記述<rt>きじゅつ</rt></ruby>する）</span>
+            <span class="answer-num">（3）</span>
+            <span class="blank">＿＿＿＿＿</span>
+            <span class="meaning">to write out</span>
+          </span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>事<rt>こと</rt></ruby><span class="meaning">the act of</span></span>
+          <span class="word" onclick="toggleWord(this, event)">です<span class="meaning">is (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>Programming means writing out an algorithm using a programming language.</p>
+        </div>
+      </div>
+
+      <div class="table-block">
+        <h3>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>水準<rt>すいじゅん</rt></ruby><span class="meaning">level</span></span>による
+          <span class="word" onclick="toggleWord(this, event)"><ruby>分類<rt>ぶんるい</rt></ruby><span class="meaning">classification</span></span> — Language Levels
+        </h3>
+        <div class="table-hint">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>行<rt>ぎょう</rt></ruby><span class="meaning">row</span></span>をタップして
+          <span class="word" onclick="toggleWord(this, event)"><ruby>解説<rt>かいせつ</rt></ruby><span class="meaning">explanation</span></span>を
+          <span class="word" onclick="toggleWord(this, event)"><ruby>表示<rt>ひょうじ</rt></ruby><span class="meaning">display</span></span> — Tap a row to see the explanation
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th><span class="word" onclick="toggleWord(this, event)"><ruby>用語<rt>ようご</rt></ruby><span class="meaning">term</span></span></th>
+              <th><span class="word" onclick="toggleWord(this, event)"><ruby>特徴<rt>とくちょう</rt></ruby><span class="meaning">characteristic</span></span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr onclick="selectRow(this, 0, event)">
+              <td><span class="word" onclick="toggleWord(this, event)"><ruby>低水準言語<rt>ていすいじゅんげんご</rt></ruby><span class="meaning">low-level language</span></span></td>
+              <td><span class="word answer-word" onclick="toggleWord(this, event)"><span class="answer-text">（コンピュータ）</span><span class="answer-num">（4）</span><span class="blank">＿＿＿＿＿</span><span class="meaning">computer</span></span>
+                に<span class="word" onclick="toggleWord(this, event)"><ruby>近<rt>ちか</rt></ruby>い<span class="meaning">close to</span></span>
+                （<span class="word" onclick="toggleWord(this, event)">アセンブラ<span class="meaning">assembler</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>言語<rt>げんご</rt></ruby><span class="meaning">language</span></span>・
+                <span class="word" onclick="toggleWord(this, event)"><ruby>機械語<rt>きかいご</rt></ruby><span class="meaning">machine language</span></span>）</td>
+            </tr>
+            <tr onclick="selectRow(this, 1, event)">
+              <td><span class="word" onclick="toggleWord(this, event)"><ruby>高水準言語<rt>こうすいじゅんげんご</rt></ruby><span class="meaning">high-level language</span></span></td>
+              <td><span class="word answer-word" onclick="toggleWord(this, event)"><span class="answer-text">（<ruby>人間<rt>にんげん</rt></ruby>の<ruby>言葉<rt>ことば</rt></ruby>）</span><span class="answer-num">（5）</span><span class="blank">＿＿＿＿＿</span><span class="meaning">human language</span></span>
+                に<span class="word" onclick="toggleWord(this, event)"><ruby>近<rt>ちか</rt></ruby>い<span class="meaning">close to</span></span></td>
+            </tr>
+            <tr onclick="selectRow(this, 2, event)">
+              <td><span class="word" onclick="toggleWord(this, event)">スクリプト<span class="meaning">script</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>言語<rt>げんご</rt></ruby><span class="meaning">language</span></span></td>
+              <td><span class="word" onclick="toggleWord(this, event)"><ruby>機械語<rt>きかいご</rt></ruby><span class="meaning">machine language</span></span>
+                への<span class="word" onclick="toggleWord(this, event)"><ruby>変換<rt>へんかん</rt></ruby><span class="meaning">conversion</span></span>を
+                <span class="word answer-word" onclick="toggleWord(this, event)"><span class="answer-text">（<ruby>省略<rt>しょうりゃく</rt></ruby>）</span><span class="answer-num">（6）</span><span class="blank">＿＿＿＿</span><span class="meaning">omit / skip</span></span>
+                して<span class="word" onclick="toggleWord(this, event)"><ruby>簡単<rt>かんたん</rt></ruby>に<span class="meaning">easily</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>実行<rt>じっこう</rt></ruby><span class="meaning">execute</span></span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="cell-info">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>行<rt>ぎょう</rt></ruby><span class="meaning">row</span></span>をタップして
+          <span class="word" onclick="toggleWord(this, event)"><ruby>解説<rt>かいせつ</rt></ruby><span class="meaning">explanation</span></span>を
+          <span class="word" onclick="toggleWord(this, event)"><ruby>表示<rt>ひょうじ</rt></ruby><span class="meaning">display</span></span> — Tap a row to see the explanation
+        </div>
+        <div class="table-note">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>低水準<rt>ていすいじゅん</rt></ruby><span class="meaning">low-level</span></span> ≈ コンピュータ ·
+          <span class="word" onclick="toggleWord(this, event)"><ruby>高水準<rt>こうすいじゅん</rt></ruby><span class="meaning">high-level</span></span> ≈
+          <span class="word" onclick="toggleWord(this, event)"><ruby>人間<rt>にんげん</rt></ruby>の<span class="meaning">human</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>言葉<rt>ことば</rt></ruby><span class="meaning">language</span></span> ·
+          <span class="word" onclick="toggleWord(this, event)">スクリプト<span class="meaning">script</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>言語<rt>げんご</rt></ruby><span class="meaning">language</span></span>は
+          <span class="word" onclick="toggleWord(this, event)"><ruby>変換<rt>へんかん</rt></ruby><span class="meaning">conversion</span></span>を
+          <span class="word" onclick="toggleWord(this, event)"><ruby>省略<rt>しょうりゃく</rt></ruby><span class="meaning">skips</span></span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ SECTION B ============ -->
+  <div class="section" id="sectionB">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-chevron">▾</span><span class="section-badge">Section B · 7-2-3</span>
+      <h2>
+        <span class="word" onclick="toggleWord(this, event)">プログラム<span class="meaning">program</span></span>
+        <span class="word" onclick="toggleWord(this, event)"><ruby>言語<rt>げんご</rt></ruby><span class="meaning">language</span></span>の
+        <span class="word" onclick="toggleWord(this, event)"><ruby>代表例<rt>だいひょうれい</rt></ruby><span class="meaning">representative examples</span></span>
+      </h2>
+      <div class="heading-translation">Representative Programming Languages</div>
+    </div>
+    <div class="section-content">
+
+      <div class="table-block">
+        <h3>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>言語<rt>げんご</rt></ruby><span class="meaning">language</span></span>と
+          <span class="word" onclick="toggleWord(this, event)"><ruby>特徴<rt>とくちょう</rt></ruby><span class="meaning">characteristic</span></span> — Languages &amp; Their Characteristics
+        </h3>
+        <div class="table-hint">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>行<rt>ぎょう</rt></ruby><span class="meaning">row</span></span>をタップして
+          <span class="word" onclick="toggleWord(this, event)"><ruby>解説<rt>かいせつ</rt></ruby><span class="meaning">explanation</span></span>を
+          <span class="word" onclick="toggleWord(this, event)"><ruby>表示<rt>ひょうじ</rt></ruby><span class="meaning">display</span></span> — Tap a row to see the explanation
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th><span class="word" onclick="toggleWord(this, event)"><ruby>言語<rt>げんご</rt></ruby><span class="meaning">language</span></span></th>
+              <th><span class="word" onclick="toggleWord(this, event)"><ruby>特徴<rt>とくちょう</rt></ruby><span class="meaning">characteristic / main uses</span></span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr onclick="selectRow(this, 3, event)">
+              <td>C</td>
+              <td>UNIX・OS・<span class="word" onclick="toggleWord(this, event)"><ruby>応用<rt>おうよう</rt></ruby><span class="meaning">application</span></span>
+                <span class="word" onclick="toggleWord(this, event)">ソフトウェア<span class="meaning">software</span></span>
+                <span class="word" onclick="toggleWord(this, event)">など<span class="meaning">and so on</span></span></td>
+            </tr>
+            <tr onclick="selectRow(this, 4, event)">
+              <td>Java</td>
+              <td><span class="word" onclick="toggleWord(this, event)">インターネット<span class="meaning">the internet</span></span>、
+                <span class="word" onclick="toggleWord(this, event)"><ruby>組込<rt>くみこ</rt></ruby>み<span class="meaning">embedded</span></span>
+                <span class="word" onclick="toggleWord(this, event)">システム<span class="meaning">system</span></span>、
+                <span class="word" onclick="toggleWord(this, event)">オブジェクト<span class="meaning">object</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>指向<rt>しこう</rt></ruby><span class="meaning">oriented</span></span></td>
+            </tr>
+            <tr onclick="selectRow(this, 5, event)">
+              <td>COBOL</td>
+              <td><span class="word" onclick="toggleWord(this, event)"><ruby>事務処理<rt>じむしょり</rt></ruby><span class="meaning">business / office processing</span></span></td>
+            </tr>
+            <tr onclick="selectRow(this, 6, event)">
+              <td>Fortran</td>
+              <td><span class="word" onclick="toggleWord(this, event)"><ruby>科学技術<rt>かがくぎじゅつ</rt></ruby><span class="meaning">science and technology</span></span></td>
+            </tr>
+            <tr onclick="selectRow(this, 7, event)">
+              <td>Python</td>
+              <td><span class="word" onclick="toggleWord(this, event)">テキスト<span class="meaning">text</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>処理<rt>しょり</rt></ruby><span class="meaning">processing</span></span>、
+                <span class="word" onclick="toggleWord(this, event)"><ruby>応用<rt>おうよう</rt></ruby><span class="meaning">application</span></span>、
+                AI、<span class="word" onclick="toggleWord(this, event)">データ<span class="meaning">data</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>分析<rt>ぶんせき</rt></ruby><span class="meaning">analysis</span></span>、
+                <span class="word" onclick="toggleWord(this, event)">グラフ<span class="meaning">graph</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>描画<rt>びょうが</rt></ruby><span class="meaning">drawing</span></span></td>
+            </tr>
+            <tr onclick="selectRow(this, 8, event)">
+              <td>R</td>
+              <td><span class="word" onclick="toggleWord(this, event)"><ruby>統計解析<rt>とうけいかいせき</rt></ruby><span class="meaning">statistical analysis</span></span>、
+                AI・<span class="word" onclick="toggleWord(this, event)"><ruby>機械学習<rt>きかいがくしゅう</rt></ruby><span class="meaning">machine learning</span></span>、
+                <span class="word" onclick="toggleWord(this, event)">データ<span class="meaning">data</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>分析<rt>ぶんせき</rt></ruby><span class="meaning">analysis</span></span>、
+                <span class="word" onclick="toggleWord(this, event)">グラフ<span class="meaning">graph</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>描画<rt>びょうが</rt></ruby><span class="meaning">drawing</span></span></td>
+            </tr>
+            <tr onclick="selectRow(this, 9, event)">
+              <td>JavaScript</td>
+              <td>HTMLに<span class="word" onclick="toggleWord(this, event)"><ruby>組込<rt>くみこ</rt></ruby>まれ<span class="meaning">embedded</span></span>、
+                <span class="word" onclick="toggleWord(this, event)">Web<span class="meaning">web</span></span>
+                <span class="word" onclick="toggleWord(this, event)">ブラウザ<span class="meaning">browser</span></span>
+                で<span class="word" onclick="toggleWord(this, event)"><ruby>実行<rt>じっこう</rt></ruby><span class="meaning">executed</span></span></td>
+            </tr>
+            <tr onclick="selectRow(this, 10, event)">
+              <td>Perl</td>
+              <td><span class="word" onclick="toggleWord(this, event)">テキスト<span class="meaning">text</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>処理<rt>しょり</rt></ruby><span class="meaning">processing</span></span>・
+                <span class="word" onclick="toggleWord(this, event)">Web<span class="meaning">web</span></span>
+                <span class="word" onclick="toggleWord(this, event)">ページ<span class="meaning">page</span></span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="cell-info">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>行<rt>ぎょう</rt></ruby><span class="meaning">row</span></span>をタップして
+          <span class="word" onclick="toggleWord(this, event)"><ruby>解説<rt>かいせつ</rt></ruby><span class="meaning">explanation</span></span>を
+          <span class="word" onclick="toggleWord(this, event)"><ruby>表示<rt>ひょうじ</rt></ruby><span class="meaning">display</span></span> — Tap a row to see the explanation
+        </div>
+        <div class="table-note">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>試験<rt>しけん</rt></ruby><span class="meaning">exam</span></span>
+          ポイント: COBOL → <span class="word" onclick="toggleWord(this, event)"><ruby>事務処理<rt>じむしょり</rt></ruby><span class="meaning">business processing</span></span> ·
+          Fortran → <span class="word" onclick="toggleWord(this, event)"><ruby>科学技術<rt>かがくぎじゅつ</rt></ruby><span class="meaning">science &amp; technology</span></span> ·
+          R → <span class="word" onclick="toggleWord(this, event)"><ruby>統計<rt>とうけい</rt></ruby><span class="meaning">statistics</span></span> ·
+          JavaScript → <span class="word" onclick="toggleWord(this, event)">ブラウザ<span class="meaning">browser</span></span>で
+          <span class="word" onclick="toggleWord(this, event)"><ruby>実行<rt>じっこう</rt></ruby><span class="meaning">runs</span></span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ SECTION C ============ -->
+  <div class="section" id="sectionC">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-chevron">▾</span><span class="section-badge">Section C · 7-2-3</span>
+      <h2>
+        <span class="word" onclick="toggleWord(this, event)"><ruby>言語<rt>げんご</rt></ruby><span class="meaning">language</span></span>
+        プロセッサ（コンパイラ・インタプリタ）
+      </h2>
+      <div class="heading-translation">Language Processors: Compiler vs. Interpreter</div>
+    </div>
+    <div class="section-content">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>言語<rt>げんご</rt></ruby><span class="meaning">language</span></span>
+          <span class="word" onclick="toggleWord(this, event)">プロセッサ<span class="meaning">processor</span></span>
+          <span class="word" onclick="toggleWord(this, event)">とは<span class="meaning">as for ~ (definition marker)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">、<span class="meaning">comma</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>人間<rt>にんげん</rt></ruby><span class="meaning">human</span></span>
+          が<span class="word" onclick="toggleWord(this, event)"><ruby>書<rt>か</rt></ruby>いた<span class="meaning">wrote</span></span>
+          <span class="word" onclick="toggleWord(this, event)">ソース<span class="meaning">source</span></span>
+          <span class="word" onclick="toggleWord(this, event)">プログラム<span class="meaning">program</span></span>
+          を<span class="word" onclick="toggleWord(this, event)"><ruby>機械語<rt>きかいご</rt></ruby><span class="meaning">machine language</span></span>
+          に<span class="word" onclick="toggleWord(this, event)"><ruby>翻訳<rt>ほんやく</rt></ruby>する<span class="meaning">to translate</span></span>
+          <span class="word" onclick="toggleWord(this, event)">ソフトウェア<span class="meaning">software</span></span>
+          <span class="word" onclick="toggleWord(this, event)">です<span class="meaning">is (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>A language processor is software that translates the source program written by humans into machine language.</p>
+        </div>
+      </div>
+
+      <div class="table-block">
+        <h3>コンパイラとインタプリタ — Compiler vs. Interpreter</h3>
+        <div class="table-hint">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>行<rt>ぎょう</rt></ruby><span class="meaning">row</span></span>をタップして
+          <span class="word" onclick="toggleWord(this, event)"><ruby>解説<rt>かいせつ</rt></ruby><span class="meaning">explanation</span></span>を
+          <span class="word" onclick="toggleWord(this, event)"><ruby>表示<rt>ひょうじ</rt></ruby><span class="meaning">display</span></span> — Tap a row to see the explanation
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th><span class="word" onclick="toggleWord(this, event)"><ruby>項目<rt>こうもく</rt></ruby><span class="meaning">item</span></span></th>
+              <th><span class="word" onclick="toggleWord(this, event)">コンパイラ<span class="meaning">compiler</span></span></th>
+              <th><span class="word" onclick="toggleWord(this, event)">インタプリタ<span class="meaning">interpreter</span></span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr onclick="selectRow(this, 11, event)">
+              <td><span class="word" onclick="toggleWord(this, event)"><ruby>翻訳<rt>ほんやく</rt></ruby><span class="meaning">translation</span></span></td>
+              <td><span class="word" onclick="toggleWord(this, event)">ソース<span class="meaning">source</span></span>
+                <span class="word" onclick="toggleWord(this, event)">プログラム<span class="meaning">program</span></span>を
+                <span class="word answer-word" onclick="toggleWord(this, event)"><span class="answer-text">（<ruby>一括<rt>いっかつ</rt></ruby>して）</span><span class="answer-num">（7）</span><span class="blank">＿＿＿＿＿</span><span class="meaning">all at once</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>翻訳<rt>ほんやく</rt></ruby><span class="meaning">translate</span></span></td>
+              <td><span class="word answer-word" onclick="toggleWord(this, event)"><span class="answer-text">（1<ruby>命令<rt>めいれい</rt></ruby>ずつ）</span><span class="answer-num">（8）</span><span class="blank">＿＿＿＿＿</span><span class="meaning">one command at a time</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>翻訳<rt>ほんやく</rt></ruby>しながら<span class="meaning">while translating</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>実行<rt>じっこう</rt></ruby><span class="meaning">execute</span></span></td>
+            </tr>
+            <tr onclick="selectRow(this, 12, event)">
+              <td><span class="word" onclick="toggleWord(this, event)"><ruby>実行<rt>じっこう</rt></ruby><span class="meaning">execution</span></span></td>
+              <td><span class="word" onclick="toggleWord(this, event)"><ruby>翻訳<rt>ほんやく</rt></ruby><span class="meaning">translation</span></span>
+                <span class="word answer-word" onclick="toggleWord(this, event)"><span class="answer-text">（<ruby>後<rt>ご</rt></ruby>）</span><span class="answer-num">（9）</span><span class="blank">＿＿</span><span class="meaning">after</span></span>
+                に<span class="word" onclick="toggleWord(this, event)"><ruby>実行<rt>じっこう</rt></ruby><span class="meaning">execute</span></span></td>
+              <td><span class="word" onclick="toggleWord(this, event)"><ruby>翻訳<rt>ほんやく</rt></ruby><span class="meaning">translation</span></span>
+                <span class="word answer-word" onclick="toggleWord(this, event)"><span class="answer-text">（しながら）</span><span class="answer-num">（10）</span><span class="blank">＿＿＿＿</span><span class="meaning">while</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>実行<rt>じっこう</rt></ruby><span class="meaning">execute</span></span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="cell-info">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>行<rt>ぎょう</rt></ruby><span class="meaning">row</span></span>をタップして
+          <span class="word" onclick="toggleWord(this, event)"><ruby>解説<rt>かいせつ</rt></ruby><span class="meaning">explanation</span></span>を
+          <span class="word" onclick="toggleWord(this, event)"><ruby>表示<rt>ひょうじ</rt></ruby><span class="meaning">display</span></span> — Tap a row to see the explanation
+        </div>
+        <div class="table-note">
+          コンパイラ = <span class="word" onclick="toggleWord(this, event)"><ruby>一括<rt>いっかつ</rt></ruby><span class="meaning">all at once</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>翻訳<rt>ほんやく</rt></ruby><span class="meaning">translate</span></span> →
+          <span class="word" onclick="toggleWord(this, event)"><ruby>後<rt>ご</rt></ruby><span class="meaning">later</span></span>で
+          <span class="word" onclick="toggleWord(this, event)"><ruby>実行<rt>じっこう</rt></ruby><span class="meaning">run</span></span> ·
+          インタプリタ = 1<span class="word" onclick="toggleWord(this, event)"><ruby>命令<rt>めいれい</rt></ruby><span class="meaning">command</span></span>ずつ
+          <span class="word" onclick="toggleWord(this, event)"><ruby>翻訳<rt>ほんやく</rt></ruby>・<span class="meaning">translate</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>実行<rt>じっこう</rt></ruby><span class="meaning">run</span></span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ SECTION D ============ -->
+  <div class="section" id="sectionD">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-chevron">▾</span><span class="section-badge">Section D · 7-2-3</span>
+      <h2>
+        コーディング<span class="word" onclick="toggleWord(this, event)"><ruby>標準<rt>ひょうじゅん</rt></ruby><span class="meaning">standard</span></span>・
+        プログラム<span class="word" onclick="toggleWord(this, event)"><ruby>構造<rt>こうぞう</rt></ruby><span class="meaning">structure</span></span>
+      </h2>
+      <div class="heading-translation">Coding Standards &amp; Program Structure</div>
+    </div>
+    <div class="section-content">
+
+      <div class="table-block">
+        <h3>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>用語<rt>ようご</rt></ruby><span class="meaning">term</span></span>と
+          <span class="word" onclick="toggleWord(this, event)"><ruby>意味<rt>いみ</rt></ruby><span class="meaning">meaning</span></span> — Terms &amp; Meanings
+        </h3>
+        <div class="table-hint">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>意味<rt>いみ</rt></ruby><span class="meaning">meaning</span></span>を
+          <span class="word" onclick="toggleWord(this, event)"><ruby>埋<rt>う</rt></ruby>めよう<span class="meaning">let's fill in</span></span> — Fill in the meanings!
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th><span class="word" onclick="toggleWord(this, event)"><ruby>用語<rt>ようご</rt></ruby><span class="meaning">term</span></span></th>
+              <th><span class="word" onclick="toggleWord(this, event)"><ruby>意味<rt>いみ</rt></ruby><span class="meaning">meaning</span></span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr onclick="selectRow(this, 13, event)">
+              <td><span class="word" onclick="toggleWord(this, event)">インデンテーション<span class="meaning">indentation</span></span></td>
+              <td><span class="word" onclick="toggleWord(this, event)"><ruby>字下<rt>じさ</rt></ruby>げ<span class="meaning">indenting</span></span>のこと。
+                <span class="word" onclick="toggleWord(this, event)">プログラム<span class="meaning">program</span></span>を
+                <span class="word" onclick="toggleWord(this, event)"><ruby>読<rt>よ</rt></ruby>みやすくする<span class="meaning">makes it readable</span></span></td>
+            </tr>
+            <tr onclick="selectRow(this, 14, event)">
+              <td><span class="word" onclick="toggleWord(this, event)"><ruby>命名規則<rt>めいめいきそく</rt></ruby><span class="meaning">naming convention</span></span></td>
+              <td><span class="word" onclick="toggleWord(this, event)">プログラム<span class="meaning">program</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>名<rt>めい</rt></ruby><span class="meaning">name</span></span>・
+                <span class="word" onclick="toggleWord(this, event)"><ruby>変数<rt>へんすう</rt></ruby><span class="meaning">variable</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>名<rt>めい</rt></ruby><span class="meaning">name</span></span>などの
+                <span class="word" onclick="toggleWord(this, event)"><ruby>名前<rt>なまえ</rt></ruby>の<span class="meaning">name's</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>付<rt>つ</rt></ruby>け<span class="meaning">attaching</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>方<rt>かた</rt></ruby>の<span class="meaning">way of</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>規則<rt>きそく</rt></ruby><span class="meaning">rules</span></span></td>
+            </tr>
+            <tr onclick="selectRow(this, 15, event)">
+              <td><span class="word" onclick="toggleWord(this, event)">ネスト<span class="meaning">nest / nesting</span></span></td>
+              <td><span class="word" onclick="toggleWord(this, event)"><ruby>条件<rt>じょうけん</rt></ruby><span class="meaning">condition</span></span>の
+                <span class="word" onclick="toggleWord(this, event)"><ruby>中<rt>なか</rt></ruby>に<span class="meaning">inside</span></span>
+                <span class="word" onclick="toggleWord(this, event)">さらに<span class="meaning">further</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>条件<rt>じょうけん</rt></ruby>を<span class="meaning">condition</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>入<rt>い</rt></ruby>れること<span class="meaning">to put in</span></span></td>
+            </tr>
+            <tr onclick="selectRow(this, 16, event)">
+              <td><span class="word" onclick="toggleWord(this, event)"><ruby>予約語<rt>よやくご</rt></ruby><span class="meaning">reserved word</span></span></td>
+              <td><span class="word answer-word" onclick="toggleWord(this, event)"><span class="answer-text">（<ruby>仕様上<rt>しようじょう</rt></ruby>、<ruby>決<rt>き</rt></ruby>まった）</span><span class="answer-num">（11）</span><span class="blank">＿＿＿＿＿＿</span><span class="meaning">fixed by the specification</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>意味<rt>いみ</rt></ruby>を<span class="meaning">meaning</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>持<rt>も</rt></ruby>つ<span class="meaning">to have</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>単語<rt>たんご</rt></ruby><span class="meaning">word</span></span></td>
+            </tr>
+            <tr onclick="selectRow(this, 17, event)">
+              <td><span class="word" onclick="toggleWord(this, event)">モジュール<span class="meaning">module</span></span></td>
+              <td><span class="word" onclick="toggleWord(this, event)">プログラム<span class="meaning">program</span></span>を
+                <span class="word" onclick="toggleWord(this, event)"><ruby>分割<rt>ぶんかつ</rt></ruby>した<span class="meaning">divided</span></span>
+                <span class="word answer-word" onclick="toggleWord(this, event)"><span class="answer-text">（<ruby>小<rt>ちい</rt></ruby>さい）</span><span class="answer-num">（12）</span><span class="blank">＿＿＿＿</span><span class="meaning">small</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>単位<rt>たんい</rt></ruby><span class="meaning">unit</span></span></td>
+            </tr>
+            <tr onclick="selectRow(this, 18, event)">
+              <td><span class="word" onclick="toggleWord(this, event)">メイン<span class="meaning">main</span></span>
+                <span class="word" onclick="toggleWord(this, event)">ルーチン<span class="meaning">routine</span></span></td>
+              <td><span class="word answer-word" onclick="toggleWord(this, event)"><span class="answer-text">（<ruby>最初<rt>さいしょ</rt></ruby>に<ruby>起動<rt>きどう</rt></ruby>される）</span><span class="answer-num">（13）</span><span class="blank">＿＿＿＿＿＿</span><span class="meaning">started first</span></span></td>
+            </tr>
+            <tr onclick="selectRow(this, 19, event)">
+              <td><span class="word" onclick="toggleWord(this, event)">サブ<span class="meaning">sub-</span></span>
+                <span class="word" onclick="toggleWord(this, event)">ルーチン<span class="meaning">routine</span></span></td>
+              <td><span class="word" onclick="toggleWord(this, event)">メイン<span class="meaning">main</span></span>
+                <span class="word" onclick="toggleWord(this, event)">ルーチン<span class="meaning">routine</span></span>から
+                <span class="word answer-word" onclick="toggleWord(this, event)"><span class="answer-text">（<ruby>呼<rt>よ</rt></ruby>び<ruby>出<rt>だ</rt></ruby>されるモジュール）</span><span class="answer-num">（14）</span><span class="blank">＿＿＿＿＿＿＿</span><span class="meaning">called module</span></span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="cell-info">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>行<rt>ぎょう</rt></ruby><span class="meaning">row</span></span>をタップして
+          <span class="word" onclick="toggleWord(this, event)"><ruby>解説<rt>かいせつ</rt></ruby><span class="meaning">explanation</span></span>を
+          <span class="word" onclick="toggleWord(this, event)"><ruby>表示<rt>ひょうじ</rt></ruby><span class="meaning">display</span></span> — Tap a row to see the explanation
+        </div>
+        <div class="table-note">
+          <span class="word" onclick="toggleWord(this, event)">メイン<span class="meaning">main</span></span>
+          <span class="word" onclick="toggleWord(this, event)">ルーチン<span class="meaning">routine</span></span>が
+          <span class="word" onclick="toggleWord(this, event)"><ruby>最初<rt>さいしょ</rt></ruby>に<span class="meaning">first</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>起動<rt>きどう</rt></ruby><span class="meaning">starts</span></span> →
+          <span class="word" onclick="toggleWord(this, event)">サブ<span class="meaning">sub-</span></span>
+          <span class="word" onclick="toggleWord(this, event)">ルーチン<span class="meaning">routine</span></span>を
+          <span class="word" onclick="toggleWord(this, event)"><ruby>呼<rt>よ</rt></ruby>び<span class="meaning">call</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>出<rt>だ</rt></ruby>す<span class="meaning">invoke</span></span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ SECTION E ============ -->
+  <div class="section" id="sectionE">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-chevron">▾</span><span class="section-badge">Section E · 7-2-4</span>
+      <h2>
+        <span class="word" onclick="toggleWord(this, event)">マークアップ<span class="meaning">markup</span></span>
+        <span class="word" onclick="toggleWord(this, event)"><ruby>言語<rt>げんご</rt></ruby><span class="meaning">language</span></span>
+      </h2>
+      <div class="heading-translation">Markup Languages</div>
+    </div>
+    <div class="section-content">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)">マークアップ<span class="meaning">markup</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>言語<rt>げんご</rt></ruby><span class="meaning">language</span></span>
+          <span class="word" onclick="toggleWord(this, event)">とは<span class="meaning">as for ~ (definition marker)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">、<span class="meaning">comma</span></span>
+          <span class="word answer-word" onclick="toggleWord(this, event)">
+            <span class="answer-text">（タグ）</span>
+            <span class="answer-num">（15）</span>
+            <span class="blank">＿＿＿＿</span>
+            <span class="meaning">tag</span>
+          </span>
+          <span class="word" onclick="toggleWord(this, event)">を<span class="meaning">object marker</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>使<rt>つか</rt></ruby>って<span class="meaning">using</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>文書<rt>ぶんしょ</rt></ruby><span class="meaning">document</span></span>
+          の<span class="word" onclick="toggleWord(this, event)"><ruby>構造<rt>こうぞう</rt></ruby>を<span class="meaning">structure</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>示<rt>しめ</rt></ruby>す<span class="meaning">to indicate</span></span>
+          <span class="word" onclick="toggleWord(this, event)"><ruby>言語<rt>げんご</rt></ruby><span class="meaning">language</span></span>
+          <span class="word" onclick="toggleWord(this, event)">です<span class="meaning">is (polite)</span></span>
+          <span class="word" onclick="toggleWord(this, event)">。<span class="meaning">period</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>A markup language is a language that indicates the structure of a document using tags.</p>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="sentence-block">
+        <div class="japanese">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>代表例<rt>だいひょうれい</rt></ruby><span class="meaning">representative examples</span></span>
+          <span class="word" onclick="toggleWord(this, event)">：<span class="meaning">colon</span></span>
+          <span class="word answer-word" onclick="toggleWord(this, event)"><span class="answer-text">（HTML）</span><span class="answer-num">（16）</span><span class="blank">＿＿＿＿</span><span class="meaning">HTML</span></span>
+          ・
+          <span class="word answer-word" onclick="toggleWord(this, event)"><span class="answer-text">（XML）</span><span class="answer-num">（17）</span><span class="blank">＿＿＿＿</span><span class="meaning">XML</span></span>
+        </div>
+        <div class="translation">
+          <div class="translation-title">English Translation</div>
+          <p>Representative examples: HTML and XML.</p>
+        </div>
+      </div>
+
+      <div class="table-block">
+        <h3>HTML と XML — HTML vs. XML</h3>
+        <div class="table-hint">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>行<rt>ぎょう</rt></ruby><span class="meaning">row</span></span>をタップして
+          <span class="word" onclick="toggleWord(this, event)"><ruby>解説<rt>かいせつ</rt></ruby><span class="meaning">explanation</span></span>を
+          <span class="word" onclick="toggleWord(this, event)"><ruby>表示<rt>ひょうじ</rt></ruby><span class="meaning">display</span></span> — Tap a row to see the explanation
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th><span class="word" onclick="toggleWord(this, event)"><ruby>言語<rt>げんご</rt></ruby><span class="meaning">language</span></span></th>
+              <th><span class="word" onclick="toggleWord(this, event)"><ruby>特徴<rt>とくちょう</rt></ruby><span class="meaning">characteristic</span></span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr onclick="selectRow(this, 20, event)">
+              <td>HTML</td>
+              <td><span class="word answer-word" onclick="toggleWord(this, event)"><span class="answer-text">（Webページ）</span><span class="answer-num">（18）</span><span class="blank">＿＿＿＿＿</span><span class="meaning">web page</span></span>
+                を<span class="word" onclick="toggleWord(this, event)"><ruby>作成<rt>さくせい</rt></ruby>する<span class="meaning">to create</span></span>ための
+                <span class="word" onclick="toggleWord(this, event)"><ruby>言語<rt>げんご</rt></ruby><span class="meaning">language</span></span></td>
+            </tr>
+            <tr onclick="selectRow(this, 21, event)">
+              <td>HTMLの<span class="word" onclick="toggleWord(this, event)"><ruby>正式名称<rt>せいしきめいしょう</rt></ruby><span class="meaning">official name</span></span></td>
+              <td><span class="word answer-word" onclick="toggleWord(this, event)"><span class="answer-text">（ハイパーテキスト・マークアップ・ランゲージ）</span><span class="answer-num">（19）</span><span class="blank">＿＿＿＿＿＿＿＿</span><span class="meaning">HyperText Markup Language</span></span></td>
+            </tr>
+            <tr onclick="selectRow(this, 22, event)">
+              <td>XML</td>
+              <td><span class="word answer-word" onclick="toggleWord(this, event)"><span class="answer-text">（インターネットでデータ）</span><span class="answer-num">（20）</span><span class="blank">＿＿＿＿＿＿＿</span><span class="meaning">data on the internet</span></span>
+                を<span class="word" onclick="toggleWord(this, event)"><ruby>記述<rt>きじゅつ</rt></ruby>する<span class="meaning">to describe</span></span>ための
+                <span class="word" onclick="toggleWord(this, event)">マークアップ<span class="meaning">markup</span></span>
+                <span class="word" onclick="toggleWord(this, event)"><ruby>言語<rt>げんご</rt></ruby><span class="meaning">language</span></span></td>
+            </tr>
+            <tr onclick="selectRow(this, 23, event)">
+              <td>XMLの<span class="word" onclick="toggleWord(this, event)"><ruby>特徴<rt>とくちょう</rt></ruby><span class="meaning">characteristic</span></span></td>
+              <td><span class="word" onclick="toggleWord(this, event)">タグ<span class="meaning">tag</span></span>を
+                <span class="word answer-word" onclick="toggleWord(this, event)"><span class="answer-text">（<ruby>独自<rt>どくじ</rt></ruby>）</span><span class="answer-num">（21）</span><span class="blank">＿＿＿＿</span><span class="meaning">freely / one's own</span></span>
+                に<span class="word" onclick="toggleWord(this, event)"><ruby>定義<rt>ていぎ</rt></ruby>できる<span class="meaning">can define</span></span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="cell-info">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>行<rt>ぎょう</rt></ruby><span class="meaning">row</span></span>をタップして
+          <span class="word" onclick="toggleWord(this, event)"><ruby>解説<rt>かいせつ</rt></ruby><span class="meaning">explanation</span></span>を
+          <span class="word" onclick="toggleWord(this, event)"><ruby>表示<rt>ひょうじ</rt></ruby><span class="meaning">display</span></span> — Tap a row to see the explanation
+        </div>
+        <div class="table-note">
+          HTML → Webページ（タグは<span class="word" onclick="toggleWord(this, event)"><ruby>固定<rt>こてい</rt></ruby><span class="meaning">fixed</span></span>） ·
+          XML → データ<span class="word" onclick="toggleWord(this, event)"><ruby>記述<rt>きじゅつ</rt></ruby><span class="meaning">describing</span></span>（タグを
+          <span class="word" onclick="toggleWord(this, event)"><ruby>独自<rt>どくじ</rt></ruby><span class="meaning">freely</span></span>に
+          <span class="word" onclick="toggleWord(this, event)"><ruby>定義<rt>ていぎ</rt></ruby><span class="meaning">define</span></span>できる）
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ SECTION F ============ -->
+  <div class="section" id="sectionF">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-chevron">▾</span><span class="section-badge">Section F · 7-2-4</span>
+      <h2>
+        HTML の
+        <span class="word" onclick="toggleWord(this, event)">タグ<span class="meaning">tag</span></span>
+      </h2>
+      <div class="heading-translation">HTML Tags</div>
+    </div>
+    <div class="section-content">
+
+      <div class="table-block">
+        <h3>
+          <span class="word" onclick="toggleWord(this, event)">タグ<span class="meaning">tag</span></span>と
+          <span class="word" onclick="toggleWord(this, event)"><ruby>役割<rt>やくわり</rt></ruby><span class="meaning">role</span></span> — HTML Tags &amp; Roles
+        </h3>
+        <div class="table-hint">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>行<rt>ぎょう</rt></ruby><span class="meaning">row</span></span>をタップして
+          <span class="word" onclick="toggleWord(this, event)"><ruby>解説<rt>かいせつ</rt></ruby><span class="meaning">explanation</span></span>を
+          <span class="word" onclick="toggleWord(this, event)"><ruby>表示<rt>ひょうじ</rt></ruby><span class="meaning">display</span></span> — Tap a row to see the explanation
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th><span class="word" onclick="toggleWord(this, event)">タグ<span class="meaning">tag</span></span></th>
+              <th><span class="word" onclick="toggleWord(this, event)"><ruby>役割<rt>やくわり</rt></ruby><span class="meaning">role</span></span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr onclick="selectRow(this, 24, event)">
+              <td class="tag-cell">&lt;html&gt;</td>
+              <td><span class="word answer-word" onclick="toggleWord(this, event)"><span class="answer-text">（HTML<ruby>文書<rt>ぶんしょ</rt></ruby>の<ruby>開始<rt>かいし</rt></ruby>と<ruby>終了<rt>しゅうりょう</rt></ruby>）</span><span class="answer-num">（22）</span><span class="blank">＿＿＿＿＿＿＿＿</span><span class="meaning">start and end of the HTML document</span></span></td>
+            </tr>
+            <tr onclick="selectRow(this, 25, event)">
+              <td class="tag-cell">&lt;head&gt;</td>
+              <td><span class="word answer-word" onclick="toggleWord(this, event)"><span class="answer-text">（ヘッダーの<ruby>開始<rt>かいし</rt></ruby>〜<ruby>終了<rt>しゅうりょう</rt></ruby>）</span><span class="answer-num">（23）</span><span class="blank">＿＿＿＿＿＿＿</span><span class="meaning">start to end of the header</span></span></td>
+            </tr>
+            <tr onclick="selectRow(this, 26, event)">
+              <td class="tag-cell">&lt;title&gt;</td>
+              <td><span class="word answer-word" onclick="toggleWord(this, event)"><span class="answer-text">（タイトルの<ruby>開始<rt>かいし</rt></ruby>〜<ruby>終了<rt>しゅうりょう</rt></ruby>）</span><span class="answer-num">（24）</span><span class="blank">＿＿＿＿＿＿</span><span class="meaning">start to end of the title</span></span></td>
+            </tr>
+            <tr onclick="selectRow(this, 27, event)">
+              <td class="tag-cell">&lt;body&gt;</td>
+              <td><span class="word answer-word" onclick="toggleWord(this, event)"><span class="answer-text">（<ruby>本文<rt>ほんぶん</rt></ruby>の<ruby>開始<rt>かいし</rt></ruby>〜<ruby>終了<rt>しゅうりょう</rt></ruby>）</span><span class="answer-num">（25）</span><span class="blank">＿＿＿＿＿＿</span><span class="meaning">start to end of the body text</span></span></td>
+            </tr>
+            <tr onclick="selectRow(this, 28, event)">
+              <td class="tag-cell">&lt;p&gt;</td>
+              <td><span class="word answer-word" onclick="toggleWord(this, event)"><span class="answer-text">（<ruby>段落<rt>だんらく</rt></ruby>の<ruby>開始<rt>かいし</rt></ruby>〜<ruby>終了<rt>しゅうりょう</rt></ruby>）</span><span class="answer-num">（26）</span><span class="blank">＿＿＿＿＿＿</span><span class="meaning">start to end of a paragraph</span></span></td>
+            </tr>
+            <tr onclick="selectRow(this, 29, event)">
+              <td class="tag-cell">&lt;a&gt;</td>
+              <td><span class="word answer-word" onclick="toggleWord(this, event)"><span class="answer-text">（リンクの<ruby>開始<rt>かいし</rt></ruby>〜<ruby>終了<rt>しゅうりょう</rt></ruby>）</span><span class="answer-num">（27）</span><span class="blank">＿＿＿＿＿</span><span class="meaning">start to end of a link</span></span></td>
+            </tr>
+            <tr onclick="selectRow(this, 30, event)">
+              <td class="tag-cell">&lt;br&gt;</td>
+              <td><span class="word answer-word" onclick="toggleWord(this, event)"><span class="answer-text">（<ruby>改行<rt>かいぎょう</rt></ruby>）</span><span class="answer-num">（28）</span><span class="blank">＿＿＿＿</span><span class="meaning">line break</span></span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="cell-info">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>行<rt>ぎょう</rt></ruby><span class="meaning">row</span></span>をタップして
+          <span class="word" onclick="toggleWord(this, event)"><ruby>解説<rt>かいせつ</rt></ruby><span class="meaning">explanation</span></span>を
+          <span class="word" onclick="toggleWord(this, event)"><ruby>表示<rt>ひょうじ</rt></ruby><span class="meaning">display</span></span> — Tap a row to see the explanation
+        </div>
+        <div class="table-note">
+          <span class="word" onclick="toggleWord(this, event)"><ruby>試験<rt>しけん</rt></ruby><span class="meaning">exam</span></span>
+          ポイント: &lt;p&gt; = <span class="word" onclick="toggleWord(this, event)"><ruby>段落<rt>だんらく</rt></ruby><span class="meaning">paragraph</span></span> ·
+          &lt;a&gt; = リンク（anchor） · &lt;br&gt; = <span class="word" onclick="toggleWord(this, event)"><ruby>改行<rt>かいぎょう</rt></ruby><span class="meaning">line break</span></span>（
+          <span class="word" onclick="toggleWord(this, event)"><ruby>終了<rt>しゅうりょう</rt></ruby><span class="meaning">closing</span></span>
+          タグなし）
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ GLOSSARY ============ -->
+  <div class="glossary">
+    <h2>Key Terms — <span class="word" onclick="toggleWord(this, event)"><ruby>重要用語<rt>じゅうようようご</rt></ruby><span class="meaning">important terms</span></span></h2>
+    <div class="glossary-subtitle">
+      <span class="word" onclick="toggleWord(this, event)">カード<span class="meaning">card</span></span>をタップして「
+      <span class="word" onclick="toggleWord(this, event)"><ruby>習得済<rt>しゅうとくずみ</rt></ruby><span class="meaning">learned</span></span>」にする — Tap a card to mark it as learned ✓ ·
+      <span id="learnedCount">0</span> / <span id="learnedTotal">0</span> learned ·
+      <span class="reset-link" onclick="resetLearned()">Reset</span>
+    </div>
+    <div class="glossary-grid">
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp">プログラム</div>
+        <div class="term-en">program (No. 1)</div>
+        <div class="term-def">A document that gives instructions (an algorithm) to a computer.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp">プログラム<ruby>言語<rt>げんご</rt></ruby></div>
+        <div class="term-en">programming language (No. 2)</div>
+        <div class="term-def">The rules and grammar used to write programs.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp">プログラミング</div>
+        <div class="term-en">programming (No. 3)</div>
+        <div class="term-def">Writing an algorithm using a programming language.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp"><ruby>低水準言語<rt>ていすいじゅんげんご</rt></ruby></div>
+        <div class="term-en">low-level language (No. 4)</div>
+        <div class="term-def">A language close to the computer — assembler language and machine language.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp"><ruby>高水準言語<rt>こうすいじゅんげんご</rt></ruby></div>
+        <div class="term-en">high-level language (No. 5)</div>
+        <div class="term-def">A language close to human language — easy to read and write (e.g., Java, Python).</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp">スクリプト<ruby>言語<rt>げんご</rt></ruby></div>
+        <div class="term-en">script language (No. 6)</div>
+        <div class="term-def">A language that skips conversion to machine language, executed easily and immediately (e.g., JavaScript, Perl).</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp">COBOL</div>
+        <div class="term-en">COBOL</div>
+        <div class="term-def">A language traditionally used for business/office processing (banking systems, etc.).</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp">Fortran</div>
+        <div class="term-en">Fortran</div>
+        <div class="term-def">A language for scientific and technical computing.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp">JavaScript</div>
+        <div class="term-en">JavaScript</div>
+        <div class="term-def">A script language embedded in HTML and executed in the web browser.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp">R</div>
+        <div class="term-en">R</div>
+        <div class="term-def">A language specialized in statistical analysis, AI/machine learning, data analysis, and graph drawing.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp">コンパイラ</div>
+        <div class="term-en">compiler (No. 7, 9)</div>
+        <div class="term-def">A language processor that translates the entire source program at once and executes it after translation.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp">インタプリタ</div>
+        <div class="term-en">interpreter (No. 8, 10)</div>
+        <div class="term-def">A language processor that translates and executes one command at a time.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp">インデンテーション</div>
+        <div class="term-en">indentation</div>
+        <div class="term-def">Shifting lines inward (字下げ) to make a program easier to read.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp"><ruby>命名規則<rt>めいめいきそく</rt></ruby></div>
+        <div class="term-en">naming convention</div>
+        <div class="term-def">Rules for how names (program names, variable names, etc.) are given.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp">ネスト</div>
+        <div class="term-en">nest / nesting</div>
+        <div class="term-def">Putting a condition inside another condition — a nested structure.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp"><ruby>予約語<rt>よやくご</rt></ruby></div>
+        <div class="term-en">reserved word / keyword (No. 11)</div>
+        <div class="term-def">A word with a fixed meaning defined by the language specification; it cannot be used as a variable name.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp">モジュール</div>
+        <div class="term-en">module (No. 12)</div>
+        <div class="term-def">A small unit obtained by dividing a program into parts.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp">メインルーチン</div>
+        <div class="term-en">main routine (No. 13)</div>
+        <div class="term-def">The part of the program that is started first.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp">サブルーチン</div>
+        <div class="term-en">subroutine (No. 14)</div>
+        <div class="term-def">A module called from the main routine.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp">マークアップ<ruby>言語<rt>げんご</rt></ruby></div>
+        <div class="term-en">markup language (No. 15)</div>
+        <div class="term-def">A language that indicates document structure using tags. Representative examples: HTML and XML.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp">HTML</div>
+        <div class="term-en">HTML (No. 16, 18, 19)</div>
+        <div class="term-def">HyperText Markup Language — a language for creating web pages.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp">XML</div>
+        <div class="term-en">XML (No. 17, 20, 21)</div>
+        <div class="term-def">A markup language for describing data on the internet; tags can be defined freely.</div>
+      </div>
+
+      <div class="glossary-card" onclick="toggleLearned(this)">
+        <div class="learned-badge">✓ Learned</div>
+        <div class="term-jp">タグ</div>
+        <div class="term-en">tag (No. 15, 21)</div>
+        <div class="term-def">A marker (like &lt;p&gt; or &lt;a&gt;) used in markup languages to indicate document structure.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ CONTENT QUIZ ============ -->
+  <div class="quiz-block" id="quizBlock">
+    <h2>
+      <span class="word" onclick="toggleWord(this, event)"><ruby>内容<rt>ないよう</rt></ruby><span class="meaning">content</span></span>クイズ
+    </h2>
+    <div class="quiz-sub">
+      <span class="word" onclick="toggleWord(this, event)"><ruby>質問<rt>しつもん</rt></ruby><span class="meaning">question</span></span>・
+      <span class="word" onclick="toggleWord(this, event)"><ruby>選択肢<rt>せんたくし</rt></ruby><span class="meaning">choices</span></span>・
+      <span class="word" onclick="toggleWord(this, event)"><ruby>解説<rt>かいせつ</rt></ruby><span class="meaning">explanation</span></span>の
+      <span class="word" onclick="toggleWord(this, event)"><ruby>単語<rt>たんご</rt></ruby><span class="meaning">words</span></span>はタップで
+      <span class="word" onclick="toggleWord(this, event)"><ruby>意味<rt>いみ</rt></ruby><span class="meaning">meaning</span></span>を
+      <span class="word" onclick="toggleWord(this, event)"><ruby>表示<rt>ひょうじ</rt></ruby><span class="meaning">display</span></span>できます！<br>
+      Tap any word in the questions, choices, or explanations to reveal its meaning.
+    </div>
+    <div class="quiz-progress" id="quizProgress"></div>
+    <div class="quiz-question" id="quizQuestion">「Start Quiz」を<span class="word" onclick="toggleWord(this, event)"><ruby>押<rt>お</rt></ruby>してください<span class="meaning">please press</span></span> — Press Start to begin</div>
+    <div class="quiz-translation" id="quizTranslation"></div>
+    <div class="quiz-choices" id="quizChoices"></div>
+    <div class="quiz-feedback" id="quizFeedback"></div>
+    <div class="quiz-btns">
+      <button class="answer-btn" id="quizNextBtn" onclick="quizNext()">Start Quiz</button>
+      <button class="mini-btn" onclick="startQuiz()">Restart</button>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+  </div>
+
+  <div class="footer">
+    ITパスポート 第7章 テクノロジー系 —
+    <span class="word" onclick="toggleWord(this, event)">プログラミング<span class="meaning">programming</span></span>・
+    <span class="word" onclick="toggleWord(this, event)">プログラム<span class="meaning">program</span></span>
+    <span class="word" onclick="toggleWord(this, event)"><ruby>言語<rt>げんご</rt></ruby><span class="meaning">language</span></span>／
+    <span class="word" onclick="toggleWord(this, event)">マークアップ<span class="meaning">markup</span></span>
+    <span class="word" onclick="toggleWord(this, event)"><ruby>言語<rt>げんご</rt></ruby><span class="meaning">language</span></span>
+    <span class="word" onclick="toggleWord(this, event)"><ruby>対策学習<rt>たいさくがくしゅう</rt></ruby><span class="meaning">exam prep study</span></span>
+    ワークシート Part 3
+  </div>
+
+</div>
+
+<script>
+  /* ---------- Word meanings (event passed explicitly) ---------- */
+  function toggleWord(el, ev) {
+    ev = ev || window.event;
+    if (ev && ev.stopPropagation) ev.stopPropagation();
+    el.classList.toggle('revealed');
+  }
+
+  /* Build an interactive word span: [japanese, furigana-or-null, english] */
+  function w(jp, kana, en) {
+    return '<span class="word" onclick="toggleWord(this, event)">' +
+      (kana ? '<ruby>' + jp + '<rt>' + kana + '</rt></ruby>' : jp) +
+      '<span class="meaning">' + en + '</span></span>';
+  }
+  function seg(arr) { return w(arr[0], arr[1], arr[2]); }
+  function segs(list) { return list.map(seg).join(''); }
+
+  /* ---------- Answers ---------- */
+  function toggleAnswers() {
+    var body = document.body;
+    var btn = document.getElementById('answerBtn');
+    body.classList.toggle('hide-answers');
+    if (body.classList.contains('hide-answers')) {
+      btn.textContent = 'Show Answers ✓';
+      btn.classList.add('active');
+    } else {
+      btn.textContent = 'Hide Answers ✗';
+      btn.classList.remove('active');
+    }
+  }
+
+  /* ---------- Furigana / Translations ---------- */
+  function toggleFurigana(ev) {
+    ev = ev || window.event;
+    document.body.classList.toggle('hide-furigana');
+    var btn = ev.target || ev.srcElement;
+    btn.textContent = document.body.classList.contains('hide-furigana')
+      ? 'Furigana OFF' : 'Furigana ON';
+    btn.classList.toggle('off');
+  }
+  function toggleTranslations(ev) {
+    ev = ev || window.event;
+    document.body.classList.toggle('hide-translations');
+    var btn = ev.target || ev.srcElement;
+    btn.textContent = document.body.classList.contains('hide-translations')
+      ? 'Translations OFF' : 'Translations ON';
+    btn.classList.toggle('off');
+  }
+
+  /* ---------- Sections ---------- */
+  function toggleSection(header) {
+    var section = header.closest('.section');
+    if (section) section.classList.toggle('collapsed');
+  }
+  function scrollTo0(id) {
+    var target = document.getElementById(id);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /* ---------- Row explanations (interactive!) ---------- */
+  var ROWX = [
+    { jp: [['低水準言語', 'ていすいじゅんげんご', 'low-level language'], ['は', null, 'topic marker'], ['コンピュータ', null, 'computer'], ['に', null, 'to'], ['近', 'ちか', 'close'], ['い', null, 'is'], ['言語', 'げんご', 'language'], ['です', null, 'is'], ['。', null, '.'], ['アセンブラ言語', null, 'assembler language'], ['・', null, 'and'], ['機械語', 'きかいご', 'machine language'], ['が', null, 'subject marker'], ['当', 'あ', 'corresponds'], ['たります', 'あたります', 'to'], ['。', null, '.']],
+      en: 'Low-level languages are close to the computer — assembler language and machine language.' },
+    { jp: [['高水準言語', 'こうすいじゅんげんご', 'high-level language'], ['は', null, 'topic marker'], ['人間', 'にんげん', 'human'], ['の', null, 'of'], ['言葉', 'ことば', 'language'], ['に', null, 'to'], ['近', 'ちか', 'close'], ['い', null, 'is'], ['言語', 'げんご', 'language'], ['で', null, 'is'], ['、', null, ','], ['読', 'よ', 'read'], ['み', null, 'read'], ['書', 'か', 'write'], ['き', null, 'write'], ['しやすい', null, 'easy to'], ['のが', null, 'is the'], ['特徴', 'とくちょう', 'characteristic'], ['です', null, 'is'], ['。', null, '.']],
+      en: 'High-level languages are close to human language — easy to read and write (e.g., Java, Python).' },
+    { jp: [['スクリプト言語', 'スクリプトげんご', 'script language'], ['は', null, 'topic marker'], ['、', null, ','], ['機械語', 'きかいご', 'machine language'], ['への', null, 'to'], ['変換', 'へんかん', 'conversion'], ['を', null, 'object marker'], ['省略', 'しょうりゃく', 'skip'], ['して', null, 'and'], ['、', null, ','], ['簡単', 'かんたん', 'easy'], ['に', null, 'easily'], ['すぐ', null, 'immediately'], ['実行', 'じっこう', 'execute'], ['できます', null, 'is possible'], ['。', null, '.'], ['JavaScript', null, 'JavaScript'], ['や', null, 'and'], ['Perl', null, 'Perl'], ['が', null, 'subject marker'], ['代表例', 'だいひょうれい', 'representative examples'], ['です', null, 'is']],
+      en: 'Script languages skip conversion to machine language and run easily and immediately — e.g., JavaScript and Perl.' },
+    { jp: [['C言語', 'シーげんご', 'the C language'], ['は', null, 'topic marker'], ['UNIX', null, 'UNIX'], ['・', null, 'and'], ['OS', null, 'OS'], ['・', null, 'and'], ['応用', 'おうよう', 'application'], ['ソフトウェア', null, 'software'], ['など', null, 'etc.'], ['を', null, 'object marker'], ['作', 'つく', 'make'], ['る', null, 'to make'], ['のに', null, 'for'], ['使', 'つか', 'used'], ['われます', null, 'is used'], ['。', null, '.']],
+      en: 'C is used to build UNIX, operating systems, and application software.' },
+    { jp: [['Java', null, 'Java'], ['は', null, 'topic marker'], ['インターネット', null, 'the internet'], ['、', null, ','], ['組込', 'くみこ', 'embedded'], ['み', null, 'embedded'], ['システム', null, 'system'], ['、', null, ','], ['オブジェクト指向', 'オブジェクトしこう', 'object-oriented'], ['の', null, 'of'], ['開発', 'かいはつ', 'development'], ['に', null, 'for'], ['使', 'つか', 'used'], ['われます', null, 'is used'], ['。', null, '.']],
+      en: 'Java is used for the internet, embedded systems, and object-oriented development — "write once, run anywhere."' },
+    { jp: [['COBOL', null, 'COBOL'], ['は', null, 'topic marker'], ['事務処理', 'じむしょり', 'business processing'], ['（', null, '('], ['銀行', 'ぎんこう', 'bank'], ['の', null, 'of'], ['基幹', 'きかん', 'core'], ['システム', null, 'system'], ['など', null, 'etc.'], ['）', null, ')'], ['に', null, 'for'], ['長', 'なが', 'long'], ['く', null, 'long'], ['使', 'つか', 'used'], ['われて', null, 'is used'], ['きました', null, 'has been'], ['。', null, '.']],
+      en: 'COBOL has long been used for business processing (e.g., banking core systems).' },
+    { jp: [['Fortran', null, 'Fortran'], ['は', null, 'topic marker'], ['科学技術', 'かがくぎじゅつ', 'science and technology'], ['計算', 'けいさん', 'calculation'], ['（', null, '('], ['数値', 'すうち', 'numerical'], ['計算', 'けいさん', 'calculation'], ['・', null, 'and'], ['シミュレーション', null, 'simulation'], ['）', null, ')'], ['向け', 'むけ', 'for'], ['の', null, 'of'], ['言語', 'げんご', 'language'], ['です', null, 'is'], ['。', null, '.']],
+      en: 'Fortran is a language for scientific and technical computing (numerical calculation, simulation).' },
+    { jp: [['Python', null, 'Python'], ['は', null, 'topic marker'], ['テキスト処理', 'テキストしょり', 'text processing'], ['・', null, 'and'], ['アプリ', null, 'apps'], ['・', null, 'and'], ['AI', null, 'AI'], ['・', null, 'and'], ['データ分析', 'データぶんせき', 'data analysis'], ['・', null, 'and'], ['グラフ描画', 'グラフびょうが', 'graph drawing'], ['に', null, 'for'], ['広', 'ひろ', 'widely'], ['く', null, 'widely'], ['使', 'つか', 'used'], ['われます', null, 'is used'], ['。', null, '.']],
+      en: 'Python is widely used for text processing, apps, AI, data analysis, and graph drawing.' },
+    { jp: [['R', null, 'R'], ['は', null, 'topic marker'], ['統計解析', 'とうけいかいせき', 'statistical analysis'], ['・', null, 'and'], ['機械学習', 'きかいがくしゅう', 'machine learning'], ['・', null, 'and'], ['データ分析', 'データぶんせき', 'data analysis'], ['・', null, 'and'], ['グラフ描画', 'グラフびょうが', 'graph drawing'], ['に', null, 'for'], ['特化', 'とっか', 'specialized'], ['した', null, '(past)'], ['言語', 'げんご', 'language'], ['です', null, 'is'], ['。', null, '.']],
+      en: 'R is a language specialized for statistical analysis, machine learning, data analysis, and graph drawing.' },
+    { jp: [['JavaScript', null, 'JavaScript'], ['は', null, 'topic marker'], ['HTML', null, 'HTML'], ['に', null, 'in'], ['組込', 'くみこ', 'embedded'], ['まれ', null, 'is embedded'], ['、', null, ','], ['Web', null, 'web'], ['ブラウザ', null, 'browser'], ['上', 'じょう', 'on'], ['で', null, 'in'], ['実行', 'じっこう', 'executed'], ['される', null, 'is'], ['スクリプト言語', 'スクリプトげんご', 'script language'], ['です', null, 'is'], ['。', null, '.'], ['Webページ', null, 'web page'], ['に', null, 'to'], ['動', 'うご', 'motion'], ['き', null, 'movement'], ['を', null, 'object marker'], ['与', 'あた', 'gives'], ['えます', null, 'gives']],
+      en: 'JavaScript is a script language embedded in HTML and executed in the web browser — it adds motion to web pages.' },
+    { jp: [['Perl', null, 'Perl'], ['は', null, 'topic marker'], ['テキスト処理', 'テキストしょり', 'text processing'], ['や', null, 'and'], ['Webページ', null, 'web page'], ['（', null, '('], ['CGI', null, 'CGI'], ['など', null, 'etc.'], ['）', null, ')'], ['に', null, 'for'], ['使', 'つか', 'used'], ['われる', null, 'is used'], ['スクリプト言語', 'スクリプトげんご', 'script language'], ['です', null, 'is'], ['。', null, '.']],
+      en: 'Perl is a script language used for text processing and web pages (such as CGI).' },
+    { jp: [['コンパイラ', null, 'compiler'], ['は', null, 'topic marker'], ['ソース', null, 'source'], ['プログラム', null, 'program'], ['を', null, 'object marker'], ['一括', 'いっかつ', 'all at once'], ['して', null, 'at once'], ['翻訳', 'ほんやく', 'translate'], ['し', null, 'and'], ['ます', null, 'does'], ['。', null, '.'], ['全部', 'ぜんぶ', 'the whole'], ['翻訳', 'ほんやく', 'translation'], ['してから', null, 'after translating'], ['実行', 'じっこう', 'execute'], ['します', null, 'runs']],
+      en: 'A compiler translates the whole source program at once, then runs it after translation is complete.' },
+    { jp: [['インタプリタ', null, 'interpreter'], ['は', null, 'topic marker'], ['1命令', 'いちめいれい', 'one command'], ['ずつ', null, 'at a time'], ['翻訳', 'ほんやく', 'translate'], ['しながら', null, 'while'], ['実行', 'じっこう', 'execute'], ['します', null, 'does'], ['。', null, '.'], ['翻訳', 'ほんやく', 'translation'], ['と', null, 'and'], ['実行', 'じっこう', 'execution'], ['が', null, 'subject marker'], ['同時', 'どうじ', 'simultaneous'], ['に', null, 'simultaneously'], ['行', 'おこな', 'performed'], ['われる', null, 'is done'], ['のが', null, 'is the'], ['特徴', 'とくちょう', 'characteristic'], ['です', null, 'is']],
+      en: 'An interpreter translates and executes one command at a time — translation and execution happen simultaneously.' },
+    { jp: [['インデンテーション', null, 'indentation'], ['＝', null, 'equals'], ['字下', 'じさ', 'indent'], ['げ', null, 'shift inward'], ['の', null, 'of'], ['こと', null, 'the thing of'], ['。', null, '.'], ['プログラム', null, 'program'], ['の', null, 'of'], ['構造', 'こうぞう', 'structure'], ['を', null, 'object marker'], ['見', 'み', 'see'], ['やすく', null, 'easy to'], ['、', null, ','], ['読', 'よ', 'read'], ['みやすく', null, 'readable'], ['する', null, 'to make'], ['効果', 'こうか', 'effect'], ['が', null, 'subject marker'], ['あります', null, 'there is']],
+      en: "Indentation means shifting lines inward — it makes a program's structure easy to see and read." },
+    { jp: [['命名規則', 'めいめいきそく', 'naming convention'], ['＝', null, 'equals'], ['プログラム名', 'プログラムめい', 'program name'], ['・', null, 'and'], ['変数名', 'へんすうめい', 'variable name'], ['など', null, 'etc.'], ['の', null, 'of'], ['名前', 'なまえ', 'name'], ['の', null, 'of'], ['付', 'つ', 'attaching'], ['け方', 'けかた', 'way of'], ['の', null, 'of'], ['規則', 'きそく', 'rules'], ['。', null, '.'], ['チーム', null, 'team'], ['で', null, 'in'], ['統一', 'とういつ', 'unify'], ['して', null, 'and'], ['読', 'よ', 'read'], ['みやすく', null, 'readable'], ['する', null, 'to make'], ['ため', 'ため', 'for'], ['の', null, 'of'], ['ルール', null, 'rule'], ['です', null, 'is']],
+      en: 'Naming conventions are rules for how names (program names, variable names) are given — keeping code consistent.' },
+    { jp: [['ネスト', null, 'nesting'], ['＝', null, 'equals'], ['条件', 'じょうけん', 'condition'], ['の', null, 'of'], ['中', 'なか', 'inside'], ['に', null, 'in'], ['さらに', null, 'further'], ['条件', 'じょうけん', 'condition'], ['を', null, 'object marker'], ['入', 'い', 'put in'], ['れる', null, 'to put in'], ['こと', null, 'the act of'], ['。', null, '.'], ['「入', 'い', 'nested'], ['れ子', 'れこ', 'nesting'], ['」', null, '"nested"'], ['構造', 'こうぞう', 'structure'], ['と', null, 'also'], ['呼', 'よ', 'call'], ['ばれます', null, 'is called']],
+      en: 'Nesting means putting a condition inside another condition — also called a "nested" structure.' },
+    { jp: [['予約語', 'よやくご', 'reserved word'], ['＝', null, 'equals'], ['言語', 'げんご', 'language'], ['の', null, 'of'], ['仕様', 'しよう', 'specification'], ['上', 'じょう', 'on'], ['、', null, ','], ['決', 'き', 'fixed'], ['まった', null, 'fixed'], ['意味', 'いみ', 'meaning'], ['を', null, 'object marker'], ['持', 'も', 'to have'], ['つ', null, 'having'], ['単語', 'たんご', 'word'], ['（', null, '('], ['if', null, 'if'], ['や', null, 'and'], ['for', null, 'for'], ['など', null, 'etc.'], ['）', null, ')'], ['。', null, '.'], ['変数名', 'へんすうめい', 'variable name'], ['には', null, 'as'], ['使', 'つか', 'use'], ['えません', null, 'cannot use']],
+      en: 'Reserved words have fixed meanings defined by the language specification (like "if" and "for") — they cannot be used as variable names.' },
+    { jp: [['モジュール', null, 'module'], ['＝', null, 'equals'], ['プログラム', null, 'program'], ['を', null, 'object marker'], ['分割', 'ぶんかつ', 'divide'], ['した', null, 'divided'], ['小', 'ちい', 'small'], ['さい', null, 'small'], ['単位', 'たんい', 'unit'], ['。', null, '.'], ['部品', 'ぶひん', 'part'], ['ごとに', null, 'by part'], ['分', 'わ', 'divide'], ['ける', null, 'to divide'], ['と', null, 'when'], ['、', null, ','], ['開発', 'かいはつ', 'development'], ['・', null, 'and'], ['修正', 'しゅうせい', 'fixing'], ['・', null, 'and'], ['再利用', 'さいりよう', 'reuse'], ['が', null, 'subject marker'], ['しやすく', null, 'easy to'], ['なります', null, 'becomes']],
+      en: 'A module is a small unit obtained by dividing a program — splitting into parts makes development, fixing, and reuse easier.' },
+    { jp: [['メインルーチン', null, 'main routine'], ['＝', null, 'equals'], ['プログラム', null, 'program'], ['の', null, 'of'], ['中', 'なか', 'inside'], ['で', null, 'in'], ['最初', 'さいしょ', 'first'], ['に', null, 'first'], ['起動', 'きどう', 'started'], ['される', null, 'is'], ['部分', 'ぶぶん', 'part'], ['。', null, '.'], ['ここ', null, 'here'], ['から', null, 'from'], ['処理', 'しょり', 'processing'], ['が', null, 'subject marker'], ['始', 'はじ', 'begins'], ['まります', null, 'begins']],
+      en: 'The main routine is the part of the program that is started first — execution begins here.' },
+    { jp: [['サブルーチン', null, 'subroutine'], ['＝', null, 'equals'], ['メインルーチン', null, 'main routine'], ['から', null, 'from'], ['呼', 'よ', 'call'], ['び', null, 'call'], ['出', 'だ', 'out'], ['される', null, 'is'], ['モジュール', null, 'module'], ['。', null, '.'], ['必要', 'ひつよう', 'necessary'], ['な', null, '(adj.)'], ['とき', 'とき', 'when'], ['に', null, 'at'], ['呼', 'よ', 'call'], ['んで', null, 'calling'], ['使', 'つか', 'use'], ['う', null, 'to use'], ['部品', 'ぶひん', 'part'], ['です', null, 'is']],
+      en: 'A subroutine is a module called from the main routine — a part invoked whenever needed.' },
+    { jp: [['HTML', null, 'HTML'], ['＝', null, 'equals'], ['Webページ', null, 'web page'], ['を', null, 'object marker'], ['作成', 'さくせい', 'create'], ['する', null, 'to create'], ['ための', null, 'for the purpose of'], ['言語', 'げんご', 'language'], ['。', null, '.']],
+      en: 'HTML is a language for creating web pages.' },
+    { jp: [['正式名称', 'せいしきめいしょう', 'official name'], ['は', null, 'topic marker'], ['「', null, '"'], ['HyperText', null, 'HyperText'], ['Markup', null, 'Markup'], ['Language', null, 'Language'], ['」', null, '"'], ['（', null, '('], ['ハイパーテキスト', null, 'hypertext'], ['・', null, 'and'], ['マークアップ', null, 'markup'], ['・', null, 'and'], ['ランゲージ', null, 'language'], ['）', null, ')'], ['です', null, 'is'], ['。', null, '.']],
+      en: 'HTML stands for HyperText Markup Language.' },
+    { jp: [['XML', null, 'XML'], ['＝', null, 'equals'], ['インターネット', null, 'the internet'], ['で', null, 'on'], ['データ', null, 'data'], ['を', null, 'object marker'], ['記述', 'きじゅつ', 'describe'], ['する', null, 'to describe'], ['ための', null, 'for the purpose of'], ['マークアップ言語', 'マークアップげんご', 'markup language'], ['。', null, '.']],
+      en: 'XML is a markup language for describing data on the internet.' },
+    { jp: [['XML', null, 'XML'], ['の', null, 'of'], ['特徴', 'とくちょう', 'characteristic'], ['：', null, ':'], ['タグ', null, 'tag'], ['を', null, 'object marker'], ['独自', 'どくじ', 'one\u2019s own'], ['に', null, 'freely'], ['定義', 'ていぎ', 'define'], ['できる', null, 'can'], ['。', null, '.'], ['HTML', null, 'HTML'], ['と', null, 'unlike'], ['違', 'ちが', 'different'], ['い', null, 'is'], ['、', null, ','], ['目的', 'もくてき', 'purpose'], ['に', null, 'to'], ['合', 'あ', 'fit'], ['わせた', null, 'fitted'], ['タグ', null, 'tag'], ['が', null, 'subject marker'], ['作', 'つく', 'make'], ['れます', null, 'can be made']],
+      en: 'XML lets you define your own tags freely — unlike HTML, where tag meanings are fixed.' },
+    { jp: [['&lt;html&gt;〜&lt;/html&gt;', null, 'html tag'], ['＝', null, 'equals'], ['HTML', null, 'HTML'], ['文書', 'ぶんしょ', 'document'], ['全体', 'ぜんたい', 'the whole'], ['の', null, 'of'], ['開始', 'かいし', 'start'], ['と', null, 'and'], ['終了', 'しゅうりょう', 'end'], ['を', null, 'object marker'], ['示', 'しめ', 'indicates'], ['します', null, 'does'], ['。', null, '.'], ['文書', 'ぶんしょ', 'document'], ['は', null, 'topic marker'], ['この', null, 'this'], ['タグ', null, 'tag'], ['で', null, 'with'], ['囲', 'かこ', 'wrap'], ['まれます', null, 'is wrapped']],
+      en: '&lt;html&gt;...&lt;/html&gt; marks the start and end of the whole HTML document.' },
+    { jp: [['&lt;head&gt;〜&lt;/head&gt;', null, 'head tag'], ['＝', null, 'equals'], ['ヘッダー', null, 'header'], ['部分', 'ぶぶん', 'section'], ['（', null, '('], ['タイトル', null, 'title'], ['など', null, 'etc.'], ['、', null, ','], ['文書', 'ぶんしょ', 'document'], ['の', null, 'of'], ['情報', 'じょうほう', 'information'], ['）', null, ')'], ['の', null, 'of'], ['開始', 'かいし', 'start'], ['〜', null, 'to'], ['終了', 'しゅうりょう', 'end'], ['を', null, 'object marker'], ['示', 'しめ', 'indicates'], ['します', null, 'does'], ['。', null, '.']],
+      en: '&lt;head&gt;...&lt;/head&gt; marks the start and end of the header section (document info such as the title).' },
+    { jp: [['&lt;title&gt;〜&lt;/title&gt;', null, 'title tag'], ['＝', null, 'equals'], ['タイトル', null, 'title'], ['（', null, '('], ['ブラウザ', null, 'browser'], ['の', null, 'of'], ['タブ', null, 'tab'], ['に', null, 'on'], ['表示', 'ひょうじ', 'displayed'], ['される', null, 'is'], ['名前', 'なまえ', 'name'], ['）', null, ')'], ['の', null, 'of'], ['開始', 'かいし', 'start'], ['〜', null, 'to'], ['終了', 'しゅうりょう', 'end'], ['。', null, '.'], ['head', null, 'head'], ['の', null, 'of'], ['中', 'なか', 'inside'], ['に', null, 'in'], ['入', 'はい', 'enter'], ['ります', null, 'goes']],
+      en: '&lt;title&gt;...&lt;/title&gt; marks the start and end of the title (shown on the browser tab); it sits inside the head.' },
+    { jp: [['&lt;body&gt;〜&lt;/body&gt;', null, 'body tag'], ['＝', null, 'equals'], ['本文', 'ほんぶん', 'body text'], ['（', null, '('], ['画面', 'がめん', 'screen'], ['に', null, 'on'], ['実際', 'じっさい', 'actually'], ['に', null, 'actually'], ['表示', 'ひょうじ', 'displayed'], ['される', null, 'is'], ['内容', 'ないよう', 'content'], ['）', null, ')'], ['の', null, 'of'], ['開始', 'かいし', 'start'], ['〜', null, 'to'], ['終了', 'しゅうりょう', 'end'], ['。', null, '.']],
+      en: '&lt;body&gt;...&lt;/body&gt; marks the start and end of the body — the content actually shown on screen.' },
+    { jp: [['&lt;p&gt;〜&lt;/p&gt;', null, 'p tag'], ['＝', null, 'equals'], ['段落', 'だんらく', 'paragraph'], ['（', null, '('], ['paragraph', null, 'paragraph'], ['）', null, ')'], ['の', null, 'of'], ['開始', 'かいし', 'start'], ['〜', null, 'to'], ['終了', 'しゅうりょう', 'end'], ['。', null, '.'], ['p', null, 'p'], ['は', null, 'topic marker'], ['paragraph', null, 'paragraph'], ['の', null, 'of'], ['頭文字', 'かしらもじ', 'initial letter'], ['です', null, 'is']],
+      en: '&lt;p&gt;...&lt;/p&gt; marks the start and end of a paragraph; "p" stands for paragraph.' },
+    { jp: [['&lt;a&gt;〜&lt;/a&gt;', null, 'a tag'], ['＝', null, 'equals'], ['リンク', null, 'link'], ['（', null, '('], ['他', 'ほか', 'other'], ['の', null, 'of'], ['ページ', null, 'page'], ['への', null, 'to'], ['飛', 'と', 'jump'], ['び先', 'びさき', 'destination'], ['）', null, ')'], ['の', null, 'of'], ['開始', 'かいし', 'start'], ['〜', null, 'to'], ['終了', 'しゅうりょう', 'end'], ['。', null, '.'], ['a', null, 'a'], ['は', null, 'topic marker'], ['anchor', null, 'anchor'], ['（', null, '('], ['錨', 'いかり', 'anchor'], ['）', null, ')'], ['の', null, 'of'], ['頭文字', 'かしらもじ', 'initial letter'], ['です', null, 'is']],
+      en: '&lt;a&gt;...&lt;/a&gt; marks the start and end of a link; "a" stands for anchor.' },
+    { jp: [['&lt;br&gt;', null, 'br tag'], ['＝', null, 'equals'], ['改行', 'かいぎょう', 'line break'], ['（', null, '('], ['line', null, 'line'], ['break', null, 'break'], ['）', null, ')'], ['。', null, '.'], ['終了', 'しゅうりょう', 'closing'], ['タグ', null, 'tag'], ['なし', null, 'without'], ['で', null, 'with'], ['単独', 'たんどく', 'alone'], ['で', null, 'alone'], ['使', 'つか', 'use'], ['う', null, 'to use'], ['タグ', null, 'tag'], ['の', null, 'of'], ['代表例', 'だいひょうれい', 'representative example'], ['です', null, 'is']],
+      en: '&lt;br&gt; is a line break — a representative tag used alone, with no closing tag.' }
+  ];
+
+  function selectRow(row, idx, ev) {
+    ev = ev || window.event;
+    if (ev && ev.stopPropagation) ev.stopPropagation();
+    var block = row.closest('.table-block');
+    if (!block) return;
+    block.querySelectorAll('tr.selected').forEach(function (r) {
+      r.classList.remove('selected');
+    });
+    row.classList.add('selected');
+    var info = block.querySelector('.cell-info');
+    if (info && ROWX[idx]) {
+      info.innerHTML = segs(ROWX[idx].jp) +
+        '<span class="fb-en">' + ROWX[idx].en + '</span>';
+    }
+  }
+
+  /* ---------- Glossary learned tracking ---------- */
+  function toggleLearned(card) {
+    card.classList.toggle('learned');
+    updateLearnedCount();
+  }
+  function updateLearnedCount() {
+    var total = document.querySelectorAll('.glossary-card').length;
+    var learned = document.querySelectorAll('.glossary-card.learned').length;
+    document.getElementById('learnedCount').textContent = learned;
+    document.getElementById('learnedTotal').textContent = total;
+  }
+  function resetLearned() {
+    document.querySelectorAll('.glossary-card.learned').forEach(function (c) {
+      c.classList.remove('learned');
+    });
+    updateLearnedCount();
+  }
+
+  /* ==================================================
+     CONTENT QUIZ — fully interactive
+     ================================================== */
+  var QUIZ = [
+
+    {
+      q: [
+        ['プログラム', null, 'program'],
+        ['とは', null, 'as for'],
+        ['、', null, ','],
+        ['何', 'なに', 'what'],
+        ['を', null, 'object marker'],
+        ['コンピュータ', null, 'computer'],
+        ['に', null, 'to'],
+        ['指示', 'しじ', 'instruct'],
+        ['する', null, 'to do'],
+        ['ための', null, 'for the purpose of'],
+        ['文書', 'ぶんしょ', 'document'],
+        ['ですか', null, 'is it?']
+      ],
+      qEn: 'A program is a document used to instruct a computer with what?',
+      choices: [
+        [['アルゴリズム', null, 'algorithm']],
+        [['データ', null, 'data']],
+        [['言語', 'げんご', 'language']],
+        [['結果', 'けっか', 'result']]
+      ],
+      correct: 0,
+      exp: [
+        ['プログラム', null, 'program'], ['とは', null, 'as for'],
+        ['、', null, ','], ['アルゴリズム', null, 'algorithm'],
+        ['を', null, 'object marker'], ['コンピュータ', null, 'computer'],
+        ['に', null, 'to'], ['指示', 'しじ', 'instruct'],
+        ['する', null, 'to do'], ['ための', null, 'for the purpose of'],
+        ['文書', 'ぶんしょ', 'document'], ['です', null, 'is'], ['。', null, '.']
+      ],
+      expEn: 'A program is a document that gives instructions (an algorithm) to a computer.'
+    },
+
+    {
+      q: [
+        ['低水準言語', 'ていすいじゅんげんご', 'low-level language'],
+        ['の', null, 'of'],
+        ['例', 'れい', 'example'],
+        ['として', null, 'as'],
+        ['正しい', 'ただしい', 'correct'],
+        ['もの', null, 'one'],
+        ['は', null, 'topic marker'],
+        ['？', null, '?']
+      ],
+      qEn: 'Which is an example of a low-level language?',
+      choices: [
+        [['Java', null, 'Java'], ['や', null, 'and'], ['Python', null, 'Python']],
+        [['アセンブラ言語', null, 'assembler language'], ['・', null, 'and'], ['機械語', 'きかいご', 'machine language']],
+        [['COBOL', null, 'COBOL'], ['や', null, 'and'], ['Fortran', null, 'Fortran']],
+        [['スクリプト言語', 'スクリプトげんご', 'script language']]
+      ],
+      correct: 1,
+      exp: [
+        ['低水準言語', 'ていすいじゅんげんご', 'low-level language'],
+        ['は', null, 'topic marker'], ['コンピュータ', null, 'computer'],
+        ['に', null, 'to'], ['近', 'ちか', 'close'], ['い', null, 'is'],
+        ['言語', 'げんご', 'language'], ['で', null, 'is'],
+        ['、', null, ','], ['アセンブラ言語', null, 'assembler language'],
+        ['・', null, 'and'], ['機械語', 'きかいご', 'machine language'],
+        ['が', null, 'subject marker'], ['当', 'あ', 'corresponds'],
+        ['たります', 'あたります', 'to'], ['。', null, '.']
+      ],
+      expEn: 'Low-level languages are close to the computer — assembler language and machine language.'
+    },
+
+    {
+      q: [
+        ['スクリプト言語', 'スクリプトげんご', 'script language'],
+        ['の', null, 'of'],
+        ['特徴', 'とくちょう', 'characteristic'],
+        ['として', null, 'as'],
+        ['正しい', 'ただしい', 'correct'],
+        ['もの', null, 'one'],
+        ['は', null, 'topic marker'],
+        ['？', null, '?']
+      ],
+      qEn: 'Which correctly describes a script language?',
+      choices: [
+        [
+          ['機械語', 'きかいご', 'machine language'], ['への', null, 'to'],
+          ['変換', 'へんかん', 'conversion'], ['を', null, 'object marker'],
+          ['省略', 'しょうりゃく', 'skip'], ['して', null, 'and'],
+          ['簡単', 'かんたん', 'easily'], ['に', null, 'easily'],
+          ['実行', 'じっこう', 'execute']
+        ],
+        [
+          ['翻訳', 'ほんやく', 'translation'], ['に', null, 'takes'],
+          ['時間', 'じかん', 'time'], ['が', null, 'subject marker'],
+          ['非常', 'ひじょう', 'extremely'], ['に', null, 'extremely'],
+          ['かかる', null, 'takes long']
+        ],
+        [
+          ['コンピュータ', null, 'computer'], ['しか', null, 'only'],
+          ['読', 'よ', 'read'], ['めない', null, 'cannot read']
+        ],
+        [
+          ['予約語', 'よやくご', 'reserved words'], ['が', null, 'subject marker'],
+          ['使', 'つか', 'use'], ['えない', null, 'cannot use']
+        ]
+      ],
+      correct: 0,
+      exp: [
+        ['スクリプト言語', 'スクリプトげんご', 'script language'],
+        ['は', null, 'topic marker'], ['、', null, ','],
+        ['機械語', 'きかいご', 'machine language'], ['への', null, 'to'],
+        ['変換', 'へんかん', 'conversion'], ['を', null, 'object marker'],
+        ['省略', 'しょうりゃく', 'skip'], ['して', null, 'and'],
+        ['簡単', 'かんたん', 'easily'], ['に', null, 'easily'],
+        ['実行', 'じっこう', 'execute'], ['できます', null, 'is possible'],
+        ['。', null, '.'], ['JavaScript', null, 'JavaScript'],
+        ['や', null, 'and'], ['Perl', null, 'Perl'],
+        ['など', null, 'such as'], ['が', null, 'subject marker'],
+        ['代表例', 'だいひょうれい', 'representative examples'], ['です', null, 'is']
+      ],
+      expEn: 'Script languages skip the conversion to machine language and run easily — e.g., JavaScript and Perl.'
+    },
+
+    {
+      q: [
+        ['主', 'おも', 'mainly'],
+        ['に', null, 'mainly'],
+        ['事務処理', 'じむしょり', 'business processing'],
+        ['に', null, 'for'],
+        ['使', 'つか', 'used'],
+        ['われて', null, 'is used'],
+        ['きた', null, 'has been'],
+        ['言語', 'げんご', 'language'],
+        ['は', null, 'topic marker'],
+        ['？', null, '?']
+      ],
+      qEn: 'Which language has mainly been used for business (office) processing?',
+      choices: [
+        [['Fortran', null, 'Fortran']],
+        [['COBOL', null, 'COBOL']],
+        [['R', null, 'R']],
+        [['JavaScript', null, 'JavaScript']]
+      ],
+      correct: 1,
+      exp: [
+        ['COBOL', null, 'COBOL'], ['は', null, 'topic marker'],
+        ['事務処理', 'じむしょり', 'business processing'],
+        ['（', null, '('], ['銀行', 'ぎんこう', 'bank'],
+        ['の', null, 'of'], ['基幹', 'きかん', 'core'],
+        ['システム', null, 'system'], ['など', null, 'etc.'], ['）', null, ')'],
+        ['に', null, 'for'], ['長', 'なが', 'long'], ['く', null, 'long'],
+        ['使', 'つか', 'used'], ['われて', null, 'is used'],
+        ['きました', null, 'has been'], ['。', null, '.'],
+        ['※', null, 'note'], ['Fortran', null, 'Fortran'],
+        ['＝', null, 'equals'], ['科学技術', 'かがくぎじゅつ', 'science and technology'],
+        ['向け', 'むけ', 'for'], ['です', null, 'is']
+      ],
+      expEn: 'COBOL has long been used for business processing. Note: Fortran is for science and technology.'
+    },
+
+    {
+      q: [
+        ['HTML', null, 'HTML'],
+        ['に', null, 'in'],
+        ['組込', 'くみこ', 'embedded'],
+        ['まれ', null, 'is embedded'],
+        ['、', null, ','],
+        ['Web', null, 'web'],
+        ['ブラウザ', null, 'browser'],
+        ['で', null, 'in'],
+        ['実行', 'じっこう', 'executed'],
+        ['される', null, 'is'],
+        ['言語', 'げんご', 'language'],
+        ['は', null, 'topic marker'],
+        ['？', null, '?']
+      ],
+      qEn: 'Which language is embedded in HTML and executed in the web browser?',
+      choices: [
+        [['Java', null, 'Java']],
+        [['Python', null, 'Python']],
+        [['JavaScript', null, 'JavaScript']],
+        [['Perl', null, 'Perl']]
+      ],
+      correct: 2,
+      exp: [
+        ['JavaScript', null, 'JavaScript'], ['は', null, 'topic marker'],
+        ['、', null, ','], ['HTML', null, 'HTML'], ['に', null, 'in'],
+        ['組込', 'くみこ', 'embedded'], ['まれ', null, 'is embedded'],
+        ['、', null, ','], ['Web', null, 'web'],
+        ['ブラウザ', null, 'browser'], ['上', 'じょう', 'on'],
+        ['で', null, 'in'], ['実行', 'じっこう', 'executed'],
+        ['される', null, 'is'], ['スクリプト言語', 'スクリプトげんご', 'script language'],
+        ['です', null, 'is'], ['。', null, '.'],
+        ['Webページ', null, 'web page'], ['に', null, 'to'],
+        ['動', 'うご', 'motion'], ['き', null, 'movement'],
+        ['を', null, 'object marker'], ['与', 'あた', 'gives'],
+        ['えます', null, 'gives']
+      ],
+      expEn: 'JavaScript is embedded in HTML and runs in the web browser — it adds motion to web pages.'
+    },
+
+    {
+      q: [
+        ['統計解析', 'とうけいかいせき', 'statistical analysis'],
+        ['や', null, 'and'],
+        ['機械学習', 'きかいがくしゅう', 'machine learning'],
+        ['に', null, 'for'],
+        ['特化', 'とっか', 'specialized'],
+        ['した', null, '(past)'],
+        ['言語', 'げんご', 'language'],
+        ['は', null, 'topic marker'],
+        ['？', null, '?']
+      ],
+      qEn: 'Which language is specialized for statistical analysis and machine learning?',
+      choices: [
+        [['R', null, 'R']],
+        [['COBOL', null, 'COBOL']],
+        [['Fortran', null, 'Fortran']],
+        [['Perl', null, 'Perl']]
+      ],
+      correct: 0,
+      exp: [
+        ['R', null, 'R'], ['は', null, 'topic marker'], ['、', null, ','],
+        ['統計解析', 'とうけいかいせき', 'statistical analysis'],
+        ['、', null, ','], ['AI・機械学習', 'AIきかいがくしゅう', 'AI and machine learning'],
+        ['、', null, ','], ['データ', null, 'data'],
+        ['分析', 'ぶんせき', 'analysis'], ['、', null, ','],
+        ['グラフ', null, 'graph'], ['描画', 'びょうが', 'drawing'],
+        ['に', null, 'for'], ['使', 'つか', 'used'],
+        ['われる', null, 'is used'], ['言語', 'げんご', 'language'],
+        ['です', null, 'is'], ['。', null, '.']
+      ],
+      expEn: 'R is used for statistical analysis, AI/machine learning, data analysis, and graph drawing.'
+    },
+
+    {
+      q: [
+        ['コンパイラ', null, 'compiler'],
+        ['の', null, 'of'],
+        ['翻訳', 'ほんやく', 'translation'],
+        ['方法', 'ほうほう', 'method'],
+        ['として', null, 'as'],
+        ['正しい', 'ただしい', 'correct'],
+        ['もの', null, 'one'],
+        ['は', null, 'topic marker'],
+        ['？', null, '?']
+      ],
+      qEn: 'Which correctly describes how a compiler translates?',
+      choices: [
+        [
+          ['1命令', 'いちめいれい', 'one command'], ['ずつ', null, 'at a time'],
+          ['翻訳', 'ほんやく', 'translate'], ['しながら', null, 'while'],
+          ['実行', 'じっこう', 'execute']
+        ],
+        [
+          ['ソース', null, 'source'], ['プログラム', null, 'program'],
+          ['を', null, 'object marker'], ['一括', 'いっかつ', 'all at once'],
+          ['して', null, 'at once'], ['翻訳', 'ほんやく', 'translate']
+        ],
+        [
+          ['翻訳', 'ほんやく', 'translation'], ['を', null, 'object marker'],
+          ['一切', 'いっさい', 'not at all'], ['行', 'おこな', 'perform'],
+          ['わない', null, 'does not']
+        ],
+        [
+          ['実行', 'じっこう', 'execution'], ['後', 'ご', 'after'],
+          ['に', null, 'after'], ['翻訳', 'ほんやく', 'translate']
+        ]
+      ],
+      correct: 1,
+      exp: [
+        ['コンパイラ', null, 'compiler'], ['は', null, 'topic marker'],
+        ['、', null, ','], ['ソース', null, 'source'],
+        ['プログラム', null, 'program'], ['を', null, 'object marker'],
+        ['一括', 'いっかつ', 'all at once'], ['して', null, 'at once'],
+        ['翻訳', 'ほんやく', 'translate'], ['し', null, 'and'],
+        ['、', null, ','], ['翻訳', 'ほんやく', 'translation'],
+        ['後', 'ご', 'after'], ['に', null, 'after'],
+        ['実行', 'じっこう', 'execute'], ['します', null, 'does'],
+        ['。', null, '.'], ['1命令ずつ', 'いちめいれいずつ', 'one command at a time'],
+          ['翻訳', 'ほんやく', 'translate'], ['は', null, 'topic marker'],
+        ['インタプリタ', null, 'interpreter'], ['の', null, 'of'],
+        ['方法', 'ほうほう', 'method'], ['です', null, 'is']
+      ],
+      expEn: 'A compiler translates the whole source program at once and runs it after translation; one-at-a-time is the interpreter.'
+    },
+
+    {
+      q: [
+        ['インタプリタ', null, 'interpreter'],
+        ['の', null, 'of'],
+        ['特徴', 'とくちょう', 'characteristic'],
+        ['として', null, 'as'],
+        ['正しい', 'ただしい', 'correct'],
+        ['もの', null, 'one'],
+        ['は', null, 'topic marker'],
+        ['？', null, '?']
+      ],
+      qEn: 'Which correctly describes an interpreter?',
+      choices: [
+        [
+          ['全部', 'ぜんぶ', 'the whole'], ['一括', 'いっかつ', 'at once'],
+          ['で', null, 'at once'], ['翻訳', 'ほんやく', 'translate'],
+          ['後', 'ご', 'after'], ['に', null, 'after'],
+          ['実行', 'じっこう', 'execute']
+        ],
+        [
+          ['1命令', 'いちめいれい', 'one command'], ['ずつ', null, 'at a time'],
+          ['翻訳', 'ほんやく', 'translate'], ['しながら', null, 'while'],
+          ['実行', 'じっこう', 'execute'], ['する', null, 'do']
+        ],
+        [
+          ['機械語', 'きかいご', 'machine language'], ['を', null, 'object marker'],
+          ['出力', 'しゅつりょく', 'output'], ['しない', null, 'does not']
+        ],
+        [
+          ['予約語', 'よやくご', 'reserved word'], ['しか', null, 'only'],
+          ['処理', 'しょり', 'process'], ['できない', null, 'cannot']
+        ]
+      ],
+      correct: 1,
+      exp: [
+        ['インタプリタ', null, 'interpreter'], ['は', null, 'topic marker'],
+        ['、', null, ','], ['1命令', 'いちめいれい', 'one command'],
+        ['ずつ', null, 'at a time'], ['翻訳', 'ほんやく', 'translate'],
+        ['しながら', null, 'while'], ['実行', 'じっこう', 'execute'],
+        ['します', null, 'does'], ['。', null, '.'],
+        ['翻訳', 'ほんやく', 'translation'], ['と', null, 'and'],
+        ['実行', 'じっこう', 'execution'], ['が', null, 'subject marker'],
+        ['同時', 'どうじ', 'simultaneous'], ['に', null, 'simultaneously'],
+        ['行', 'おこな', 'performed'], ['われる', null, 'is done'],
+        ['のが', null, 'is the'], ['特徴', 'とくちょう', 'characteristic'],
+        ['です', null, 'is']
+      ],
+      expEn: 'An interpreter translates one command at a time while executing — translation and execution are simultaneous.'
+    },
+
+    {
+      q: [
+        ['字下', 'じさ', 'indent'],
+        ['げ', null, 'shift inward'],
+        ['の', null, 'of'],
+        ['こと', null, 'the thing of'],
+        ['、', null, ','],
+        ['つまり', null, 'in other words'],
+        ['プログラム', null, 'program'],
+        ['を', null, 'object marker'],
+        ['読', 'よ', 'read'],
+        ['みやすく', null, 'readable'],
+        ['する', null, 'to make'],
+        ['もの', null, 'one'],
+        ['を', null, 'object marker'],
+        ['何', 'なに', 'what'],
+        ['と', null, 'quotation'],
+        ['呼', 'よ', 'call'],
+        ['びます', null, 'is called'],
+        ['か', null, '?']
+      ],
+      qEn: 'What is the term for indentation — shifting lines inward to make a program readable?',
+      choices: [
+        [['ネスト', null, 'nesting']],
+        [['インデンテーション', null, 'indentation']],
+        [['命名規則', 'めいめいきそく', 'naming convention']],
+        [['モジュール', null, 'module']]
+      ],
+      correct: 1,
+      exp: [
+        ['インデンテーション', null, 'indentation'],
+        ['とは', null, 'as for'], ['、', null, ','],
+        ['字下', 'じさ', 'indent'], ['げ', null, 'shift inward'],
+        ['の', null, 'of'], ['こと', null, 'the thing of'],
+        ['です', null, 'is'], ['。', null, '.'],
+        ['プログラム', null, 'program'], ['の', null, 'of'],
+        ['構造', 'こうぞう', 'structure'], ['を', null, 'object marker'],
+        ['見', 'み', 'see'], ['やすく', null, 'easy to see'],
+        ['読', 'よ', 'read'], ['みやすく', null, 'readable'],
+        ['する', null, 'to make'], ['効果', 'こうか', 'effect'],
+        ['が', null, 'subject marker'], ['あります', null, 'there is']
+      ],
+      expEn: "Indentation (インデンテーション) means shifting lines inward — it makes a program's structure easy to see and read."
+    },
+
+    {
+      q: [
+        ['条件', 'じょうけん', 'condition'],
+        ['の', null, 'of'],
+        ['中', 'なか', 'inside'],
+        ['に', null, 'in'],
+        ['さらに', null, 'further'],
+        ['条件', 'じょうけん', 'condition'],
+        ['を', null, 'object marker'],
+        ['入', 'い', 'put in'],
+        ['れる', null, 'to put in'],
+        ['こと', null, 'the act of'],
+        ['を', null, 'object marker'],
+        ['何', 'なに', 'what'],
+        ['と', null, 'quotation'],
+        ['呼', 'よ', 'call'],
+        ['びます', null, 'is called'],
+        ['か', null, '?']
+      ],
+      qEn: 'What is the term for putting a condition inside another condition?',
+      choices: [
+        [['ネスト', null, 'nesting']],
+        [['インデンテーション', null, 'indentation']],
+        [['予約語', 'よやくご', 'reserved word']],
+        [['サブルーチン', null, 'subroutine']]
+      ],
+      correct: 0,
+      exp: [
+        ['ネスト', null, 'nest'], ['とは', null, 'as for'],
+        ['、', null, ','], ['条件', 'じょうけん', 'condition'],
+        ['の', null, 'of'], ['中', 'なか', 'inside'],
+        ['に', null, 'in'], ['さらに', null, 'further'],
+        ['条件', 'じょうけん', 'condition'], ['を', null, 'object marker'],
+        ['入', 'い', 'put in'], ['れる', null, 'to put in'],
+        ['こと', null, 'the act of'], ['です', null, 'is'],
+        ['。', null, '.'], ['「入', 'い', 'nested'],
+        ['れ子', 'れこ', 'nesting'], ['」', null, '"nested"'],
+        ['構造', 'こうぞう', 'structure'], ['と', null, 'also'],
+        ['呼', 'よ', 'call'], ['ばれます', null, 'is also called']
+      ],
+      expEn: 'Nesting (ネスト) means putting a condition inside another condition — a "nested" structure.'
+    },
+
+    {
+      q: [
+        ['メインルーチン', null, 'main routine'],
+        ['から', null, 'from'],
+        ['呼', 'よ', 'call'],
+        ['び', null, 'call'],
+        ['出', 'だ', 'out'],
+        ['される', null, 'is'],
+        ['モジュール', null, 'module'],
+        ['の', null, 'of'],
+        ['こと', null, 'the thing of'],
+        ['を', null, 'object marker'],
+        ['何', 'なに', 'what'],
+        ['と', null, 'quotation'],
+        ['呼', 'よ', 'call'],
+        ['びます', null, 'is called'],
+        ['か', null, '?']
+      ],
+      qEn: 'What is the term for a module that is called from the main routine?',
+      choices: [
+        [['メインルーチン', null, 'main routine']],
+        [['サブルーチン', null, 'subroutine']],
+        [['モジュール', null, 'module'], ['単位', 'たんい', 'unit']],
+        [['予約語', 'よやくご', 'reserved word']]
+      ],
+      correct: 1,
+      exp: [
+        ['サブルーチン', null, 'subroutine'], ['とは', null, 'as for'],
+        ['、', null, ','], ['メインルーチン', null, 'main routine'],
+        ['から', null, 'from'], ['呼', 'よ', 'call'],
+        ['び', null, 'call'], ['出', 'だ', 'out'],
+        ['される', null, 'is'], ['モジュール', null, 'module'],
+        ['の', null, 'of'], ['こと', null, 'the thing of'],
+        ['です', null, 'is'], ['。', null, '.'],
+        ['メインルーチン', null, 'main routine'],
+        ['は', null, 'topic marker'], ['最初', 'さいしょ', 'first'],
+        ['に', null, 'first'], ['起動', 'きどう', 'started'],
+        ['される', null, 'is'], ['側', 'がわ', 'side'], ['です', null, 'is']
+      ],
+      expEn: 'A subroutine is a module called from the main routine; the main routine is the side started first.'
+    },
+
+    {
+      q: [
+        ['マークアップ', null, 'markup'],
+        ['言語', 'げんご', 'language'],
+        ['の', null, 'of'],
+        ['代表例', 'だいひょうれい', 'representative examples'],
+        ['として', null, 'as'],
+        ['正しい', 'ただしい', 'correct'],
+        ['組', 'くみ', 'pair'],
+        ['み', null, 'pairing'],
+        ['合', 'あ', 'pairing'],
+        ['わせ', null, 'combination'],
+        ['は', null, 'topic marker'],
+        ['？', null, '?']
+      ],
+      qEn: 'Which pair are the representative markup languages?',
+      choices: [
+        [['Java', null, 'Java'], ['と', null, 'and'], ['Python', null, 'Python']],
+        [['HTML', null, 'HTML'], ['と', null, 'and'], ['XML', null, 'XML']],
+        [['C', null, 'C'], ['と', null, 'and'], ['COBOL', null, 'COBOL']],
+        [['Perl', null, 'Perl'], ['と', null, 'and'], ['R', null, 'R']]
+      ],
+      correct: 1,
+      exp: [
+        ['マークアップ', null, 'markup'], ['言語', 'げんご', 'language'],
+        ['の', null, 'of'], ['代表例', 'だいひょうれい', 'representative examples'],
+        ['は', null, 'topic marker'], ['HTML', null, 'HTML'],
+        ['と', null, 'and'], ['XML', null, 'XML'], ['です', null, 'is'],
+        ['。', null, '.'], ['HTML', null, 'HTML'], ['＝', null, 'equals'],
+        ['Webページ', null, 'web page'], ['作成', 'さくせい', 'creating'],
+        ['用', 'よう', 'for'], ['、', null, ','],
+        ['XML', null, 'XML'], ['＝', null, 'equals'],
+        ['データ', null, 'data'], ['記述', 'きじゅつ', 'describing'],
+        ['用', 'よう', 'for'], ['です', null, 'is']
+      ],
+      expEn: 'The representative markup languages are HTML (for web pages) and XML (for describing data).'
+    },
+
+    {
+      q: [
+        ['XML', null, 'XML'],
+        ['の', null, 'of'],
+        ['特徴', 'とくちょう', 'characteristic'],
+        ['として', null, 'as'],
+        ['正しい', 'ただしい', 'correct'],
+        ['もの', null, 'one'],
+        ['は', null, 'topic marker'],
+        ['？', null, '?']
+      ],
+      qEn: 'Which is a key characteristic of XML?',
+      choices: [
+        [
+          ['タグ', null, 'tag'], ['が', null, 'subject marker'],
+          ['決', 'き', 'fixed'], ['まって', null, 'fixed'],
+          ['いて', null, 'being'], ['変更', 'へんこう', 'change'],
+          ['できない', null, 'cannot']
+        ],
+        [
+          ['タグ', null, 'tag'], ['を', null, 'object marker'],
+          ['独自', 'どくじ', 'freely'], ['に', null, 'freely'],
+          ['定義', 'ていぎ', 'define'], ['できる', null, 'can']
+        ],
+        [
+          ['機械語', 'きかいご', 'machine language'], ['で', null, 'in'],
+          ['実行', 'じっこう', 'execute'], ['される', null, 'is']
+        ],
+        [
+          ['事務処理', 'じむしょり', 'business processing'],
+          ['専用', 'せんよう', 'exclusive'], ['の', null, 'of'],
+          ['言語', 'げんご', 'language'], ['である', null, 'is']
+        ]
+      ],
+      correct: 1,
+      exp: [
+        ['XML', null, 'XML'], ['は', null, 'topic marker'],
+        ['、', null, ','], ['インターネット', null, 'the internet'],
+        ['で', null, 'on'], ['データ', null, 'data'],
+        ['を', null, 'object marker'], ['記述', 'きじゅつ', 'describe'],
+        ['する', null, 'to describe'], ['ための', null, 'for the purpose of'],
+        ['マークアップ', null, 'markup'], ['言語', 'げんご', 'language'],
+        ['で', null, 'is'], ['、', null, ','],
+        ['タグ', null, 'tag'], ['を', null, 'object marker'],
+        ['独自', 'どくじ', 'freely'], ['に', null, 'freely'],
+        ['定義', 'ていぎ', 'define'], ['できる', null, 'can'],
+        ['のが', null, 'is the'], ['特徴', 'とくちょう', 'characteristic'],
+        ['です', null, 'is'], ['。', null, '.'],
+        ['HTML', null, 'HTML'], ['と', null, 'unlike'],
+        ['違い', 'ちがい', 'difference'], ['、', null, ','],
+        ['目的', 'もくてき', 'purpose'], ['に', null, 'to'],
+        ['合', 'あ', 'fit'], ['わせた', null, 'fitted'],
+        ['タグ', null, 'tag'], ['が', null, 'subject marker'],
+        ['作', 'つく', 'make'], ['れます', null, 'can be made']
+      ],
+      expEn: 'XML describes data on the internet; unlike HTML, you can define your own tags to fit your purpose.'
+    },
+
+    {
+      q: [
+        ['HTML', null, 'HTML'],
+        ['の', null, 'of'],
+        ['タグ', null, 'tag'],
+        ['の', null, 'of'],
+        ['役割', 'やくわり', 'role'],
+        ['の', null, 'of'],
+        ['組', 'くみ', 'pair'],
+        ['み', null, 'pairing'],
+        ['合わせ', 'あわせ', 'combination'],
+        ['として', null, 'as'],
+        ['正しい', 'ただしい', 'correct'],
+        ['もの', null, 'one'],
+        ['は', null, 'topic marker'],
+        ['？', null, '?']
+      ],
+      qEn: 'Which pairing of HTML tags and their roles is correct?',
+      choices: [
+        [
+          ['&lt;p&gt;', null, 'p tag'], ['＝', null, 'equals'],
+          ['改行', 'かいぎょう', 'line break'], ['／', null, '/'],
+          ['&lt;br&gt;', null, 'br tag'], ['＝', null, 'equals'],
+          ['段落', 'だんらく', 'paragraph']
+        ],
+        [
+          ['&lt;p&gt;', null, 'p tag'], ['＝', null, 'equals'],
+          ['段落', 'だんらく', 'paragraph'], ['／', null, '/'],
+          ['&lt;br&gt;', null, 'br tag'], ['＝', null, 'equals'],
+          ['改行', 'かいぎょう', 'line break']
+        ],
+        [
+          ['&lt;a&gt;', null, 'a tag'], ['＝', null, 'equals'],
+          ['改行', 'かいぎょう', 'line break'], ['／', null, '/'],
+          ['&lt;p&gt;', null, 'p tag'], ['＝', null, 'equals'],
+          ['リンク', null, 'link']
+        ],
+        [
+          ['&lt;body&gt;', null, 'body tag'], ['＝', null, 'equals'],
+          ['ヘッダー', null, 'header'], ['／', null, '/'],
+          ['&lt;head&gt;', null, 'head tag'], ['＝', null, 'equals'],
+          ['本文', 'ほんぶん', 'body text']
+        ]
+      ],
+      correct: 1,
+      exp: [
+        ['&lt;p&gt;', null, 'p tag'], ['は', null, 'topic marker'],
+        ['段落', 'だんらく', 'paragraph'], ['（', null, '('],
+        ['paragraph', null, 'paragraph'], ['）', null, ')'],
+        ['の', null, 'of'], ['開始', 'かいし', 'start'], ['〜', null, 'to'],
+        ['終了', 'しゅうりょう', 'end'], ['、', null, ','],
+        ['&lt;br&gt;', null, 'br tag'], ['は', null, 'topic marker'],
+        ['改行', 'かいぎょう', 'line break'], ['（', null, '('],
+        ['line', null, 'line'], ['break', null, 'break'], ['）', null, ')'],
+        ['を', null, 'object marker'], ['示', 'しめ', 'indicates'],
+        ['します', null, 'does'], ['。', null, '.'],
+        ['&lt;a&gt;', null, 'a tag'], ['＝', null, 'equals'],
+        ['リンク', null, 'link'], ['、', null, ','],
+        ['&lt;head&gt;', null, 'head tag'], ['＝', null, 'equals'],
+        ['ヘッダー', null, 'header'], ['、', null, ','],
+        ['&lt;body&gt;', null, 'body tag'], ['＝', null, 'equals'],
+        ['本文', 'ほんぶん', 'body text'], ['です', null, 'is']
+      ],
+      expEn: '&lt;p&gt; = paragraph, &lt;br&gt; = line break, &lt;a&gt; = link, &lt;head&gt; = header, &lt;body&gt; = body text.'
+    }
+
+  ];
+
+  var quizOrder = [], quizPos = 0, quizCorrect = 0, quizAnswered = false;
+
+  function startQuiz() {
+    quizOrder = [];
+    for (var i = 0; i < QUIZ.length; i++) quizOrder.push(i);
+    for (var j = quizOrder.length - 1; j > 0; j--) {
+      var r = Math.floor(Math.random() * (j + 1));
+      var tmp = quizOrder[j]; quizOrder[j] = quizOrder[r]; quizOrder[r] = tmp;
+    }
+    quizPos = 0; quizCorrect = 0;
+    document.getElementById('quizNextBtn').textContent = 'Next Question';
+    showQuizQuestion();
+  }
+
+  function showQuizQuestion() {
+    if (quizPos >= quizOrder.length) {
+      document.getElementById('quizProgress').textContent = '';
+      document.getElementById('quizQuestion').innerHTML =
+        segs([['クイズ完了！', 'クイズかんりょう', 'Quiz complete!']]);
+      document.getElementById('quizTranslation').innerHTML =
+        '<div class="translation-title">English Translation</div><p>Quiz complete!</p>';
+      document.getElementById('quizChoices').innerHTML = '';
+      document.getElementById('quizFeedback').innerHTML =
+        '<div class="quiz-result">' + quizCorrect + ' / ' + quizOrder.length +
+        ' 正解 — correct</div>' +
+        (quizCorrect === quizOrder.length
+          ? 'パーフェクト！🎉 — Perfect score!'
+          : '間違えた問題の解説をもう一度読んでみよう！ — Review the explanations!');
+      document.getElementById('quizNextBtn').textContent = 'Restart';
+      document.getElementById('quizScore').textContent =
+        'Score: ' + quizCorrect + ' / ' + quizOrder.length;
+      return;
+    }
+    var q = QUIZ[quizOrder[quizPos]];
+    quizAnswered = false;
+    document.getElementById('quizProgress').textContent =
+      'Question ' + (quizPos + 1) + ' / ' + quizOrder.length;
+    document.getElementById('quizQuestion').innerHTML = segs(q.q);
+    document.getElementById('quizTranslation').innerHTML =
+      '<div class="translation-title">English Translation</div><p>' + q.qEn + '</p>';
+    var choicesEl = document.getElementById('quizChoices');
+    choicesEl.innerHTML = '';
+    q.choices.forEach(function (choiceSegs, idx) {
+      var btn = document.createElement('button');
+      btn.className = 'quiz-choice';
+      btn.type = 'button';
+      btn.innerHTML = segs(choiceSegs);
+      btn.onclick = function (ev) {
+        ev = ev || window.event;
+        if (ev && ev.stopPropagation) ev.stopPropagation();
+        if (quizAnswered) return;
+        answerQuiz(idx, btn);
+      };
+      choicesEl.appendChild(btn);
+    });
+    document.getElementById('quizFeedback').innerHTML = '';
+  }
+
+  function answerQuiz(idx, clickedBtn) {
+    var q = QUIZ[quizOrder[quizPos]];
+    quizAnswered = true;
+    var buttons = document.querySelectorAll('.quiz-choice');
+    buttons.forEach(function (b) { b.classList.add('disabled'); });
+    buttons[q.correct].classList.add('correct');
+    var head;
+    if (idx === q.correct) {
+      quizCorrect++;
+      head = '<strong class="ok">⭕ 正解！ Correct!</strong><br>';
+    } else {
+      clickedBtn.classList.add('wrong');
+      head = '<strong class="ng">❌ 不正解… Incorrect.</strong><br>';
+    }
+    document.getElementById('quizFeedback').innerHTML =
+      head + segs(q.exp) + '<span class="fb-en">' + q.expEn + '</span>';
+    quizPos++;
+    document.getElementById('quizScore').textContent =
+      'Score: ' + quizCorrect + ' correct so far';
+  }
+
+  function quizNext() {
+    if (quizOrder.length === 0) { startQuiz(); return; }
+    if (quizPos >= quizOrder.length) { startQuiz(); return; }
+    if (!quizAnswered) return;
+    showQuizQuestion();
+  }
+
+  /* ---------- Init ---------- */
+  document.addEventListener('DOMContentLoaded', updateLearnedCount);
+</script>
+</body>
+</html>

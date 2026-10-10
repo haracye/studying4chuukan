@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>1 AIと機械学習の基本 — Japanese Study Notes</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", "Meiryo", sans-serif;
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 40px 25px 80px;
+      line-height: 1.6;
+      color: #1a1a2e;
+      background: #f5f6f8;
+    }
+
+    /* ---- Page Header ---- */
+    .page-header {
+      margin-bottom: 36px;
+      padding-bottom: 24px;
+      border-bottom: 2px solid #e2e5ec;
+    }
+
+    .page-header .chapter {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: #8890a6;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 34px;
+      margin-bottom: 8px;
+      letter-spacing: 0.02em;
+      color: #16213e;
+      font-weight: 700;
+    }
+
+    h1 rt {
+      font-size: 12px;
+      color: #a0a4b4;
+      font-weight: 400;
+    }
+
+    .ref {
+      font-size: 14px;
+      color: #8890a6;
+    }
+
+    /* ---- Toolbar ---- */
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 0 -25px 40px;
+      padding: 14px 25px;
+      background: rgba(245, 246, 248, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid #e2e5ec;
+    }
+
+    .hint {
+      font-size: 13px;
+      color: #8890a6;
+      margin-right: auto;
+    }
+
+    .toggle-btn {
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      padding: 8px 20px;
+      border: 2px solid #4a6fa5;
+      border-radius: 999px;
+      background: #fff;
+      color: #4a6fa5;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .toggle-btn:hover {
+      background: #4a6fa5;
+      color: #fff;
+    }
+
+    .toggle-btn.active {
+      background: #4a6fa5;
+      color: #fff;
+    }
+
+    /* ---- Section Headers ---- */
+    .section-header {
+      margin-top: 56px;
+      margin-bottom: 28px;
+    }
+
+    .section-header:first-of-type {
+      margin-top: 0;
+    }
+
+    .section-label {
+      display: inline-block;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #fff;
+      background: #16213e;
+      padding: 4px 14px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #16213e;
+      margin-bottom: 4px;
+      line-height: 1.4;
+    }
+
+    .section-title rt {
+      font-size: 10px;
+      color: #a0a4b4;
+    }
+
+    .section-q {
+      font-size: 15px;
+      color: #8890a6;
+      font-style: italic;
+    }
+
+    /* ---- Breakdown: inline flowing text ---- */
+    .breakdown {
+      font-size: 26px;
+      line-height: 2.8;
+      letter-spacing: 0.02em;
+      margin-bottom: 20px;
+    }
+
+    .word {
+      display: inline;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      border-radius: 6px;
+      padding: 1px 3px;
+      margin: 0 1px;
+    }
+
+    .word:active {
+      background: rgba(74, 111, 165, 0.1);
+    }
+
+    .word ruby {
+      color: #1a1a2e;
+      transition: color 0.2s ease;
+    }
+
+    .word.revealed ruby {
+      color: #4a6fa5;
+    }
+
+    .word.revealed {
+      background: rgba(74, 111, 165, 0.06);
+    }
+
+    rt {
+      font-size: 11px;
+      line-height: 1;
+      color: #a0a4b4;
+      font-weight: 400;
+    }
+
+    /* ---- Meaning: inline pill on tap ---- */
+    .meaning {
+      display: none;
+      font-size: 12px;
+      line-height: 1.3;
+      color: #4a6fa5;
+      background: rgba(74, 111, 165, 0.08);
+      padding: 2px 7px;
+      border-radius: 5px;
+      margin: 0 2px;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .word.revealed .meaning {
+      display: inline;
+    }
+
+    /* ---- Answer words (numbered blanks) ---- */
+    .answer-word .answer-text {
+      display: inline;
+    }
+
+    .answer-word .answer-text ruby {
+      color: #4a6fa5;
+      font-weight: 500;
+    }
+
+    .answer-word .answer-num {
+      display: none;
+      font-size: 18px;
+      color: #e07a5f;
+      font-weight: 600;
+    }
+
+    .answer-word .blank {
+      display: none;
+    }
+
+    body.hide-answers .answer-word .answer-text {
+      display: none;
+    }
+
+    body.hide-answers .answer-word .answer-num {
+      display: inline;
+    }
+
+    body.hide-answers .answer-word .blank {
+      display: inline;
+      letter-spacing: 0.1em;
+      color: #e07a5f;
+      opacity: 0.55;
+    }
+
+    /* ---- Translation ---- */
+    .translation {
+      margin: 16px 0 48px;
+      padding: 16px 20px;
+      font-size: 16px;
+      line-height: 1.7;
+      color: #4a6fa5;
+      background: rgba(74, 111, 165, 0.04);
+      border-radius: 10px;
+    }
+
+    .translation-title {
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      letter-spacing: 0.08em;
+      color: #4a6fa5;
+      text-transform: uppercase;
+    }
+
+    /* ---- Formula ---- */
+    .formula-block {
+      text-align: center;
+      margin: 30px 0 40px;
+      padding: 24px 20px;
+      background: #fff;
+      border-radius: 12px;
+    }
+
+    .formula-enzyme {
+      font-size: 16px;
+      color: #4a6fa5;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .formula-arrow {
+      font-size: 20px;
+      color: #b0b4c4;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    .formula {
+      font-family: "SF Mono", "Fira Code", "Courier New", monospace;
+      font-size: 19px;
+      color: #16213e;
+      overflow-x: auto;
+      white-space: nowrap;
+      line-height: 2;
+    }
+
+    .formula .plus {
+      margin: 0 8px;
+      color: #b0b4c4;
+    }
+
+    .formula .arrow-r {
+      margin: 0 10px;
+      color: #b0b4c4;
+    }
+
+    .answer-inline .answer-text {
+      display: inline;
+      color: #4a6fa5;
+      font-weight: 500;
+    }
+
+    .answer-inline .answer-num {
+      display: none;
+    }
+
+    .answer-inline .blank {
+      display: none;
+    }
+
+    body.hide-answers .answer-inline .answer-text {
+      display: none;
+    }
+
+    body.hide-answers .answer-inline .answer-num {
+      display: inline;
+      color: #e07a5f;
+      font-weight: 600;
+    }
+
+    body.hide-answers .answer-inline .blank {
+      display: inline;
+      letter-spacing: 0.1em;
+      color: #e07a5f;
+      opacity: 0.55;
+    }
+
+    .formula-gloss {
+      font-size: 13px;
+      margin-top: 14px;
+      color: #8890a6;
+      line-height: 1.9;
+    }
+
+    /* Words inside formula glosses (smaller scale) */
+    .formula-gloss .word {
+      color: #8890a6;
+    }
+
+    .formula-gloss rt {
+      font-size: 9px;
+    }
+
+    .formula-gloss .meaning {
+      font-size: 11px;
+      padding: 1px 5px;
+    }
+
+    /* ---- Divider ---- */
+    .divider {
+      margin: 48px 0;
+      text-align: center;
+      font-size: 13px;
+      letter-spacing: 0.5em;
+      color: #d0d4de;
+      text-indent: 0.5em;
+    }
+
+    /* ---- Tables ---- */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 30px 0 12px;
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .unit-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .unit-table th {
+      background: #16213e;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 10px 14px;
+      text-align: left;
+    }
+
+    .unit-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #e2e5ec;
+      color: #1a1a2e;
+      vertical-align: middle;
+    }
+
+    .unit-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .unit-table rt {
+      font-size: 9px;
+    }
+
+    .unit-table .meaning {
+      font-size: 11px;
+      padding: 1px 5px;
+    }
+
+    .unit-table .word {
+      color: #1a1a2e;
+    }
+
+    /* Header words: light styling on dark background */
+    .unit-table th .word ruby {
+      color: #fff;
+    }
+
+    .unit-table th .word.revealed {
+      background: rgba(255, 255, 255, 0.10);
+    }
+
+    .unit-table th .word.revealed ruby {
+      color: #cfd8ec;
+    }
+
+    .unit-table th .meaning {
+      background: rgba(255, 255, 255, 0.14);
+      color: #cfd8ec;
+    }
+
+    /* ---- Learning-methods table: multi-line cells ---- */
+    .ml-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 15px;
+      white-space: normal;
+    }
+
+    .ml-table th {
+      background: #16213e;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 12px 16px;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .ml-table td {
+      padding: 20px 16px;
+      border-bottom: 1px solid #e2e5ec;
+      color: #1a1a2e;
+      vertical-align: top;
+      line-height: 2.3;
+      width: 33%;
+    }
+
+    .ml-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .ml-table rt {
+      font-size: 9px;
+    }
+
+    .ml-table .meaning {
+      font-size: 11px;
+      padding: 1px 5px;
+    }
+
+    .ml-table .method-cell {
+      width: 24%;
+      min-width: 150px;
+    }
+
+    .ml-table .method-cell .answer-inline,
+    .ml-table .method-cell .answer-word {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .ml-table .cell-translation {
+      display: block;
+      font-size: 12px;
+      line-height: 1.7;
+      color: #4a6fa5;
+      background: rgba(74, 111, 165, 0.04);
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin-top: 12px;
+    }
+
+    .ml-table .cell-translation .tt {
+      display: block;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .ml-table .ex {
+      display: block;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed #e2e5ec;
+      font-size: 14px;
+      line-height: 2.2;
+    }
+
+    .ml-table .ex .tag {
+      font-size: 10px;
+      font-weight: 700;
+      color: #8890a6;
+      letter-spacing: 0.06em;
+    }
+
+    .table-note {
+      font-size: 13px;
+      color: #8890a6;
+      margin-bottom: 48px;
+      padding: 0 4px;
+      line-height: 2;
+    }
+
+    .table-note .word {
+      color: #8890a6;
+    }
+
+    .table-note rt {
+      font-size: 9px;
+    }
+
+    .table-note .meaning {
+      font-size: 11px;
+      padding: 1px 5px;
+    }
+
+    /* ---- Key Terms Section ---- */
+    .terms-section {
+      margin-top: 60px;
+      padding-top: 40px;
+      border-top: 2px solid #e2e5ec;
+    }
+
+    .terms-heading {
+      font-size: 22px;
+      font-weight: 700;
+      color: #16213e;
+      margin-bottom: 6px;
+    }
+
+    .terms-sub {
+      font-size: 14px;
+      color: #8890a6;
+      margin-bottom: 30px;
+    }
+
+    .term-item {
+      margin-bottom: 20px;
+      padding: 14px 18px;
+      background: #fff;
+      border-radius: 10px;
+    }
+
+    .term-jp {
+      font-size: 18px;
+      font-weight: 600;
+      color: #16213e;
+    }
+
+    .term-jp rt {
+      font-size: 11px;
+      color: #a0a4b4;
+    }
+
+    .term-en {
+      font-size: 14px;
+      color: #4a6fa5;
+      font-weight: 500;
+      margin-left: 8px;
+    }
+
+    .term-def {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #555a6e;
+      margin-top: 6px;
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 600px) {
+      body { padding: 25px 16px 60px; }
+      h1 { font-size: 26px; }
+      .section-title { font-size: 19px; }
+      .breakdown { font-size: 22px; line-height: 2.6; }
+      .formula { font-size: 16px; }
+      .translation { font-size: 14px; padding: 14px 16px; }
+      .hint { display: none; }
+      .toolbar { padding: 12px 16px; margin: 0 -16px 30px; }
+      .term-jp { font-size: 16px; }
+      .unit-table { font-size: 13px; }
+      .unit-table th, .unit-table td { padding: 8px 10px; }
+      .ml-table { font-size: 13px; }
+      .ml-table td { padding: 14px 10px; line-height: 2.1; }
+      .ml-table .method-cell .answer-inline,
+      .ml-table .method-cell .answer-word { font-size: 16px; }
+      .ml-table .cell-translation { font-size: 11px; }
+      .ml-table .ex { font-size: 12.5px; }
+    }
+  
+    /* Added usability improvements: responsive layout, readable controls, and print support. */
+    html { scroll-behavior: smooth; }
+    body { width: min(100% - 28px, 920px); padding-left: 0 !important; padding-right: 0 !important; }
+    img, svg, video, canvas, table { max-width: 100%; }
+    table { display: block; overflow-x: auto; }
+    button, .toggle-btn, input, select { touch-action: manipulation; }
+    button, .toggle-btn { min-height: 40px; cursor: pointer; }
+    :focus-visible { outline: 3px solid #647de8; outline-offset: 3px; }
+    .chapter-nav { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; margin: 0 0 22px; padding: 12px 14px; border:1px solid #dfe3ed; border-radius:12px; background:rgba(255,255,255,.88); font-size:14px; }
+    .chapter-nav a { color:#4257a6; text-decoration:none; font-weight:600; padding:7px 9px; border-radius:8px; }
+    .chapter-nav a:hover { background:#eef1ff; }
+    .chapter-nav .home-link { margin-right:auto; }
+    @media (max-width: 600px) {
+      body { width: calc(100% - 24px); padding-top: 18px !important; padding-bottom: 40px !important; font-size: 15px; }
+      h1 { font-size: clamp(24px, 7vw, 32px) !important; overflow-wrap:anywhere; }
+      .toolbar { margin-left: -12px !important; margin-right: -12px !important; padding: 10px 12px !important; gap:8px !important; }
+      .chapter-nav { gap:5px; padding:8px; }
+      .chapter-nav a { padding:8px 6px; }
+    }
+    @media print {
+      body { width:100%; max-width:none; padding:0 !important; background:#fff !important; color:#000 !important; }
+      .toolbar, .chapter-nav, button, .toggle-btn { display:none !important; }
+      .card, section, table { break-inside:avoid; }
+    }
+    
+  
+/* Study-site polish: shared accessible controls, focus states, themes, and spacing. */
+:root { color-scheme: light; --study-bg:#f5f6fa; --study-card:#fff; --study-text:#20243a; --study-muted:#687089; --study-line:#e1e5ef; --study-accent:#5267b8; --study-soft:#eef1ff; }
+html { scroll-padding-top: 90px; }
+body { background:var(--study-bg); color:var(--study-text); transition:background .18s,color .18s; }
+.page-header { border-color:var(--study-line)!important; }
+.section-header, .section-title, .translation, .table-note, .formula-gloss, .unit-table, .term-card, .example-box, .breakdown, .card { max-width:100%; }
+.translation, .table-note, .term-card, .example-box, .breakdown, .unit-table, table { overflow-wrap:anywhere; }
+.chapter-nav { position:relative; }
+.study-progress { position:fixed; inset:0 0 auto; height:4px; z-index:9999; background:transparent; pointer-events:none; }
+.study-progress span { display:block; width:0; height:100%; background:linear-gradient(90deg,#7487df,#a4b1ff); transition:width .08s linear; }
+.study-tools { display:flex; align-items:center; gap:8px; flex-wrap:wrap; width:100%; }
+.study-tools .tool-spacer { flex:1 1 12px; }
+.study-tools button { appearance:none; border:1px solid #d6dced; border-radius:999px; background:#fff; color:#36436e; font-family:inherit; font-size:13px; font-weight:600; line-height:1.2; padding:10px 13px; min-height:42px; cursor:pointer; }
+.study-tools button:hover { background:#f0f2ff; border-color:#aab5e8; }
+.study-tools button[aria-pressed="true"] { background:#e9edff; border-color:#9aa8eb; }
+.study-tools .font-size-label { font-size:12px; color:var(--study-muted); }
+body.study-large-text { font-size:1.12em; }
+body.study-larger-text { font-size:1.24em; }
+body.study-show-meanings .meaning { display:inline!important; }
+body.study-show-meanings .word { background:rgba(99,119,201,.07); border-radius:5px; }
+body.study-dark { --study-bg:#171a24; --study-card:#222635; --study-text:#edf0fa; --study-muted:#b4bad0; --study-line:#3a4054; --study-accent:#b1bdff; --study-soft:#2c3350; color-scheme:dark; }
+body.study-dark .toolbar, body.study-dark .chapter-nav, body.study-dark .study-tools button { background:#222635!important; color:#edf0fa!important; border-color:#414860!important; }
+body.study-dark .chapter-nav a, body.study-dark .toggle-btn { color:#c6ceff!important; }
+body.study-dark .translation, body.study-dark .table-note, body.study-dark .breakdown, body.study-dark .unit-table, body.study-dark .term-card, body.study-dark .example-box, body.study-dark .card, body.study-dark section { background-color:var(--study-card); color:var(--study-text); border-color:var(--study-line); }
+body.study-dark .page-header h1, body.study-dark h1, body.study-dark h2, body.study-dark h3 { color:var(--study-text)!important; }
+body.study-dark .study-tools button[aria-pressed="true"] { background:#343d61!important; }
+.word[onclick], .answer-word[onclick] { -webkit-tap-highlight-color:transparent; }
+.word:focus-visible { outline:2px solid #7185df; outline-offset:2px; border-radius:4px; }
+@media(max-width:600px){ .study-tools button { flex:1 1 auto; padding:10px 9px; font-size:12px; } .study-tools .tool-spacer { display:none; } .study-progress { height:3px; } }
+@media(prefers-reduced-motion:reduce){ html{scroll-behavior:auto!important} *,*::before,*::after{transition:none!important;animation:none!important} }
+@media print { .study-progress,.study-tools {display:none!important} body {font-size:11pt!important} .meaning {display:inline!important} }
+
+  </style>
+</head>
+
+<body>
+  <nav class="chapter-nav" aria-label="Chapter navigation">
+    <a class="home-link" href="index.html">⌂ All notes</a><a href="05-chapter.html" aria-label="Previous chapter">← Previous</a><a href="07-chapter.html" aria-label="Next chapter">Next →</a>
+  </nav>
+
+
+  <!-- ==================== PAGE HEADER ==================== -->
+  <div class="page-header">
+    <div class="chapter">Unit 1 · IT Fundamentals</div>
+    <h1>AI（<ruby>人工知能<rt>じんこうちのう</rt></ruby>）と<ruby>機械学習<rt>きかいがくしゅう</rt></ruby>の<ruby>基本<rt>きほん</rt></ruby></h1>
+    <div class="ref">基礎講義 1 — Basics of AI &amp; Machine Learning</div>
+  </div>
+
+  <!-- ==================== TOOLBAR ==================== -->
+  <div class="toolbar">
+    <div class="hint">Tap any word to reveal its meaning</div>
+    <div class="toggle-btn active" id="toggleAnswers" onclick="toggleAnswers()">Hide Answers ✓</div>
+  </div>
+
+  <!-- ==================== SECTION 1 ==================== -->
+  <div class="section-header">
+    <span class="section-label">1</span>
+    <div class="section-title">AI（<ruby>人工知能<rt>じんこうちのう</rt></ruby>：Artificial Intelligence）とは</div>
+    <div class="section-q">What exactly is AI (artificial intelligence)?</div>
+  </div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)"><ruby>人間<rt>にんげん</rt></ruby><span class="meaning">human</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>実現<rt>じつげん</rt></ruby>する<span class="meaning">carries out / realizes</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>様々<rt>さまざま</rt></ruby>な<span class="meaning">various</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>知的活動<rt>ちてきかつどう</rt></ruby><span class="meaning">intellectual activities</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>行<rt>おこな</rt></ruby>う<span class="meaning">perform</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>プログラム<rt>プログラム</rt></ruby><span class="meaning">program</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>や<rt>や</rt></ruby><span class="meaning">and</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>システム<rt>システム</rt></ruby><span class="meaning">system</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>のことを<rt>のことを</rt></ruby><span class="meaning">the thing of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>指<rt>さ</rt></ruby>します<span class="meaning">refers to</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    AI refers to programs and systems that perform the various intellectual activities that humans carry out.
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)">AI<span class="meaning">AI</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>支<rt>ささ</rt></ruby>える<span class="meaning">supports</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>基礎技術<rt>きそぎじゅつ</rt></ruby><span class="meaning">fundamental technologies</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>には<rt>には</rt></ruby><span class="meaning">as for... in</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>機械学習<rt>きかいがくしゅう</rt></ruby></span><span class="answer-num">（1）</span><span class="blank">＿＿＿＿＿＿</span><span class="meaning">machine learning</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>や<rt>や</rt></ruby><span class="meaning">and</span></span>、<span class="word" onclick="toggleWord(event, this)"><ruby>深層学習<rt>しんそうがくしゅう</rt></ruby><span class="meaning">deep learning</span></span>（<span class="word" onclick="toggleWord(event, this)"><ruby>以降<rt>いこう</rt></ruby><span class="meaning">hereafter</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>省略<rt>しょうりゃく</rt></ruby><span class="meaning">abbreviated as</span></span><span class="word" onclick="toggleWord(event, this)">DL<span class="meaning">DL</span></span>）<span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>あり<rt>あり</rt></ruby><span class="meaning">there are</span></span><span class="word" onclick="toggleWord(event, this)">ます<span class="meaning">(polite)</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    The fundamental technologies supporting AI include (machine learning) and deep learning (DL).
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)"><ruby>機械学習<rt>きかいがくしゅう</rt></ruby><span class="meaning">machine learning</span></span><span class="word" onclick="toggleWord(event, this)">（<span class="meaning">(</span></span><span class="word" onclick="toggleWord(event, this)">ML<span class="meaning">ML — abbreviation for Machine Learning</span></span><span class="word" onclick="toggleWord(event, this)">）<span class="meaning">)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>と<rt>と</rt></ruby><span class="meaning">and</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>深層学習<rt>しんそうがくしゅう</rt></ruby><span class="meaning">deep learning</span></span><span class="word" onclick="toggleWord(event, this)">（<span class="meaning">(</span></span><span class="word" onclick="toggleWord(event, this)">DL<span class="meaning">DL</span></span><span class="word" onclick="toggleWord(event, this)">）<span class="meaning">)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>違<rt>ちが</rt></ruby>い<span class="meaning">difference</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>について<rt>について</rt></ruby><span class="meaning">about</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>整理<rt>せいり</rt></ruby>して<span class="meaning">sort out</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>おきましょう<rt>おきましょう</rt></ruby><span class="meaning">let's keep organized</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    Let's sort out the difference between machine learning (ML) and deep learning (DL) in advance.
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)"><ruby>機械学習<rt>きかいがくしゅう</rt></ruby><span class="meaning">machine learning</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>は<rt>は</rt></ruby><span class="meaning">topic</span></span><span class="word" onclick="toggleWord(event, this)">AI<span class="meaning">AI</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>実現<rt>じつげん</rt></ruby>する<span class="meaning">to realize</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>ための<rt>ための</rt></ruby><span class="meaning">for</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>基礎技術<rt>きそぎじゅつ</rt></ruby><span class="meaning">fundamental technology</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)">1つ<span class="meaning">one</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>です<rt>です</rt></ruby><span class="meaning">is</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    Machine learning is one of the fundamental technologies for realizing AI.
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)"><ruby>深層学習<rt>しんそうがくしゅう</rt></ruby><span class="meaning">deep learning</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>は<rt>は</rt></ruby><span class="meaning">topic</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>機械学習<rt>きかいがくしゅう</rt></ruby><span class="meaning">machine learning</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>土台<rt>どだい</rt></ruby><span class="meaning">foundation</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>と<rt>と</rt></ruby><span class="meaning">as</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>した<rt>した</rt></ruby><span class="meaning">based on</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>手法<rt>しゅほう</rt></ruby><span class="meaning">technique / method</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)">1つ<span class="meaning">one</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>です<rt>です</rt></ruby><span class="meaning">is</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    Deep learning is one of the techniques based on the foundation of machine learning.
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)"><ruby>これら<rt>これら</rt></ruby><span class="meaning">these</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>土台<rt>どだい</rt></ruby><span class="meaning">foundation</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>として<rt>として</rt></ruby><span class="meaning">as</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>画像認識<rt>がぞうにんしき</rt></ruby><span class="meaning">image recognition</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>音声認識<rt>おんせいにんしき</rt></ruby><span class="meaning">voice recognition</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>自然言語処理<rt>しぜんげんごしょり</rt></ruby><span class="meaning">natural language processing</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>など<rt>など</rt></ruby><span class="meaning">etc.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>応用技術<rt>おうようぎじゅつ</rt></ruby><span class="meaning">applied technologies</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>発展<rt>はってん</rt></ruby>しています<span class="meaning">are developing</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    With these as a foundation, applied technologies such as image recognition, voice recognition, and natural language processing are developing.
+  </div>
+
+  <!-- ==================== SECTION 2 ==================== -->
+  <div class="section-header">
+    <span class="section-label">2</span>
+    <div class="section-title"><ruby>機械学習<rt>きかいがくしゅう</rt></ruby>（マシーンラーニング）の<ruby>仕組<rt>しく</rt></ruby>み</div>
+    <div class="section-q">How does machine learning actually work?</div>
+  </div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)">コンピューター<span class="meaning">computer</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>に<rt>に</rt></ruby><span class="meaning">to</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>膨大<rt>ぼうだい</rt></ruby>な<span class="meaning">enormous</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>量<rt>りょう</rt></ruby>の<span class="meaning">amount of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>データ<rt>データ</rt></ruby><span class="meaning">data</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>読<rt>よ</rt></ruby>み<ruby>込<rt>こ</rt></ruby>ませ<span class="meaning">make it load (causative)</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)">コンピューター<span class="meaning">computer</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>学習<rt>がくしゅう</rt></ruby>し<span class="meaning">learns</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>予測<rt>よそく</rt></ruby><span class="meaning">prediction</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>や<rt>や</rt></ruby><span class="meaning">and</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>判断<rt>はんだん</rt></ruby><span class="meaning">judgment</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>する<rt>する</rt></ruby><span class="meaning">do</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>仕組<rt>しく</rt></ruby>み<span class="meaning">mechanism</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>です<rt>です</rt></ruby><span class="meaning">is</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    It is a mechanism in which a computer is made to load an enormous amount of data, learns from it, and then makes predictions and judgments.
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)"><ruby>過去<rt>かこ</rt></ruby>の<span class="meaning">past</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>データ<rt>データ</rt></ruby><span class="meaning">data</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>経験<rt>けいけん</rt></ruby><span class="meaning">experience</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>として<rt>として</rt></ruby><span class="meaning">as</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>学習<rt>がくしゅう</rt></ruby>させる<span class="meaning">make it learn (causative)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>ことで<rt>ことで</rt></ruby><span class="meaning">by doing</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>予測<rt>よそく</rt></ruby><span class="meaning">prediction</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>や<rt>や</rt></ruby><span class="meaning">and</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>判断<rt>はんだん</rt></ruby><span class="meaning">judgment</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>できる<rt>できる</rt></ruby><span class="meaning">become able to do</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>ようになります<rt>ようになります</rt></ruby><span class="meaning">it comes to be</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    By having the computer learn from past data as experience, it becomes able to make predictions and judgments.
+  </div>
+
+  <div class="divider">···</div>
+
+  <div class="breakdown">
+    <span class="word" onclick="toggleWord(event, this)"><ruby>従来<rt>じゅうらい</rt></ruby>の<span class="meaning">conventional</span></span><span class="word" onclick="toggleWord(event, this)">AI<span class="meaning">AI</span></span><span class="word" onclick="toggleWord(event, this)">（<span class="meaning">(</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>記述型<rt>きじゅつがた</rt></ruby><span class="meaning">rule-describing type</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>人工知能<rt>じんこうちのう</rt></ruby><span class="meaning">artificial intelligence</span></span><span class="word" onclick="toggleWord(event, this)">）<span class="meaning">)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>は<rt>は</rt></ruby><span class="meaning">topic</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>予<rt>あらか</rt></ruby>じめ<span class="meaning">in advance</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>人間<rt>にんげん</rt></ruby><span class="meaning">humans</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>作成<rt>さくせい</rt></ruby>した<span class="meaning">created</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>ルール<rt>ルール</rt></ruby><span class="meaning">rules</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>や<rt>や</rt></ruby><span class="meaning">and</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>処理<rt>しょり</rt></ruby><span class="meaning">processing</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>に<rt>に</rt></ruby><span class="meaning">based on</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>基<rt>もと</rt></ruby>づいて<span class="meaning">based on</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>動作<rt>どうさ</rt></ruby>していた<span class="meaning">operated</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>ため<rt>ため</rt></ruby><span class="meaning">because</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>用途<rt>ようと</rt></ruby><span class="meaning">use / application</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>限定<rt>げんてい</rt></ruby>されていました<span class="meaning">was limited</span></span>。
+  </div>
+
+  <div class="translation">
+    <div class="translation-title">English Translation</div>
+    Conventional AI (rule-based artificial intelligence) operated on rules and processing that humans had created in advance, so its uses were limited.
+  </div>
+
+  <!-- ==================== SECTION 3 (as table) ==================== -->
+  <div class="section-header">
+    <span class="section-label">3</span>
+    <div class="section-title"><ruby>機械学習<rt>きかいがくしゅう</rt></ruby>の3つの<ruby>学習方法<rt>がくしゅうほうほう</rt></ruby></div>
+    <div class="section-q">What are the three ways machines learn — and their exam keywords?</div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="ml-table">
+      <tr>
+        <th class="method-cell"><span class="word" onclick="toggleWord(event, this)"><ruby>学習方法<rt>がくしゅうほうほう</rt></ruby><span class="meaning">learning method</span></span><span class="word" onclick="toggleWord(event, this)">（<ruby>答<rt>こた</rt></ruby>え）<span class="meaning">(answer)</span></span></th>
+        <th><span class="word" onclick="toggleWord(event, this)"><ruby>特徴<rt>とくちょう</rt></ruby><span class="meaning">characteristic / feature</span></span></th>
+        <th><span class="word" onclick="toggleWord(event, this)"><ruby>重要<rt>じゅうよう</rt></ruby><span class="meaning">important</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>算法<rt>さんぽう</rt></ruby><span class="meaning">algorithm</span></span>・<span class="word" onclick="toggleWord(event, this)">キーワード<span class="meaning">keywords</span></span></th>
+      </tr>
+
+      <!-- ===== 教師あり学習 row ===== -->
+      <tr>
+        <td class="method-cell">
+          <span class="answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>教師<rt>きょうし</rt></ruby>あり<ruby>学習<rt>がくしゅう</rt></ruby></span><span class="answer-num">（2）</span><span class="blank">＿＿＿＿＿＿＿</span><span class="meaning">supervised learning</span></span>
+          <span class="cell-translation"><span class="tt">English</span>Supervised learning — learning with a teacher (labels given)</span>
+        </td>
+        <td>
+          <span class="word" onclick="toggleWord(event, this)"><ruby>学習<rt>がくしゅう</rt></ruby><span class="meaning">learning</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>データ<rt>データ</rt></ruby><span class="meaning">data</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>と<rt>と</rt></ruby><span class="meaning">and</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>その<rt>その</rt></ruby><span class="meaning">its</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>ラベル<rt>ラベル</rt></ruby><span class="meaning">label (correct answer)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>与<rt>あた</rt></ruby>えて<span class="meaning">give</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>学習<rt>がくしゅう</rt></ruby>させる<span class="meaning">make it learn (causative)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>手法<rt>しゅほう</rt></ruby><span class="meaning">method</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>です<rt>です</rt></ruby><span class="meaning">is</span></span>。
+          <span class="ex">
+            <span class="tag">【具体例】</span>
+            <span class="word" onclick="toggleWord(event, this)"><ruby>乳児<rt>にゅうじ</rt></ruby>の<span class="meaning">infant's / baby's</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>鳴<rt>な</rt></ruby>き<ruby>声<rt>ごえ</rt></ruby><span class="meaning">crying sound</span></span><span class="word" onclick="toggleWord(event, this)">（<span class="meaning">(</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>データ<rt>データ</rt></ruby><span class="meaning">data</span></span><span class="word" onclick="toggleWord(event, this)">）<span class="meaning">)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>と<rt>と</rt></ruby><span class="meaning">and</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>泣<rt>な</rt></ruby>いている<span class="meaning">crying</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>原因<rt>げんいん</rt></ruby><span class="meaning">cause</span></span><span class="word" onclick="toggleWord(event, this)">（<span class="meaning">(</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>正解<rt>せいかい</rt></ruby><span class="meaning">correct answer</span></span><span class="word" onclick="toggleWord(event, this)">）<span class="meaning">)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>から<rt>から</rt></ruby><span class="meaning">from</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>原因<rt>げんいん</rt></ruby><span class="meaning">cause</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>推測<rt>すいそく</rt></ruby>する<span class="meaning">to infer</span></span>。
+          </span>
+          <span class="cell-translation"><span class="tt">English Translation</span>A method in which learning data and its labels (correct answers) are given. [Example] Inferring the cause from a baby's crying sound (data) and the reason it is crying (correct answer).</span>
+        </td>
+        <td>
+          <span class="word" onclick="toggleWord(event, this)">◎<span class="meaning">key point marker</span></span><span class="answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>分類<rt>ぶんるい</rt></ruby></span><span class="answer-num">（3）</span><span class="blank">＿＿＿</span><span class="meaning">classification</span></span><span class="word" onclick="toggleWord(event, this)">：<span class="meaning">:</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>データ<rt>データ</rt></ruby><span class="meaning">data</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>複数<rt>ふくすう</rt></ruby>の<span class="meaning">multiple</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>クラス<rt>クラス</rt></ruby><span class="meaning">classes / categories</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>に<rt>に</rt></ruby><span class="meaning">into</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>分<rt>わ</rt></ruby>ける<span class="meaning">divide / sort</span></span><span class="word" onclick="toggleWord(event, this)">（<span class="meaning">(</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>例<rt>れい</rt></ruby><span class="meaning">example</span></span><span class="word" onclick="toggleWord(event, this)">：<span class="meaning">:</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>画像<rt>がぞう</rt></ruby>の<span class="meaning">image's</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>クラス分<rt>クラスわ</rt></ruby>け<span class="meaning">class sorting</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>など<rt>など</rt></ruby><span class="meaning">etc.</span></span><span class="word" onclick="toggleWord(event, this)">）<span class="meaning">)</span></span>
+          <span class="ex">
+            <span class="word" onclick="toggleWord(event, this)">②<span class="meaning">second key point</span></span><span class="answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>回帰<rt>かいき</rt></ruby></span><span class="answer-num">（4）</span><span class="blank">＿＿＿</span><span class="meaning">regression</span></span><span class="word" onclick="toggleWord(event, this)">：<span class="meaning">:</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>連続<rt>れんぞく</rt></ruby>する<span class="meaning">continuous</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>データ<rt>データ</rt></ruby><span class="meaning">data</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>将来<rt>しょうらい</rt></ruby>の<span class="meaning">future</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>値<rt>あたい</rt></ruby><span class="meaning">value</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>予測<rt>よそく</rt></ruby>する<span class="meaning">to predict</span></span>
+          </span>
+          <span class="cell-translation"><span class="tt">English Translation</span>◎ (Classification): sorting data into multiple classes (e.g., sorting images into categories). ② (Regression): predicting the future values of continuous data.</span>
+        </td>
+      </tr>
+
+      <!-- ===== 教師なし学習 row ===== -->
+      <tr>
+        <td class="method-cell">
+          <span class="answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>教師<rt>きょうし</rt></ruby>なし<ruby>学習<rt>がくしゅう</rt></ruby></span><span class="answer-num">（5）</span><span class="blank">＿＿＿＿＿＿＿＿</span><span class="meaning">unsupervised learning</span></span>
+          <span class="cell-translation"><span class="tt">English</span>Unsupervised learning — learning without a teacher (no labels)</span>
+        </td>
+        <td>
+          <span class="word" onclick="toggleWord(event, this)"><ruby>学習<rt>がくしゅう</rt></ruby><span class="meaning">learning</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>データ<rt>データ</rt></ruby><span class="meaning">data</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>のみ<rt>のみ</rt></ruby><span class="meaning">only</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>与<rt>あた</rt></ruby>え<span class="meaning">give</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>正解<rt>せいかい</rt></ruby><span class="meaning">correct answers</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>は<rt>は</rt></ruby><span class="meaning">topic (contrast: not given)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>与<rt>あた</rt></ruby>えない<span class="meaning">do not give</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>学習手法<rt>がくしゅうしゅほう</rt></ruby><span class="meaning">learning method</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>です<rt>です</rt></ruby><span class="meaning">is</span></span>。
+          <span class="ex">
+            <span class="tag">【具体例】</span>
+            <span class="word" onclick="toggleWord(event, this)"><ruby>利用者<rt>りようしゃ</rt></ruby>の<span class="meaning">user's</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>好<rt>この</rt></ruby>みの<span class="meaning">preference / taste</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>画像<rt>がぞう</rt></ruby><span class="meaning">images</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>分析<rt>ぶんせき</rt></ruby>し<span class="meaning">analyze</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>特徴<rt>とくちょう</rt></ruby><span class="meaning">features</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>が<rt>が</rt></ruby><span class="meaning">subj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>類似<rt>るいじ</rt></ruby>する<span class="meaning">similar</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>服<rt>ふく</rt></ruby>の<span class="meaning">clothes'</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>グループ<rt>グループ</rt></ruby><span class="meaning">group</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>自動<rt>じどう</rt></ruby><span class="meaning">automatically</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>提案<rt>ていあん</rt></ruby>する<span class="meaning">to suggest / recommend</span></span>。
+          </span>
+          <span class="cell-translation"><span class="tt">English Translation</span>A learning method in which only learning data is given and no correct answers are provided. [Example] Analyzing the images a user likes, and automatically suggesting groups of clothes with similar features.</span>
+        </td>
+        <td>
+          <span class="word" onclick="toggleWord(event, this)">★<span class="meaning">star keyword — very important</span></span><span class="answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text">クラスタリング</span><span class="answer-num">（6）</span><span class="blank">＿＿＿＿＿＿＿</span><span class="meaning">clustering</span></span><span class="word" onclick="toggleWord(event, this)">：<span class="meaning">:</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>データ間<rt>データかん</rt></ruby>の<span class="meaning">between data points</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>類似性<rt>るいじせい</rt></ruby><span class="meaning">similarity</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>に<rt>に</rt></ruby><span class="meaning">based on</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>基<rt>もと</rt></ruby>づいて<span class="meaning">based on</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>グループ分<rt>グループわ</rt></ruby>けする<span class="meaning">to group / divide into groups</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>手法<rt>しゅほう</rt></ruby><span class="meaning">method</span></span>
+          <span class="cell-translation"><span class="tt">English Translation</span>★ (Clustering): a method of grouping data based on the similarity between data points.</span>
+        </td>
+      </tr>
+
+      <!-- ===== 強化学習 row ===== -->
+      <tr>
+        <td class="method-cell">
+          <span class="answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>強化学習<rt>きょうかがくしゅう</rt></ruby></span><span class="answer-num">（7）</span><span class="blank">＿＿＿＿＿＿</span><span class="meaning">reinforcement learning</span></span>
+          <span class="cell-translation"><span class="tt">English</span>Reinforcement learning — learning by reward and repetition</span>
+        </td>
+        <td>
+          <span class="word" onclick="toggleWord(event, this)"><ruby>学習<rt>がくしゅう</rt></ruby><span class="meaning">learning</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>データ<rt>データ</rt></ruby><span class="meaning">data</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>に対する<rt>にたいする</rt></ruby><span class="meaning">toward / for</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>正解<rt>せいかい</rt></ruby><span class="meaning">correct answer</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>は<rt>は</rt></ruby><span class="meaning">topic (contrast)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>与<rt>あた</rt></ruby>えず<span class="meaning">without giving</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>評価<rt>ひょうか</rt></ruby><span class="meaning">evaluation</span></span><span class="word" onclick="toggleWord(event, this)">（<span class="meaning">(</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>報酬<rt>ほうしゅう</rt></ruby><span class="meaning">reward</span></span><span class="word" onclick="toggleWord(event, this)">）<span class="meaning">)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>与<rt>あた</rt></ruby>えて<span class="meaning">give</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>適切<rt>てきせつ</rt></ruby>な<span class="meaning">appropriate</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>制御方法<rt>せいぎょほうほう</rt></ruby><span class="meaning">control method</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>学習<rt>がくしゅう</rt></ruby>させる<span class="meaning">make it learn</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>手法<rt>しゅほう</rt></ruby><span class="meaning">method</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>です<rt>です</rt></ruby><span class="meaning">is</span></span>。
+          <span class="ex">
+            <span class="tag">【具体例】</span>
+            <span class="word" onclick="toggleWord(event, this)"><ruby>囲碁<rt>いご</rt></ruby><span class="meaning">the game of Go</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>や<rt>や</rt></ruby><span class="meaning">and</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>将棋<rt>しょうぎ</rt></ruby><span class="meaning">Japanese chess (shogi)</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>ロボット<rt>ロボット</rt></ruby><span class="meaning">robot</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>の<rt>の</rt></ruby><span class="meaning">of</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>動作訓練<rt>どうさくんれん</rt></ruby><span class="meaning">movement training</span></span>。
+          </span>
+          <span class="cell-translation"><span class="tt">English Translation</span>A method in which no correct answers are given for the learning data; instead, evaluations (rewards) are given, and the computer learns appropriate control methods. [Example] Games of Go and shogi, and the movement training of robots.</span>
+        </td>
+        <td>
+          <span class="answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>試行錯誤<rt>しこうさくご</rt></ruby></span><span class="answer-num">（8）</span><span class="blank">＿＿＿＿＿＿</span><span class="meaning">trial and error</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>繰<rt>く</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>して<span class="meaning">repeat over and over</span></span><span class="word" onclick="toggleWord(event, this)">、<span class="meaning">,</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>最適<rt>さいてき</rt></ruby>な<span class="meaning">optimal</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>行動<rt>こうどう</rt></ruby><span class="meaning">behavior / action</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>ルール<rt>ルール</rt></ruby><span class="meaning">rule</span></span><span class="word" onclick="toggleWord(event, this)">（<span class="meaning">(</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>制御方法<rt>せいぎょほうほう</rt></ruby><span class="meaning">control method</span></span><span class="word" onclick="toggleWord(event, this)">）<span class="meaning">)</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>を<rt>を</rt></ruby><span class="meaning">obj.</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>自<rt>みずか</rt></ruby>ら<span class="meaning">by itself</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>見<rt>み</rt></ruby>つけ<ruby>出<rt>だ</rt></ruby>す<span class="meaning">find out / discover</span></span>。
+          <span class="cell-translation"><span class="tt">English Translation</span>By repeating (trial and error), the computer finds the optimal behavioral rule (control method) on its own.</span>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="table-note">
+    <span class="word" onclick="toggleWord(event, this)"><ruby>試験<rt>しけん</rt></ruby><span class="meaning">exam</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>では<rt>では</rt></ruby><span class="meaning">in</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>方法名<rt>ほうほうめい</rt></ruby><span class="meaning">method name</span></span>と<span class="word" onclick="toggleWord(event, this)"><ruby>キーワード<rt>キーワード</rt></ruby><span class="meaning">keyword</span></span>の<span class="word" onclick="toggleWord(event, this)"><ruby>組<rt>くみ</rt></ruby>み<span class="word" onclick="toggleWord(event, this)"><ruby>合<rt>あ</rt></ruby>わせ<span class="meaning">combination</span></span>で<span class="word" onclick="toggleWord(event, this)"><ruby>出題<rt>しゅつだい</rt></ruby><span class="meaning">asked as questions</span></span>されます。<span class="word" onclick="toggleWord(event, this)"><ruby>下<rt>した</rt></ruby>の<span class="meaning">below</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>暗記<rt>あんき</rt></ruby><span class="meaning">memorization</span></span>ポイントで<span class="word" onclick="toggleWord(event, this)"><ruby>確認<rt>かくにん</rt></ruby><span class="meaning">confirm</span></span>！
+  </div>
+
+  <!-- ==================== 暗記ポイント FORMULA ==================== -->
+  <div class="formula-block">
+    <div class="formula-enzyme"><span class="word" onclick="toggleWord(event, this)"><ruby>試験対策<rt>しけんたいさく</rt></ruby>の<span class="meaning">exam preparation</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>暗記<rt>あんき</rt></ruby>ポイント！<span class="meaning">memorization points!</span></span></div>
+    <div class="formula-arrow">↓</div>
+    <div class="formula">
+      「<span class="word" onclick="toggleWord(event, this)"><ruby>教師<rt>きょうし</rt></ruby>あり<span class="meaning">supervised</span></span>」<span class="arrow-r">→</span>「<span class="answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>分類<rt>ぶんるい</rt></ruby></span><span class="answer-num">（9）</span><span class="blank">＿＿＿</span></span>」「<span class="answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>回帰<rt>かいき</rt></ruby></span><span class="answer-num">（10）</span><span class="blank">＿＿＿</span></span>」
+    </div>
+    <div class="formula">
+      「<span class="word" onclick="toggleWord(event, this)"><ruby>教師<rt>きょうし</rt></ruby>なし<span class="meaning">unsupervised</span></span>」<span class="arrow-r">→</span>「<span class="answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text">クラスタリング</span><span class="answer-num">（11）</span><span class="blank">＿＿＿＿＿＿</span></span>」「<span class="answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>正解<rt>せいかい</rt></ruby>なし</span><span class="answer-num">（12）</span><span class="blank">＿＿＿＿＿</span></span>」
+    </div>
+    <div class="formula">
+      「<span class="word" onclick="toggleWord(event, this)"><ruby>強化学習<rt>きょうかがくしゅう</rt></ruby><span class="meaning">reinforcement</span></span>」<span class="arrow-r">→</span>「<span class="answer-inline answer-word" onclick="toggleWord(event, this)"><span class="answer-text"><ruby>試行錯誤<rt>しこうさくご</rt></ruby></span><span class="answer-num">（13）</span><span class="blank">＿＿＿＿＿＿</span></span>」を<span class="word" onclick="toggleWord(event, this)"><ruby>繰<rt>く</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>す<span class="meaning">repeat</span></span>
+    </div>
+    <div class="formula-gloss">
+      <span class="word" onclick="toggleWord(event, this)"><ruby>出<rt>で</rt></ruby>たら<span class="meaning">when it appears (on the exam)</span></span>、<span class="word" onclick="toggleWord(event, this)"><ruby>即答<rt>そくとう</rt></ruby><span class="meaning">answer instantly</span></span>できるように<span class="word" onclick="toggleWord(event, this)"><ruby>組<rt>くみ</rt></ruby>み<span class="word" onclick="toggleWord(event, this)"><ruby>合<rt>あ</rt></ruby>わせで<span class="meaning">as pairs</span></span><span class="word" onclick="toggleWord(event, this)"><ruby>覚<rt>おぼ</rt></ruby>えよう<span class="meaning">memorize</span></span>
+    </div>
+  </div>
+
+  <!-- ==================== KEY TERMS ==================== -->
+  <div class="terms-section">
+    <div class="terms-heading">Key Terms — <ruby>重要用語<rt>じゅうようようご</rt></ruby></div>
+    <div class="terms-sub">Glossary of terms from this unit</div>
+
+    <div class="term-item">
+      <ruby class="term-jp">人工知能<rt>じんこうちのう</rt></ruby>（AI）
+      <span class="term-en">artificial intelligence</span>
+      <div class="term-def">Programs and systems that perform the various intellectual activities that humans carry out.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">機械学習<rt>きかいがくしゅう</rt></ruby>（ML）
+      <span class="term-en">machine learning (No. 1)</span>
+      <div class="term-def">A fundamental technology of AI. The computer loads enormous amounts of data, learns from it, and makes predictions and judgments.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">深層学習<rt>しんそうがくしゅう</rt></ruby>（DL）
+      <span class="term-en">deep learning</span>
+      <div class="term-def">A machine learning technique modeled on the structure of the human brain (neural networks).</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">記述型人工知能<rt>きじゅつがたじんこうちのう</rt></ruby>
+      <span class="term-en">rule-based AI</span>
+      <div class="term-def">Conventional AI that operates on rules and processing created in advance by humans. Its uses are limited.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">教師あり学習<rt>きょうしありがくしゅう</rt></ruby>
+      <span class="term-en">supervised learning (No. 2)</span>
+      <div class="term-def">A method in which learning data and its labels (correct answers) are given. Keywords: classification and regression.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">教師なし学習<rt>きょうしなしがくしゅう</rt></ruby>
+      <span class="term-en">unsupervised learning (No. 5)</span>
+      <div class="term-def">A method in which only learning data is given, with no correct answers. Keyword: clustering.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">強化学習<rt>きょうかがくしゅう</rt></ruby>
+      <span class="term-en">reinforcement learning (No. 7)</span>
+      <div class="term-def">A method in which no correct answers are given, but evaluations (rewards) are, so the computer learns control methods through trial and error.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">分類<rt>ぶんるい</rt></ruby>
+      <span class="term-en">classification (No. 3, 9)</span>
+      <div class="term-def">A supervised learning algorithm that sorts data into multiple classes, e.g. sorting images into categories.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">回帰<rt>かいき</rt></ruby>
+      <span class="term-en">regression (No. 4, 10)</span>
+      <div class="term-def">A supervised learning algorithm that predicts the future values of continuous data.</div>
+    </div>
+
+    <div class="term-item">
+      クラスタリング
+      <span class="term-en">clustering (No. 6, 11)</span>
+      <div class="term-def">An unsupervised learning algorithm that groups data based on the similarity between data points.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">試行錯誤<rt>しこうさくご</rt></ruby>
+      <span class="term-en">trial and error (No. 8, 13)</span>
+      <div class="term-def">Repeatedly trying and failing in order to find the optimal behavioral rule (control method). The keyword for reinforcement learning.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">ラベル<rt>ラベル</rt></ruby>
+      <span class="term-en">label</span>
+      <div class="term-def">The correct answer attached to a piece of learning data in supervised learning.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">報酬<rt>ほうしゅう</rt></ruby>
+      <span class="term-en">reward</span>
+      <div class="term-def">The evaluation given to an action in reinforcement learning instead of a correct answer.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">画像認識<rt>がぞうにんしき</rt></ruby>
+      <span class="term-en">image recognition</span>
+      <div class="term-def">An applied AI technology that identifies what is in an image. Built on machine learning and deep learning.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">音声認識<rt>おんせいにんしき</rt></ruby>
+      <span class="term-en">voice recognition</span>
+      <div class="term-def">An applied AI technology that understands human speech. Built on machine learning and deep learning.</div>
+    </div>
+
+    <div class="term-item">
+      <ruby class="term-jp">自然言語処理<rt>しぜんげんごしょり</rt></ruby>
+      <span class="term-en">natural language processing</span>
+      <div class="term-def">An applied AI technology that processes human language (text). Built on machine learning and deep learning.</div>
+    </div>
+  </div>
+
+  <div class="table-note">
+    <strong>注記 Note:</strong> The source material contained heavy transcription (OCR) errors; corrections were made
+    only where the intended wording was clear: 「本学きや」→「機械学習や」, 「膨大な運の」→「膨大な量の」,
+    「コンピューターラ」→「コンピューター」, 「あらかじめ条件が作成した」→「あらかじめ人間が作成した」,
+    「教師以業選」→「教師あり学習」, 「教師なん学習」→「教師なし学習」, 「強化完習」→「強化学習」,
+    「国市」→「回帰」, 「基任や将棋」→「囲碁や将棋」, 「評価生をめ返して」→「評価（報酬）を与えて」,
+    「適切な制方法」→「適切な制御方法」, 「絨行錯誤／前錯誤」→「試行錯誤」, 「グルーブ分け」→「グループ分け」,
+    「正重は」→「正解は」. The original material printed "2." twice (sections 2 and 3); the second was renumbered
+    to 3 to match the "3つの学習方法" heading, and that table now follows the original textbook layout
+    （学習方法／特徴／重要アルゴリズム・キーワード）. The example "特徴が類似する服のグループを自動提案する"
+    was restored from the garbled 「【具体例利用者の好みの…」. No question numbers appear in the original, so the
+    （1）〜（13） labels are sequential blanks introduced for study purposes, flagged here for transparency.
+  </div>
+
+  <script>
+    function toggleWord(event, el) {
+      if (event && event.stopPropagation) event.stopPropagation();
+      el.classList.toggle('revealed');
+    }
+    function toggleAnswers() {
+      var hidden = document.body.classList.toggle('hide-answers');
+      var btn = document.getElementById('toggleAnswers');
+      if (btn) { btn.classList.toggle('active', !hidden); btn.textContent = hidden ? 'Show Answers' : 'Hide Answers'; btn.setAttribute('aria-pressed', String(hidden)); }
+    }
+  </script>
+
+<script>
+(function(){
+  const body=document.body;
+  const toolbar=document.querySelector('.toolbar');
+  const progress=document.createElement('div'); progress.className='study-progress'; progress.setAttribute('aria-hidden','true'); progress.innerHTML='<span></span>'; document.body.prepend(progress);
+  const progressBar=progress.firstElementChild;
+  function updateProgress(){const max=document.documentElement.scrollHeight-window.innerHeight;progressBar.style.width=(max>0?Math.min(100,window.scrollY/max*100):100)+'%';}
+  window.addEventListener('scroll',updateProgress,{passive:true}); window.addEventListener('resize',updateProgress); updateProgress();
+  if(toolbar){
+    const tools=document.createElement('div'); tools.className='study-tools'; tools.setAttribute('aria-label','Study display controls');
+    tools.innerHTML='<button type="button" id="meaningsToggle" aria-pressed="false">Show all meanings</button><button type="button" id="themeToggle" aria-pressed="false">Dark mode</button><span class="tool-spacer"></span><span class="font-size-label">Text size</span><button type="button" id="fontNormal" aria-pressed="true" aria-label="Normal text size">A</button><button type="button" id="fontLarge" aria-pressed="false" aria-label="Large text size">A+</button><button type="button" id="fontLarger" aria-pressed="false" aria-label="Extra large text size">A++</button><button type="button" id="resetWords">Reset revealed words</button>';
+    toolbar.appendChild(tools);
+    const meanings=document.getElementById('meaningsToggle');
+    meanings.addEventListener('click',()=>{const on=body.classList.toggle('study-show-meanings');meanings.setAttribute('aria-pressed',String(on));meanings.textContent=on?'Hide all meanings':'Show all meanings';});
+    const theme=document.getElementById('themeToggle'); theme.addEventListener('click',()=>{const on=body.classList.toggle('study-dark');theme.setAttribute('aria-pressed',String(on));theme.textContent=on?'Light mode':'Dark mode';});
+    function setFont(size){body.classList.remove('study-large-text','study-larger-text');if(size===1)body.classList.add('study-large-text');if(size===2)body.classList.add('study-larger-text');[['fontNormal',0],['fontLarge',1],['fontLarger',2]].forEach(([id,n])=>document.getElementById(id).setAttribute('aria-pressed',String(n===size)));}
+    document.getElementById('fontNormal').addEventListener('click',()=>setFont(0));document.getElementById('fontLarge').addEventListener('click',()=>setFont(1));document.getElementById('fontLarger').addEventListener('click',()=>setFont(2));
+    document.getElementById('resetWords').addEventListener('click',()=>{body.querySelectorAll('.word.revealed').forEach(el=>el.classList.remove('revealed'));});
+  }
+  // Make existing word-by-word glossary items keyboard accessible.
+  document.querySelectorAll('.word[onclick], .answer-word[onclick]').forEach(el=>{if(!el.hasAttribute('tabindex'))el.setAttribute('tabindex','0');if(!el.hasAttribute('role'))el.setAttribute('role','button');el.addEventListener('keydown',ev=>{if((ev.key==='Enter'||ev.key===' ')&&ev.target===el){ev.preventDefault();el.click();}});});
+})();
+</script>
+</body>
+</html>
